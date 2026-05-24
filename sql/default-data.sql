@@ -21,7 +21,7 @@ INSERT OR IGNORE INTO site_config (key, value) VALUES
   ('site_keywords', '福溪村,富川,贺州,古村落,理学文化,周敦颐,瑶族,潇贺古道,中国传统村落'),
   ('contact_email', 'www@fuxicun.top'),
   ('contact_phone', ''),
-  ('contact_address', '广西贺州市富川瑶族自治县朝东镇福溪村'),
+  ('contact_address', '富川瑶族自治县朝东镇福溪村'),
   ('icp_number', ''),
   ('copyright_text', '© 2026 福溪村 All Rights Reserved'),
   ('footer_text', 'Powered by Cloudflare Pages'),
