@@ -29,11 +29,10 @@
     document.querySelectorAll('.install-panel').forEach(function(p) {
       p.classList.remove('active');
     });
-    var panel = document.getElementById('step-5');
-    panel.classList.add('active');
-    panel.querySelector('.install-panel__title').textContent = '系统已安装';
-    panel.querySelector('.install-panel__desc').textContent = '如需重新安装，请先清空数据库';
-    document.getElementById('success-info').innerHTML = '';
+    // 显示密码验证面板
+    document.getElementById('step-verify').classList.add('active');
+    // 绑定验证按钮
+    document.getElementById('btn-verify').onclick = verifyInstallPassword;
   }
 
   function setupEvents() {
@@ -170,6 +169,89 @@
     }
   }
 
+  // 验证安装管理密码
+  async function verifyInstallPassword() {
+    var form = document.getElementById('verify-form');
+    var data = Form.getData(form);
+    var password = data.verifyPassword;
+
+    if (!password) {
+      Toast.warning('请输入安装管理密码');
+      return;
+    }
+
+    var btn = document.getElementById('btn-verify');
+    Form.setLoading(btn, true);
+
+    try {
+      var result = await API.post('/install/verify-password', { password: password });
+      if (result.success && result.data.valid) {
+        showManagementPanel();
+      } else {
+        Toast.error('密码错误');
+      }
+    } catch (e) {
+      Toast.error('验证失败: ' + e.message);
+    } finally {
+      Form.setLoading(btn, false);
+    }
+  }
+
+  // 显示管理面板
+  function showManagementPanel() {
+    document.querySelectorAll('.install-panel').forEach(function(p) {
+      p.classList.remove('active');
+    });
+    document.getElementById('step-manage').classList.add('active');
+    document.getElementById('btn-clear-db').onclick = clearDatabase;
+    document.getElementById('btn-reinstall').onclick = reinstall;
+  }
+
+  // 清空数据库
+  async function clearDatabase() {
+    if (!confirm('确定要清空数据库吗？\n\n此操作将删除所有数据表和数据，不可恢复！')) return;
+
+    var btn = document.getElementById('btn-clear-db');
+    Form.setLoading(btn, true);
+
+    try {
+      var result = await API.post('/install/clear-database');
+      if (result.success) {
+        Toast.success('数据库已清空');
+        // 刷新页面进入安装流程
+        setTimeout(function() { window.location.reload(); }, 1000);
+      } else {
+        Toast.error(result.error?.message || '清空失败');
+      }
+    } catch (e) {
+      Toast.error('清空失败: ' + e.message);
+    } finally {
+      Form.setLoading(btn, false);
+    }
+  }
+
+  // 重新安装
+  async function reinstall() {
+    if (!confirm('确定要重新安装吗？\n\n此操作将清空所有数据并重新开始安装流程。')) return;
+
+    var btn = document.getElementById('btn-reinstall');
+    Form.setLoading(btn, true);
+
+    try {
+      var result = await API.post('/install/clear-database');
+      if (result.success) {
+        Toast.success('数据库已清空，即将进入安装流程');
+        setTimeout(function() { window.location.reload(); }, 1000);
+      } else {
+        Toast.error(result.error?.message || '操作失败');
+      }
+    } catch (e) {
+      Toast.error('操作失败: ' + e.message);
+    } finally {
+      Form.setLoading(btn, false);
+    }
+  }
+
   // 步骤4：创建管理员
   async function createAdmin() {
     var form = document.getElementById('admin-form');
@@ -179,7 +261,8 @@
       adminUsername: { required: true, minLength: 2, maxLength: 20, message: '用户名长度为2-20个字符' },
       adminPassword: { required: true, minLength: 8, message: '密码长度不能少于8位' },
       adminPasswordConfirm: { required: true, confirm: 'adminPassword', message: '两次密码不一致' },
-      adminPhone: { required: true, pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }
+      adminPhone: { required: true, pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' },
+      installPassword: { required: true, minLength: 6, message: '安装管理密码长度不能少于6位' }
     };
 
     var errors = Form.validate(rules, data);
@@ -198,7 +281,8 @@
         adminUsername: data.adminUsername,
         adminPassword: data.adminPassword,
         adminPhone: data.adminPhone,
-        adminEmail: data.adminEmail
+        adminEmail: data.adminEmail,
+        installPassword: data.installPassword
       });
 
       if (result.success) {

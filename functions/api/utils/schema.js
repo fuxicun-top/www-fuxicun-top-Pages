@@ -192,7 +192,7 @@ export const SEED_DATA_SQL = [
     ('site_keywords', '福溪村,富川,贺州,古村落,理学文化,周敦颐,瑶族,潇贺古道,中国传统村落'),
     ('contact_email', 'www@fuxicun.top'),
     ('contact_phone', ''),
-    ('contact_address', '广西贺州市富川瑶族自治县'),
+    ('contact_address', '广西贺州市富川瑶族自治县朝东镇福溪村'),
     ('icp_number', ''),
     ('copyright_text', '© 2026 福溪村 All Rights Reserved'),
     ('footer_text', 'Powered by Cloudflare Pages'),
@@ -207,7 +207,8 @@ export const SEED_DATA_SQL = [
     ('like_policy', 'open'),
     ('sensitive_words', ''),
     ('home_featured', '{"1":null,"2":null,"3":null,"4":null,"5":null}'),
-    ('home_news', '{"1":null,"2":null,"3":null,"4":null}')`,
+    ('home_news', '{"1":null,"2":null,"3":null,"4":null}'),
+    ('install_password_hash', '')`,
   // 默认导航
   `INSERT OR IGNORE INTO nav_items (name, url, sort_order, status, is_external) VALUES
     ('首页', '/', 1, 'active', 0),

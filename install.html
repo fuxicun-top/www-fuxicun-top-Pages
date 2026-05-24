@@ -167,6 +167,11 @@
           <label class="form-label">邮箱（可选）</label>
           <input type="email" name="adminEmail" class="form-input" placeholder="请输入邮箱">
         </div>
+        <div class="form-group">
+          <label class="form-label form-label--required">安装管理密码</label>
+          <input type="password" name="installPassword" class="form-input" placeholder="设置安装页面管理密码（至少6位）">
+          <p class="form-hint">用于已安装后访问安装管理页面，请妥善保管</p>
+        </div>
       </form>
       <div class="install-actions">
         <button class="btn btn-outline" id="btn-prev-4">上一步</button>
@@ -185,6 +190,45 @@
           <a href="/login.html" class="btn btn-primary btn-lg">前往登录</a>
           <a href="/" class="btn btn-outline">访问首页</a>
         </div>
+      </div>
+    </div>
+
+    <!-- 已安装：密码验证 -->
+    <div class="install-panel" id="step-verify">
+      <h2 class="install-panel__title">安装管理验证</h2>
+      <p class="install-panel__desc">系统已安装，请输入安装管理密码进入管理面板</p>
+      <form id="verify-form">
+        <div class="form-group">
+          <label class="form-label">安装管理密码</label>
+          <input type="password" name="verifyPassword" class="form-input" placeholder="请输入安装时设置的管理密码">
+        </div>
+      </form>
+      <div class="install-actions">
+        <button class="btn btn-primary btn-lg" id="btn-verify">验证</button>
+        <a href="/" class="btn btn-outline">返回首页</a>
+      </div>
+    </div>
+
+    <!-- 已安装：管理面板 -->
+    <div class="install-panel" id="step-manage">
+      <h2 class="install-panel__title">安装管理面板</h2>
+      <p class="install-panel__desc">系统已安装，您可以执行以下管理操作</p>
+
+      <div class="manage-actions">
+        <div class="manage-card">
+          <h3>清空数据库</h3>
+          <p>删除所有数据表和数据，恢复到未安装状态。此操作不可恢复。</p>
+          <button class="btn btn-danger" id="btn-clear-db">清空数据库</button>
+        </div>
+        <div class="manage-card">
+          <h3>重新安装</h3>
+          <p>清空数据库后自动进入安装流程，重新创建管理员账号。</p>
+          <button class="btn btn-primary" id="btn-reinstall">重新安装</button>
+        </div>
+      </div>
+
+      <div class="install-actions">
+        <a href="/" class="btn btn-outline">返回首页</a>
       </div>
     </div>
   </div>

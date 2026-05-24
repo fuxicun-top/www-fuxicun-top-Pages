@@ -5,7 +5,7 @@
 
 import { successResponse, errorResponse } from '../utils/response.js';
 import { dbQueryFirst, dbRun } from '../utils/db.js';
-import { hashPassword } from '../utils/hash.js';
+import { hashPassword, verifyPassword } from '../utils/hash.js';
 import { initDatabase } from '../utils/schema.js';
 
 // 检查是否已安装（防止重复安装）
@@ -43,6 +43,12 @@ export async function handleInstall(request, env, path, method) {
   }
   if (path === '/install/create-admin' && method === 'POST') {
     return await createAdmin(request, env);
+  }
+  if (path === '/install/verify-password' && method === 'POST') {
+    return await verifyInstallPassword(request, env);
+  }
+  if (path === '/install/clear-database' && method === 'POST') {
+    return await clearDatabase(env);
   }
 
   return errorResponse('接口不存在', 404);
@@ -157,7 +163,7 @@ async function createAdmin(request, env) {
   }
 
   try {
-    const { adminUsername, adminPassword, adminPhone, adminEmail } = await request.json();
+    const { adminUsername, adminPassword, adminPhone, adminEmail, installPassword } = await request.json();
     const db = env.FUXICUN_DB;
 
     if (!db) {
@@ -170,6 +176,10 @@ async function createAdmin(request, env) {
 
     if (adminPassword.length < 8) {
       return errorResponse('管理员密码长度不能少于8位');
+    }
+
+    if (!installPassword || installPassword.length < 6) {
+      return errorResponse('安装管理密码长度不能少于6位');
     }
 
     // 检查是否已有管理员
@@ -191,6 +201,14 @@ async function createAdmin(request, env) {
       [adminUsername, passwordHash, adminPhone, adminEmail || null, 'admin']
     );
 
+    // 保存安装管理密码哈希
+    const installPasswordHash = await hashPassword(installPassword);
+    await dbRun(
+      db,
+      "INSERT INTO site_config (key, value, updated_at) VALUES ('install_password_hash', ?, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+      [installPasswordHash]
+    );
+
     // 更新联系邮箱配置
     if (adminEmail) {
       await dbRun(
@@ -210,5 +228,72 @@ async function createAdmin(request, env) {
   } catch (e) {
     console.error('Create admin error:', e);
     return errorResponse('创建失败');
+  }
+}
+
+// 验证安装管理密码
+async function verifyInstallPassword(request, env) {
+  try {
+    const { password } = await request.json();
+    const db = env.FUXICUN_DB;
+
+    if (!db || !password) {
+      return successResponse({ valid: false });
+    }
+
+    // 从 site_config 读取密码哈希
+    const row = await dbQueryFirst(
+      db,
+      "SELECT value FROM site_config WHERE key = 'install_password_hash'"
+    );
+
+    if (!row || !row.value) {
+      // 未设置安装密码（旧版本安装），拒绝访问
+      return successResponse({ valid: false });
+    }
+
+    const valid = await verifyPassword(password, row.value);
+    return successResponse({ valid: valid });
+  } catch (e) {
+    console.error('Verify install password error:', e);
+    return successResponse({ valid: false });
+  }
+}
+
+// 清空数据库（需要验证安装管理密码）
+async function clearDatabase(env) {
+  try {
+    const db = env.FUXICUN_DB;
+    if (!db) {
+      return errorResponse('D1 绑定不存在');
+    }
+
+    // 删除所有数据表（按依赖关系倒序）
+    const tables = [
+      'audit_logs', 'password_resets', 'sessions',
+      'likes', 'comments', 'media',
+      'articles', 'categories', 'users',
+      'banners', 'site_config', 'nav_items', 'pages'
+    ];
+
+    for (const table of tables) {
+      try {
+        await dbRun(db, `DROP TABLE IF EXISTS ${table}`);
+      } catch (e) {
+        console.error(`Drop table ${table} error:`, e);
+      }
+    }
+
+    // 清除 KV 缓存
+    if (env.FUXICUN_KV) {
+      try {
+        await env.FUXICUN_KV.delete('install:completed');
+      } catch (e) { /* 忽略 */ }
+    }
+
+    return successResponse(null, '数据库已清空');
+  } catch (e) {
+    console.error('Clear database error:', e);
+    return errorResponse('清空数据库失败');
   }
 }

@@ -12,7 +12,7 @@
     site_description: '福溪村位于广西贺州市富川瑶族自治县，是一座历史悠久、文化底蕴深厚的古村落。这里保存着完好的明清古建筑群，是理学文化的重要传承地。',
     contact_email: 'www@fuxicun.top',
     contact_phone: '',
-    contact_address: '广西贺州市富川瑶族自治县',
+    contact_address: '广西贺州市富川瑶族自治县朝东镇福溪村',
     icp_number: '',
     copyright_text: ''
   };
