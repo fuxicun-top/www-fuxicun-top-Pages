@@ -55,7 +55,7 @@
         copyright = config.copyright_text;
       }
     } else {
-      copyright = '© ' + year + ' - ' + year + ' ' + (config.site_name || '福溪村') + ' All Rights Reserved.';
+      copyright = '© 2026 - ' + year + ' ' + (config.site_name || '福溪村') + ' All Rights Reserved.';
     }
 
     footer.innerHTML = '<div class="footer-content">' +
