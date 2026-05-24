@@ -23,7 +23,7 @@ INSERT OR IGNORE INTO site_config (key, value) VALUES
   ('contact_phone', ''),
   ('contact_address', '富川瑶族自治县朝东镇福溪村'),
   ('icp_number', ''),
-  ('copyright_text', '© 2026 福溪村 All Rights Reserved'),
+  ('copyright_text', ''),
   ('footer_text', 'Powered by Cloudflare Pages'),
   ('theme_primary_color', '#2d6a4f'),
   ('theme_primary_light', '#40916c'),
