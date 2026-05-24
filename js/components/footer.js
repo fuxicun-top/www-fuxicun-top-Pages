@@ -44,9 +44,19 @@
     if (!footer) return;
 
     var year = new Date().getFullYear();
-    var startYear = 2026;
-    var yearText = year > startYear ? (startYear + ' - ' + year) : String(startYear);
-    var copyright = config.copyright_text || ('© ' + yearText + ' ' + (config.site_name || '福溪村') + ' All Rights Reserved.');
+    var copyright = '';
+    if (config.copyright_text) {
+      // 从数据库版权文本中提取起始年份，自动追加当前年份
+      var match = config.copyright_text.match(/©\s*(\d{4})/);
+      if (match) {
+        var startYear = match[1];
+        copyright = '© ' + startYear + ' - ' + year + ' ' + config.copyright_text.replace(/©\s*\d{4}\s*/, '');
+      } else {
+        copyright = config.copyright_text;
+      }
+    } else {
+      copyright = '© ' + year + ' - ' + year + ' ' + (config.site_name || '福溪村') + ' All Rights Reserved.';
+    }
 
     footer.innerHTML = '<div class="footer-content">' +
       '<div class="footer-brand">' +
