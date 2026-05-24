@@ -1,0 +1,47 @@
+# ========================================
+# 福溪村官网 - 自动数据备份工作流
+# 功能：每周一 UTC 18:00（北京时间周二 02:00）
+#       调用站点 /api/admin/backup/r2 接口
+#       将 D1 数据库快照写入 R2（保留最近 30 份）
+# 触发：定时 cron 或手动触发
+# ========================================
+
+name: 自动数据备份
+
+on:
+  schedule:
+    # 每周一 UTC 18:00 = 北京时间 周二 02:00
+    - cron: '0 18 * * 1'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    name: 备份 D1 至 R2
+    steps:
+      - name: 调用备份接口
+        run: |
+          # SITE_URL    例: https://fuxicun.top
+          # ADMIN_TOKEN 提前在 GitHub Secrets 中配置
+          #             获取方式：用管理员账号登录后台
+          #                       浏览器控制台 localStorage.getItem('fuxicun_token')
+          #                       将 token 复制到 Secrets 的 FUXICUN_ADMIN_TOKEN 中
+          if [ -z "${{ secrets.SITE_URL }}" ] || [ -z "${{ secrets.FUXICUN_ADMIN_TOKEN }}" ]; then
+            echo "::error::缺少 SITE_URL 或 FUXICUN_ADMIN_TOKEN 仓库密钥"
+            exit 1
+          fi
+
+          response=$(curl -s -o /tmp/backup_resp.json -w "%{http_code}" \
+            -X POST "${{ secrets.SITE_URL }}/api/admin/backup/r2" \
+            -H "Authorization: Bearer ${{ secrets.FUXICUN_ADMIN_TOKEN }}" \
+            -H "Content-Type: application/json")
+
+          echo "HTTP 状态码: $response"
+          cat /tmp/backup_resp.json
+
+          if [ "$response" != "200" ]; then
+            echo "::error::备份失败 (HTTP $response)"
+            exit 1
+          fi
+
+          echo "✅ 备份成功"

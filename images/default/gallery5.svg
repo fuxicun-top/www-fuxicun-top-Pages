@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="sky5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A8D4E8"/>
+      <stop offset="100%" stop-color="#D8ECF5"/>
+    </linearGradient>
+  </defs>
+  <!-- 天空 -->
+  <rect width="400" height="300" fill="url(#sky5)"/>
+  <!-- 远山 -->
+  <path d="M0 160 Q80 110 160 145 Q280 90 400 130 L400 300 L0 300Z" fill="#6a9a7a" opacity="0.35"/>
+  <!-- 近山 -->
+  <path d="M0 190 Q80 160 160 175 Q260 140 400 170 L400 300 L0 300Z" fill="#4a7c59" opacity="0.5"/>
+  <!-- 溪岸 -->
+  <path d="M0 220 Q50 205 100 215 Q200 200 300 210 Q350 205 400 212 L400 300 L0 300Z" fill="#3d6b4f"/>
+  <!-- 福溪水面 -->
+  <path d="M50 230 Q150 220 200 228 Q300 235 380 225 L380 255 Q300 265 200 258 Q150 250 50 260Z" fill="#5BA4CF" opacity="0.7"/>
+  <!-- 水波纹 -->
+  <path d="M80 238 Q120 235 160 238" stroke="#8FC4E8" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M200 240 Q240 237 280 240" stroke="#8FC4E8" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M130 248 Q170 245 210 248" stroke="#8FC4E8" stroke-width="0.8" fill="none" opacity="0.4"/>
+  <!-- 岸边石块 -->
+  <ellipse cx="60" cy="225" rx="15" ry="8" fill="#8a8580"/>
+  <ellipse cx="340" cy="220" rx="12" ry="7" fill="#8a8580"/>
+  <!-- 柳树 -->
+  <rect x="30" y="160" width="6" height="60" fill="#5C4033"/>
+  <path d="M33 160 Q20 145 15 125" stroke="#3d6b4f" stroke-width="2" fill="none"/>
+  <path d="M33 160 Q45 140 50 120" stroke="#3d6b4f" stroke-width="2" fill="none"/>
+  <path d="M33 165 Q15 155 10 135" stroke="#3d6b4f" stroke-width="1.5" fill="none"/>
+  <path d="M33 165 Q50 155 55 135" stroke="#3d6b4f" stroke-width="1.5" fill="none"/>
+  <ellipse cx="33" cy="145" rx="20" ry="25" fill="#52b788" opacity="0.6"/>
+  <!-- 竹子 -->
+  <line x1="350" y1="130" x2="350" y2="215" stroke="#4a7c59" stroke-width="4"/>
+  <line x1="365" y1="140" x2="365" y2="210" stroke="#4a7c59" stroke-width="3"/>
+  <path d="M350 140 Q340 125 335 115" stroke="#52b788" stroke-width="1.5" fill="none"/>
+  <path d="M350 155 Q340 140 335 130" stroke="#52b788" stroke-width="1.5" fill="none"/>
+  <path d="M350 170 Q360 155 365 145" stroke="#52b788" stroke-width="1.5" fill="none"/>
+  <path d="M365 150 Q375 135 380 125" stroke="#52b788" stroke-width="1.5" fill="none"/>
+  <path d="M365 165 Q375 150 380 140" stroke="#52b788" stroke-width="1.5" fill="none"/>
+  <!-- 远处小桥 -->
+  <path d="M180 222 Q200 215 220 222" stroke="#8B7355" stroke-width="3" fill="none"/>
+  <!-- 倒影 -->
+  <path d="M33 220 Q28 240 33 260" stroke="#3d6b4f" stroke-width="1" fill="none" opacity="0.2"/>
+  <path d="M350 215 Q345 235 350 255" stroke="#4a7c59" stroke-width="1" fill="none" opacity="0.2"/>
+  <!-- 标题 -->
+  <text x="200" y="288" text-anchor="middle" font-family="KaiTi,STKaiti,serif" font-size="14" fill="#2d6a4f" opacity="0.9">福溪水景</text>
+</svg>

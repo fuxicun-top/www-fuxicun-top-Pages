@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="e4bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f0f5e8"/>
+      <stop offset="100%" stop-color="#e0ead4"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#e4bg)"/>
+  <!-- 对歌场景 -->
+  <!-- 背景树木 -->
+  <circle cx="60" cy="120" r="40" fill="#3d6b4f" opacity="0.3"/>
+  <rect x="57" y="155" width="6" height="30" fill="#5C4033" opacity="0.3"/>
+  <circle cx="340" cy="110" r="35" fill="#3d6b4f" opacity="0.3"/>
+  <rect x="337" y="140" width="6" height="25" fill="#5C4033" opacity="0.3"/>
+  <!-- 对歌台 -->
+  <rect x="120" y="200" width="160" height="8" fill="#8B7355" rx="2"/>
+  <rect x="130" y="208" width="140" height="4" fill="#6B5B4F" rx="1"/>
+  <!-- 歌手1 - 女性 -->
+  <g transform="translate(180,135)">
+    <ellipse cx="0" cy="50" rx="22" ry="32" fill="#C0392B" opacity="0.8"/>
+    <circle cx="0" cy="15" r="16" fill="#F5D0A9"/>
+    <path d="M-16 3 Q0 -15 16 3" fill="#FFD700"/>
+    <circle cx="0" cy="-10" r="3" fill="#FFD700"/>
+    <!-- 唱歌张嘴 -->
+    <circle cx="-5" cy="13" r="1.5" fill="#333"/>
+    <circle cx="5" cy="13" r="1.5" fill="#333"/>
+    <ellipse cx="0" cy="20" rx="4" ry="3" fill="#C0392B" opacity="0.5"/>
+    <!-- 手势 -->
+    <path d="M-22 40 Q-35 35 -38 25" stroke="#F5D0A9" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M22 40 Q35 38 38 30" stroke="#F5D0A9" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- 歌手2 - 男性 -->
+  <g transform="translate(240,140)">
+    <ellipse cx="0" cy="45" rx="20" ry="28" fill="#2d6a4f" opacity="0.8"/>
+    <circle cx="0" cy="15" r="14" fill="#F5D0A9"/>
+    <path d="M-14 7 Q0 -6 14 7" fill="#1a472a"/>
+    <circle cx="-4" cy="13" r="1.5" fill="#333"/>
+    <circle cx="4" cy="13" r="1.5" fill="#333"/>
+    <ellipse cx="0" cy="19" rx="3.5" ry="2.5" fill="#5C4033" opacity="0.5"/>
+    <path d="M20 38 Q32 35 35 28" stroke="#F5D0A9" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
+  <!-- 音符飘散 -->
+  <g opacity="0.4">
+    <text x="150" y="120" font-size="22" fill="#C0392B">♪</text>
+    <text x="260" y="110" font-size="18" fill="#2d6a4f">♫</text>
+    <text x="200" y="90" font-size="16" fill="#FFD700">♩</text>
+    <text x="170" y="100" font-size="14" fill="#C0392B">♬</text>
+    <text x="230" y="95" font-size="15" fill="#2d6a4f">♪</text>
+  </g>
+  <!-- 歌声波纹 -->
+  <path d="M175 120 Q180 115 185 120" stroke="#C0392B" stroke-width="1" fill="none" opacity="0.3"/>
+  <path d="M170 115 Q180 108 190 115" stroke="#C0392B" stroke-width="0.8" fill="none" opacity="0.2"/>
+  <path d="M230 115 Q240 108 250 115" stroke="#2d6a4f" stroke-width="1" fill="none" opacity="0.3"/>
+  <!-- 底部 -->
+  <text x="200" y="260" text-anchor="middle" font-family="KaiTi,STKaiti,serif" font-size="12" fill="#C0392B" opacity="0.7">瑶族对歌 · 以歌传情</text>
+  <path d="M0 270 Q100 265 200 270 Q300 275 400 270" stroke="#2d6a4f" stroke-width="0.8" fill="none" opacity="0.2"/>
+</svg>

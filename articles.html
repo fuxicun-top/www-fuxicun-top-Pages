@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="福溪村全部文章 - 新闻动态、理学文化、古建筑、民俗风情、旅游攻略、村民故事">
+  <title>全部文章 - 福溪村</title>
+
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="stylesheet" href="/css/common/reset.css">
+  <link rel="stylesheet" href="/css/common/variables.css">
+  <link rel="stylesheet" href="/css/common/typography.css">
+  <link rel="stylesheet" href="/css/common/utilities.css">
+  <link rel="stylesheet" href="/css/common/animations.css">
+  <link rel="stylesheet" href="/css/components/header.css">
+  <link rel="stylesheet" href="/css/components/footer.css">
+  <link rel="stylesheet" href="/css/components/card.css">
+  <link rel="stylesheet" href="/css/components/pagination.css">
+  <link rel="stylesheet" href="/css/components/breadcrumb.css">
+  <link rel="stylesheet" href="/css/pages/articles.css">
+  <script src="/js/common/theme-loader.js"></script>
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <!-- 面包屑 -->
+      <nav class="breadcrumb">
+        <a href="/">首页</a>
+        <span class="breadcrumb__sep">/</span>
+        <span class="breadcrumb__current">全部文章</span>
+      </nav>
+
+      <!-- 分类筛选 -->
+      <div class="articles-filter" id="category-filter">
+        <button class="filter-btn active" data-category="">全部</button>
+      </div>
+
+      <!-- 文章列表 -->
+      <div class="card-grid" id="articles-list">
+        <div class="skeleton" style="height:300px;"></div>
+        <div class="skeleton" style="height:300px;"></div>
+        <div class="skeleton" style="height:300px;"></div>
+      </div>
+
+      <!-- 分页 -->
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="/js/common/config.js"></script>
+  <script src="/js/common/storage.js"></script>
+  <script src="/js/common/utils.js"></script>
+  <script src="/js/common/api.js"></script>
+  <script src="/js/common/auth.js"></script>
+  <script src="/js/common/toast.js"></script>
+  <script src="/js/components/header.js"></script>
+  <script src="/js/components/footer.js"></script>
+  <script src="/js/components/pagination.js"></script>
+  <script src="/js/pages/articles.js"></script>
+</body>
+</html>

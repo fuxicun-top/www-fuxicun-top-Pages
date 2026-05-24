@@ -1,0 +1,177 @@
+/* ========================================
+   文件说明：CSS 变量（颜色、字体、间距、断点等）
+   文件路径：css/common/variables.css
+   ======================================== */
+
+:root {
+  /* 主题色 - 绿色系（乡村自然风格） */
+  --color-primary: #2d6a4f;
+  --color-primary-light: #40916c;
+  --color-primary-lighter: #52b788;
+  --color-primary-dark: #1b4332;
+  --color-primary-bg: #f0f7f4;
+
+  /* 辅助色 */
+  --color-secondary: #d4a373;
+  --color-secondary-light: #e9c46a;
+  --color-secondary-dark: #bc6c25;
+
+  /* 功能色 */
+  --color-success: #52b788;
+  --color-warning: #e9c46a;
+  --color-danger: #e63946;
+  --color-info: #457b9d;
+
+  /* 中性色 */
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #4a4a68;
+  --color-text-placeholder: #a0a0b8;
+  --color-text-disabled: #c0c0d0;
+  --color-text-white: #ffffff;
+  /* 兼容旧名（部分组件用 --color-text / --color-bg） */
+  --color-text: #1a1a2e;
+  --color-bg: #f8f9fa;
+
+  /* 背景色 */
+  --color-bg-page: #f8f9fa;
+  --color-bg-card: #ffffff;
+  --color-bg-hover: #f0f2f5;
+  --color-bg-mask: rgba(0, 0, 0, 0.5);
+
+  /* 边框色 */
+  --color-border: #e0e0e8;
+  --color-border-light: #f0f0f5;
+
+  /* 字体 */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-family-heading: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  /* 字号 - 项目硬约束：基础字号≥16px（中老年用户友好 + iOS 不缩放） */
+  --font-size-xs: 12px;     /* 仅辅助信息 / 标签 */
+  --font-size-sm: 14px;     /* 次要文字 */
+  --font-size-base: 16px;   /* 正文（约束底线 ≥16px） */
+  --font-size-md: 18px;
+  --font-size-lg: 20px;
+  --font-size-xl: 22px;
+  --font-size-2xl: 26px;
+  --font-size-3xl: 32px;
+  --font-size-4xl: 40px;
+
+  /* 间距 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-base: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+  --spacing-4xl: 64px;
+
+  /* 圆角 */
+  --radius-sm: 4px;
+  --radius-base: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* 容器宽度（与下方断点配套使用） */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1200px;
+
+  /* 响应式断点（仅作为参考；@media 中需直接写数字，CSS 不支持变量在 @media 表达式中） */
+  --bp-sm: 480px;     /* 小屏手机 */
+  --bp-md: 768px;     /* 平板纵向 */
+  --bp-lg: 1024px;    /* 平板横向 / 小笔记本 */
+  --bp-xl: 1280px;    /* 普通桌面 */
+
+  /* 触摸目标尺寸 - WCAG / Apple HIG / Material 共同推荐最小 44px（中老年用户更宽松一些） */
+  --touch-target-min: 44px;
+  --touch-target-comfortable: 48px;
+
+  /* 头部高度 */
+  --header-height: 64px;
+  --header-height-mobile: 56px;
+
+  /* 过渡 */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease;
+  --transition-slow: 0.4s ease;
+
+  /* z-index */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+
+  /* 纪念日模式（默认无效果） */
+  --memorial-filter: none;
+}
+
+/* ========================================
+   响应式字号微调 - 移动端略缩，超大屏略放
+   保持 --font-size-base ≥ 16px（iOS Safari 输入框 <16px 会触发自动缩放）
+   ======================================== */
+
+/* 平板纵向及以下：小屏标题适当缩小，保持正文 16px 不动 */
+@media (max-width: 768px) {
+  :root {
+    --font-size-2xl: 22px;
+    --font-size-3xl: 26px;
+    --font-size-4xl: 32px;
+    --spacing-3xl: 36px;
+    --spacing-4xl: 48px;
+    --header-height: var(--header-height-mobile);
+  }
+}
+
+/* 小屏手机：进一步压缩大标题（< 480px） */
+@media (max-width: 480px) {
+  :root {
+    --font-size-xl: 20px;
+    --font-size-2xl: 20px;
+    --font-size-3xl: 24px;
+    --font-size-4xl: 28px;
+  }
+}
+
+/* 超宽桌面：略放大让远距离阅读更舒服（≥1440px） */
+@media (min-width: 1440px) {
+  :root {
+    --font-size-2xl: 28px;
+    --font-size-3xl: 36px;
+    --font-size-4xl: 44px;
+  }
+}
+
+/* 纪念日黑白模式 - 全站灰度效果，覆盖所有元素和背景 */
+html.memorial-mode {
+  filter: grayscale(100%) !important;
+  -webkit-filter: grayscale(100%) !important;
+}
+
+html.memorial-mode *,
+html.memorial-mode *::before,
+html.memorial-mode *::after {
+  filter: grayscale(100%) !important;
+  -webkit-filter: grayscale(100%) !important;
+  transition: filter 0.6s ease, -webkit-filter 0.6s ease;
+}
+
+/* 保留按钮等交互元素的 hover 效果可识别 */
+html.memorial-mode a:hover,
+html.memorial-mode button:hover {
+  opacity: 0.8;
+}

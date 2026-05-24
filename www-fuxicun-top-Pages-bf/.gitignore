@@ -10,7 +10,6 @@ node_modules/
 wrangler.toml
 .wrangler/
 .dev.vars
-package-lock.json
 
 # 敏感文件
 secrets.local.md

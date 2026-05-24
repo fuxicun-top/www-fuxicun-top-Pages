@@ -1,0 +1,61 @@
+/* ========================================
+   文件说明：面包屑样式
+   文件路径：css/components/breadcrumb.css
+   ======================================== */
+
+.breadcrumb {
+  padding: var(--spacing-base) 0;
+  margin-top: var(--header-height);
+}
+
+.breadcrumb__list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+}
+
+.breadcrumb__item {
+  color: var(--color-text-placeholder);
+}
+
+.breadcrumb__item a {
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.breadcrumb__item a:hover {
+  color: var(--color-primary);
+}
+
+.breadcrumb__item--active {
+  color: var(--color-text-primary);
+}
+
+.breadcrumb__separator {
+  color: var(--color-text-placeholder);
+  margin: 0 var(--spacing-xs);
+}
+
+
+/* ========================================
+   响应式：移动端面包屑
+   ======================================== */
+@media (max-width: 768px) {
+  .breadcrumb {
+    padding: var(--spacing-sm) 0;
+  }
+  .breadcrumb__list {
+    font-size: var(--font-size-xs);
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    /* 隐藏滚动条但保留滚动 */
+    scrollbar-width: none;
+  }
+  .breadcrumb__list::-webkit-scrollbar {
+    display: none;
+  }
+}

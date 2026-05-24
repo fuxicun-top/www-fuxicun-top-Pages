@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>媒体库 - 福溪村后台</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="stylesheet" href="/css/common/reset.css">
+  <link rel="stylesheet" href="/css/common/variables.css">
+  <link rel="stylesheet" href="/css/common/typography.css">
+  <link rel="stylesheet" href="/css/common/utilities.css">
+  <script src="/js/common/theme-loader.js"></script>
+  <link rel="stylesheet" href="/css/components/form.css">
+  <link rel="stylesheet" href="/css/components/modal.css">
+  <link rel="stylesheet" href="/css/components/pagination.css">
+  <link rel="stylesheet" href="/css/admin/admin-layout.css">
+  <link rel="stylesheet" href="/css/admin/admin-articles.css">
+  <style>
+    /* 媒体库网格布局 */
+    .media-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; padding: 16px 0; }
+    .media-item { position: relative; border: 2px solid #e0e0e0; border-radius: 8px; overflow: hidden; cursor: pointer; transition: border-color 0.2s; aspect-ratio: 1; }
+    .media-item:hover { border-color: var(--color-primary); }
+    .media-item__img { width: 100%; height: 100%; object-fit: cover; }
+    .media-item__overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.7)); padding: 8px; color: #fff; font-size: 12px; }
+    .media-item__name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .media-item__size { opacity: 0.8; }
+    .media-item__delete { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; background: rgba(198,40,40,0.8); color: #fff; border: none; border-radius: 50%; cursor: pointer; display: none; align-items: center; justify-content: center; font-size: 14px; }
+    .media-item:hover .media-item__delete { display: flex; }
+    .media-upload-area { border: 2px dashed #ccc; border-radius: 8px; padding: 40px; text-align: center; color: #999; cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+    .media-upload-area:hover { border-color: var(--color-primary); color: var(--color-primary); }
+    .media-upload-area.dragover { border-color: var(--color-primary); background: var(--color-primary-bg); }
+    .media-detail-modal { max-width: 500px; }
+    .media-detail-preview { width: 100%; max-height: 300px; object-fit: contain; border-radius: 4px; margin-bottom: 16px; }
+    .media-detail-info { font-size: 14px; color: #666; line-height: 2; }
+  </style>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
+    <div class="admin-main">
+      <header class="admin-header" id="admin-header"></header>
+      <main class="admin-content">
+        <!-- 工具栏 -->
+        <div class="admin-toolbar">
+          <div class="admin-toolbar__left">
+            <select class="filter-select" id="filter-type">
+              <option value="">全部类型</option>
+              <option value="image">图片</option>
+              <option value="video">视频</option>
+            </select>
+          </div>
+          <div class="admin-toolbar__right">
+            <label class="btn btn-primary" style="cursor:pointer;">
+              上传文件
+              <input type="file" id="file-upload" accept="image/*,video/mp4" multiple style="display:none;">
+            </label>
+          </div>
+        </div>
+
+        <!-- 上传区域 -->
+        <div class="media-upload-area" id="upload-area">
+          <p>点击或拖拽文件到此处上传</p>
+          <p style="font-size:12px;margin-top:8px;">支持 JPG/PNG/WebP 图片（最大 5MB）和 MP4 视频（最大 100MB）</p>
+        </div>
+
+        <!-- 媒体网格 -->
+        <div class="media-grid" id="media-grid">
+          <p style="grid-column:1/-1;text-align:center;padding:40px;color:#999;">加载中...</p>
+        </div>
+
+        <!-- 分页 -->
+        <div class="table-pagination">
+          <span class="table-pagination__info" id="pagination-info"></span>
+          <div id="pagination"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/js/common/config.js"></script>
+  <script src="/js/common/storage.js"></script>
+  <script src="/js/common/utils.js"></script>
+  <script src="/js/common/api.js"></script>
+  <script src="/js/common/auth.js"></script>
+  <script src="/js/common/toast.js"></script>
+  <script src="/js/components/form.js"></script>
+  <script src="/js/components/modal.js"></script>
+  <script src="/js/components/pagination.js"></script>
+  <script src="/js/admin/admin.js"></script>
+  <script src="/js/admin/media.js"></script>
+</body>
+</html>

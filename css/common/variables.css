@@ -1,0 +1,161 @@
+/* ========================================
+   文件说明：CSS 变量（颜色、字体、间距等）
+   文件路径：css/common/variables.css
+   ======================================== */
+
+:root {
+  /* 主题色 - 绿色系（乡村自然风格） */
+  --color-primary: #2d6a4f;
+  --color-primary-light: #40916c;
+  --color-primary-lighter: #52b788;
+  --color-primary-dark: #1b4332;
+  --color-primary-bg: #f0f7f4;
+
+  /* 辅助色 */
+  --color-secondary: #d4a373;
+  --color-secondary-light: #e9c46a;
+  --color-secondary-dark: #bc6c25;
+
+  /* 功能色 */
+  --color-success: #52b788;
+  --color-warning: #e9c46a;
+  --color-danger: #e63946;
+  --color-info: #457b9d;
+
+  /* 中性色 */
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #4a4a68;
+  --color-text-placeholder: #a0a0b8;
+  --color-text-disabled: #c0c0d0;
+  --color-text-white: #ffffff;
+
+  /* 背景色 */
+  --color-bg: #f8f9fa;
+  --color-bg-page: #f8f9fa;
+  --color-bg-card: #ffffff;
+  --color-bg-hover: #f0f2f5;
+  --color-bg-mask: rgba(0, 0, 0, 0.5);
+
+  /* 文本颜色（兼容别名） */
+  --color-text: #1a1a2e;
+
+  /* 边框色 */
+  --color-border: #e0e0e8;
+  --color-border-light: #f0f0f5;
+
+  /* 字体 */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-family-heading: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --font-family-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+
+  /* 字号 */
+  --font-size-xs: 12px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 30px;
+  --font-size-4xl: 36px;
+
+  /* 间距 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-base: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --spacing-3xl: 48px;
+  --spacing-4xl: 64px;
+
+  /* 圆角 */
+  --radius-sm: 4px;
+  --radius-base: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* 容器宽度 */
+  --container-sm: 640px;
+  --container-md: 768px;
+  --container-lg: 1024px;
+  --container-xl: 1200px;
+
+  /* 头部高度 */
+  --header-height: 64px;
+
+  /* 过渡 */
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.25s ease;
+  --transition-slow: 0.4s ease;
+
+  /* z-index */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+
+  /* 纪念日模式（默认无效果） */
+  --memorial-filter: none;
+}
+
+/* 纪念日黑白模式 - 全站灰度效果，覆盖所有元素和背景 */
+html.memorial-mode {
+  filter: grayscale(100%) !important;
+  -webkit-filter: grayscale(100%) !important;
+}
+
+html.memorial-mode *,
+html.memorial-mode *::before,
+html.memorial-mode *::after {
+  filter: grayscale(100%) !important;
+  -webkit-filter: grayscale(100%) !important;
+  transition: filter 0.6s ease, -webkit-filter 0.6s ease;
+}
+
+/* 保留按钮等交互元素的 hover 效果可识别 */
+html.memorial-mode a:hover,
+html.memorial-mode button:hover {
+  opacity: 0.8;
+}
+
+/* ===== 响应式变量覆盖（全局适配，改一处生效全局） ===== */
+@media (max-width: 1024px) {
+  :root {
+    --spacing-3xl: 40px;
+    --spacing-4xl: 56px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --font-size-2xl: 22px;
+    --font-size-3xl: 26px;
+    --font-size-4xl: 32px;
+    --spacing-3xl: 36px;
+    --spacing-4xl: 48px;
+    --header-height: 56px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --font-size-xl: 20px;
+    --font-size-2xl: 20px;
+    --font-size-3xl: 24px;
+    --font-size-4xl: 28px;
+    --spacing-3xl: 28px;
+    --spacing-4xl: 36px;
+  }
+}

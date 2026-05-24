@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="福溪村文章详情">
+  <title>文章详情 - 福溪村</title>
+
+  <!-- Open Graph 标签（社交分享） -->
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="文章详情 - 福溪村">
+  <meta property="og:description" content="福溪村文章详情">
+  <meta property="og:image" content="/images/logo/logo.svg">
+  <meta property="og:site_name" content="福溪村">
+  <meta property="og:locale" content="zh_CN">
+
+  <!-- Twitter Card 标签 -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="文章详情 - 福溪村">
+  <meta name="twitter:description" content="福溪村文章详情">
+  <meta name="twitter:image" content="/images/logo/logo.svg">
+
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="stylesheet" href="/css/common/reset.css">
+  <link rel="stylesheet" href="/css/common/variables.css">
+  <link rel="stylesheet" href="/css/common/typography.css">
+  <link rel="stylesheet" href="/css/common/utilities.css">
+  <link rel="stylesheet" href="/css/common/animations.css">
+  <link rel="stylesheet" href="/css/components/header.css">
+  <link rel="stylesheet" href="/css/components/footer.css">
+  <link rel="stylesheet" href="/css/components/breadcrumb.css">
+  <link rel="stylesheet" href="/css/components/form.css">
+  <link rel="stylesheet" href="/css/pages/article-detail.css">
+  <script src="/js/common/theme-loader.js"></script>
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <nav class="breadcrumb">
+        <a href="/">首页</a>
+        <span class="breadcrumb__sep">/</span>
+        <a href="/articles.html" class="breadcrumb__category">新闻动态</a>
+        <span class="breadcrumb__sep">/</span>
+        <span class="breadcrumb__current" id="breadcrumb-title">加载中...</span>
+      </nav>
+
+      <article class="article-detail" id="article-detail">
+        <!-- 默认静态文章内容（API 加载成功后替换） -->
+        <div class="article-detail__header">
+          <h1 class="article-detail__title">欢迎来到福溪村</h1>
+          <div class="article-detail__meta">
+            <span>作者：福溪村</span>
+            <span>分类：村内新闻</span>
+            <span>发布时间：2026年</span>
+          </div>
+        </div>
+        <img src="/images/default/article.svg" alt="福溪村" class="article-detail__cover" loading="lazy">
+        <div class="article-detail__content">
+          <p>福溪村位于广西贺州市富川瑶族自治县朝东镇，始建于宋代，距今已有千年历史。村落保存着完好的明清古建筑群，是周敦颐理学思想的重要传承地，也是瑶族文化的活态博物馆。</p>
+          <p>这里青砖黛瓦、飞檐翘角，古戏台、爱莲堂、石板古街、风雨桥等古建筑错落有致，展现着岭南建筑艺术的精髓。漫步其中，仿佛穿越时空，感受千年古村的静谧与美好。</p>
+          <p>福溪村不仅是一座建筑博物馆，更是理学文化的传承圣地。周敦颐"出淤泥而不染，濯清涟而不妖"的精神在这里代代相传，影响着一代又一代的福溪人。</p>
+        </div>
+        <div class="article-detail__actions">
+          <button class="btn-like" id="btn-like"><span>&#9829;</span> <span id="like-count">0</span></button>
+        </div>
+      </article>
+
+      <!-- 评论区 -->
+      <section class="comments-section" id="comments-section">
+        <h3 class="comments-title">评论</h3>
+
+        <div class="comment-form" id="comment-form" style="display:none;">
+          <textarea class="form-input form-textarea" id="comment-content" placeholder="写下你的评论..." rows="3"></textarea>
+          <button class="btn btn-primary" id="btn-submit-comment">发表评论</button>
+        </div>
+        <div class="comment-login-tip" id="comment-login-tip" style="display:none;">
+          <a href="/login.html">登录</a>后可以发表评论
+        </div>
+
+        <div class="comments-list" id="comments-list">
+          <div class="skeleton" style="height:80px;margin-bottom:16px;"></div>
+          <div class="skeleton" style="height:80px;"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="/js/common/config.js"></script>
+  <script src="/js/common/storage.js"></script>
+  <script src="/js/common/utils.js"></script>
+  <script src="/js/common/api.js"></script>
+  <script src="/js/common/auth.js"></script>
+  <script src="/js/common/toast.js"></script>
+  <script src="/js/components/header.js"></script>
+  <script src="/js/components/footer.js"></script>
+  <script src="/js/pages/article-detail.js"></script>
+</body>
+</html>

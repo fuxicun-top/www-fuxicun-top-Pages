@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="福溪村视频库 - 古村风貌、瑶族文化、民俗活动的影像记录">
+  <meta name="keywords" content="福溪村,视频,古村风貌,瑶族文化,民俗活动">
+  <title>视频库 - 福溪村</title>
+
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="stylesheet" href="/css/common/reset.css">
+  <link rel="stylesheet" href="/css/common/variables.css">
+  <link rel="stylesheet" href="/css/common/typography.css">
+  <link rel="stylesheet" href="/css/common/utilities.css">
+  <link rel="stylesheet" href="/css/components/header.css">
+  <link rel="stylesheet" href="/css/components/footer.css">
+  <link rel="stylesheet" href="/css/components/breadcrumb.css">
+  <link rel="stylesheet" href="/css/components/pagination.css">
+  <link rel="stylesheet" href="/css/pages/videos.css">
+  <script src="/js/common/theme-loader.js"></script>
+</head>
+<body>
+  <header class="site-header" id="site-header"></header>
+
+  <main class="main-content">
+    <!-- 页面横幅 -->
+    <div class="page-banner">
+      <div class="container">
+        <h1 class="page-banner__title">视频库</h1>
+        <p class="page-banner__subtitle">古村风貌 · 瑶族文化 · 民俗活动</p>
+      </div>
+    </div>
+
+    <!-- 面包屑 -->
+    <div class="container">
+      <nav class="breadcrumb">
+        <a href="/">首页</a>
+        <span class="breadcrumb__sep">/</span>
+        <span class="breadcrumb__current">视频库</span>
+      </nav>
+    </div>
+
+    <!-- 视频列表 -->
+    <section class="content-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">视频精选</h2>
+          <p class="section-subtitle">用影像记录古村的精彩瞬间</p>
+        </div>
+        <div class="video-grid" id="videos-list">
+          <div class="empty-state">加载中...</div>
+        </div>
+        <div id="pagination"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 视频播放弹窗 -->
+  <div class="video-modal" id="video-modal">
+    <div class="video-modal__content">
+      <div class="video-modal__header">
+        <h3 id="video-title"></h3>
+        <button class="video-modal__close" onclick="VideosPage.closeModal()">&times;</button>
+      </div>
+      <div class="video-modal__body">
+        <video id="video-player" controls></video>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script src="/js/common/config.js"></script>
+  <script src="/js/common/storage.js"></script>
+  <script src="/js/common/utils.js"></script>
+  <script src="/js/common/api.js"></script>
+  <script src="/js/common/auth.js"></script>
+  <script src="/js/common/toast.js"></script>
+  <script src="/js/components/header.js"></script>
+  <script src="/js/components/footer.js"></script>
+  <script src="/js/components/pagination.js"></script>
+  <script src="/js/pages/videos.js"></script>
+</body>
+</html>

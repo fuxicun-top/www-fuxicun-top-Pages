@@ -1,0 +1,135 @@
+/* ========================================
+   文件说明：表单组件样式
+   文件路径：css/components/form.css
+   ======================================== */
+
+.form-group {
+  margin-bottom: var(--spacing-base);
+}
+
+.form-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.form-label--required::after {
+  content: '*';
+  color: var(--color-danger);
+  margin-left: 2px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: var(--font-size-base);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  background: var(--color-bg-card);
+  transition: border-color var(--transition-fast);
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+}
+
+.form-input::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.form-input--error {
+  border-color: var(--color-danger);
+}
+
+.form-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+}
+
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a4a68' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.form-error {
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  margin-top: var(--spacing-xs);
+}
+
+.form-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-placeholder);
+  margin-top: var(--spacing-xs);
+}
+
+/* 复选框/单选框 */
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+}
+
+.form-check input[type="checkbox"],
+.form-check input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--color-primary);
+}
+
+/* Turnstile 容器 */
+.turnstile-container {
+  margin: var(--spacing-base) 0;
+}
+
+/* ========================================
+   响应式：移动端表单优化
+   ======================================== */
+@media (max-width: 768px) {
+  /* 输入框触摸目标 ≥44px，且 font-size 必须 ≥16px 防止 iOS 自动缩放 */
+  .form-input {
+    min-height: 46px;
+    padding: 12px 14px;
+    font-size: 16px;
+  }
+
+  .form-textarea {
+    min-height: 100px;
+  }
+
+  .form-select {
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+
+  /* 复选框/单选框：放大方便手指点选 */
+  .form-check input[type="checkbox"],
+  .form-check input[type="radio"] {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* 表单组之间留更大间距，避免误触 */
+  .form-group {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+@media (max-width: 480px) {
+  /* 小屏手机：标签放大易读 */
+  .form-label {
+    font-size: var(--font-size-base);
+  }
+}

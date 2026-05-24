@@ -1,0 +1,128 @@
+/* ========================================
+   文件说明：轮播图样式
+   文件路径：css/components/banner.css
+   ======================================== */
+
+.banner {
+  position: relative;
+  width: 100%;
+  height: 480px;
+  overflow: hidden;
+  margin-top: var(--header-height);
+}
+
+.banner__slides {
+  display: flex;
+  height: 100%;
+  transition: transform 0.6s ease;
+}
+
+.banner__slide {
+  min-width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.banner__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.banner__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.05) 60%, rgba(0,0,0,0.45) 100%),
+    radial-gradient(ellipse at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.35) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--color-text-white);
+  padding: var(--spacing-xl);
+}
+
+.banner__title {
+  font-size: var(--font-size-4xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  color: #fff;
+  text-shadow:
+    0 1px 3px rgba(0,0,0,0.6),
+    0 2px 8px rgba(0,0,0,0.4),
+    0 0 20px rgba(0,0,0,0.2);
+  letter-spacing: 4px;
+}
+
+.banner__subtitle {
+  font-size: var(--font-size-lg);
+  color: #fff;
+  text-shadow:
+    0 1px 3px rgba(0,0,0,0.6),
+    0 2px 6px rgba(0,0,0,0.3);
+  letter-spacing: 2px;
+  opacity: 0.95;
+}
+
+/* 指示器 */
+.banner__dots {
+  position: absolute;
+  bottom: var(--spacing-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.banner__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.banner__dot.active {
+  background: var(--color-text-white);
+  width: 28px;
+}
+
+/* 箭头 */
+.banner__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-white);
+  font-size: var(--font-size-xl);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.banner__arrow:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.banner__arrow--prev { left: var(--spacing-lg); }
+.banner__arrow--next { right: var(--spacing-lg); }
+
+@media (max-width: 768px) {
+  .banner { height: 280px; }
+  .banner__title {
+    font-size: var(--font-size-2xl);
+    letter-spacing: 2px;
+  }
+  .banner__subtitle {
+    font-size: var(--font-size-base);
+    letter-spacing: 1px;
+  }
+}

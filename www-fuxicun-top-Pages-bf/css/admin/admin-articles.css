@@ -1,0 +1,138 @@
+/* ========================================
+   文件说明：后台文章管理样式
+   文件路径：css/admin/admin-articles.css
+   ======================================== */
+
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-toolbar__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-input {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  padding: 0 12px;
+  transition: border-color var(--transition-fast);
+}
+
+.search-input:focus-within {
+  border-color: var(--color-primary);
+}
+
+.search-input input {
+  border: none;
+  outline: none;
+  padding: 8px 0;
+  font-size: var(--font-size-sm);
+  width: 200px;
+  background: transparent;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-base);
+  font-size: var(--font-size-sm);
+  background: var(--color-bg-card);
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234a4a68' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+}
+
+/* 数据表格 */
+.data-table-wrapper {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: var(--font-size-sm);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.data-table th {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  background: var(--color-bg-page);
+  white-space: nowrap;
+}
+
+.data-table tr:hover {
+  background: var(--color-bg-hover);
+}
+
+.data-table .actions {
+  display: flex;
+  gap: 8px;
+}
+
+.data-table .actions a,
+.data-table .actions button {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.data-table .actions .btn-danger-text {
+  color: var(--color-danger);
+}
+
+/* 分页 */
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.table-pagination__info {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .data-table-wrapper {
+    overflow-x: auto;
+  }
+}

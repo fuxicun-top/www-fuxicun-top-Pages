@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>后台管理 - 福溪村</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="stylesheet" href="/css/common/reset.css">
+  <link rel="stylesheet" href="/css/common/variables.css">
+  <link rel="stylesheet" href="/css/common/typography.css">
+  <link rel="stylesheet" href="/css/common/utilities.css">
+  <link rel="stylesheet" href="/css/components/pagination.css">
+  <link rel="stylesheet" href="/css/admin/admin-layout.css">
+  <link rel="stylesheet" href="/css/admin/admin-dashboard.css">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
+    <div class="admin-main">
+      <header class="admin-header" id="admin-header"></header>
+      <main class="admin-content">
+        <!-- 统计卡片 -->
+        <div class="dashboard-stats">
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--users">👥</div>
+            <div class="stat-card__info">
+              <div class="stat-card__value" id="stat-users">-</div>
+              <div class="stat-card__label">注册用户</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--articles">📝</div>
+            <div class="stat-card__info">
+              <div class="stat-card__value" id="stat-articles">-</div>
+              <div class="stat-card__label">文章总数</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--comments">💬</div>
+            <div class="stat-card__info">
+              <div class="stat-card__value" id="stat-comments">-</div>
+              <div class="stat-card__label">评论总数</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card__icon stat-card__icon--views">👁️</div>
+            <div class="stat-card__info">
+              <div class="stat-card__value" id="stat-views">-</div>
+              <div class="stat-card__label">总浏览量</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 最新数据 -->
+        <div class="dashboard-grid">
+          <div class="dashboard-panel">
+            <div class="dashboard-panel__header">
+              <h3 class="dashboard-panel__title">最新文章</h3>
+              <a href="/admin/articles.html" class="dashboard-panel__more">查看全部 →</a>
+            </div>
+            <div class="dashboard-panel__body" id="recent-articles">
+              <p style="text-align:center;padding:20px;color:var(--color-text-placeholder);">加载中...</p>
+            </div>
+          </div>
+          <div class="dashboard-panel">
+            <div class="dashboard-panel__header">
+              <h3 class="dashboard-panel__title">快捷操作</h3>
+            </div>
+            <div class="dashboard-panel__body" style="padding:20px;">
+              <div style="display:flex;flex-wrap:wrap;gap:12px;">
+                <a href="/admin/articles.html" class="btn btn-outline btn-sm">📝 管理文章</a>
+                <a href="/admin/categories.html" class="btn btn-outline btn-sm">📁 管理分类</a>
+                <a href="/admin/users.html" class="btn btn-outline btn-sm">👥 管理用户</a>
+                <a href="/admin/banners.html" class="btn btn-outline btn-sm">🎨 管理轮播图</a>
+                <a href="/admin/settings.html" class="btn btn-outline btn-sm">⚙️ 网站设置</a>
+                <a href="/" target="_blank" class="btn btn-outline btn-sm">🌐 访问前台</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/js/common/config.js"></script>
+  <script src="/js/common/storage.js"></script>
+  <script src="/js/common/utils.js"></script>
+  <script src="/js/common/api.js"></script>
+  <script src="/js/common/auth.js?v=2"></script>
+  <script src="/js/common/toast.js"></script>
+  <script src="/js/admin/admin.js"></script>
+  <script src="/js/admin/dashboard.js"></script>
+</body>
+</html>

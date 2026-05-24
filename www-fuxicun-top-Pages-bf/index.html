@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="福溪村官方网站 - 广西贺州市富川瑶族自治县朝东镇福溪村，千年古村、理学圣地">
+  <meta name="keywords" content="福溪村,富川,贺州,古村落,理学文化,瑶族,旅游">
+  <title>福溪村 - 千年古村 · 理学圣地</title>
+
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="stylesheet" href="/css/common/reset.css">
+  <link rel="stylesheet" href="/css/common/variables.css">
+  <link rel="stylesheet" href="/css/common/typography.css">
+  <link rel="stylesheet" href="/css/common/utilities.css">
+  <link rel="stylesheet" href="/css/common/animations.css">
+  <link rel="stylesheet" href="/css/components/header.css">
+  <link rel="stylesheet" href="/css/components/footer.css">
+  <link rel="stylesheet" href="/css/components/banner.css">
+  <link rel="stylesheet" href="/css/components/card.css">
+  <link rel="stylesheet" href="/css/pages/home.css">
+
+  <!-- Open Graph 社交分享标签 -->
+  <meta property="og:title" content="福溪村 - 千年古村 · 理学圣地">
+  <meta property="og:description" content="福溪村官方网站 - 广西贺州市富川瑶族自治县朝东镇福溪村">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.fuxicun.top">
+  <meta property="og:image" content="/images/banners/banner1.svg">
+
+  <script src="/js/common/theme-loader.js"></script>
+</head>
+<body>
+  <!-- 头部导航 -->
+  <header class="site-header" id="site-header"></header>
+
+  <!-- 轮播图 -->
+  <section class="banner" id="banner-container"></section>
+
+  <!-- 村庄简介 -->
+  <section class="home-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">走进福溪村</h2>
+        <p class="section-subtitle">千年古村 · 理学圣地 · 瑶族风情</p>
+      </div>
+      <p id="intro-description" class="intro-description" style="text-align:center;max-width:720px;margin:0 auto 32px;color:var(--color-text-secondary);font-size:17px;line-height:1.8;">
+        福溪村位于广西贺州市富川瑶族自治县朝东镇，始建于宋代，距今已有千年历史。村落保存着完好的明清古建筑群，是周敦颐理学思想的重要传承地，也是瑶族文化的活态博物馆。
+      </p>
+      <div class="intro-grid">
+        <div class="intro-card">
+          <div class="intro-card__icon">🏛️</div>
+          <h3 class="intro-card__title">古建筑群</h3>
+          <p class="intro-card__desc">保存完好的明清古建筑群，青砖黛瓦、飞檐翘角，展现岭南建筑艺术的精髓。</p>
+          <a href="/scenery.html" class="intro-card__link">了解更多 →</a>
+        </div>
+        <div class="intro-card">
+          <div class="intro-card__icon">📚</div>
+          <h3 class="intro-card__title">理学文化</h3>
+          <p class="intro-card__desc">周敦颐理学思想的重要传承地，"爱莲说"精神在这片土地上生生不息。</p>
+          <a href="/culture.html" class="intro-card__link">了解更多 →</a>
+        </div>
+        <div class="intro-card">
+          <div class="intro-card__icon">🎭</div>
+          <h3 class="intro-card__title">瑶族风情</h3>
+          <p class="intro-card__desc">独特的瑶族民俗文化，传统节庆、民间艺术、特色美食，体验多彩民族风情。</p>
+          <a href="/ethnic.html" class="intro-card__link">了解更多 →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 精选推荐 -->
+  <section class="home-section home-section--gray">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">精选推荐</h2>
+        <a href="/articles.html" class="section-more">查看更多 →</a>
+      </div>
+      <div class="featured-grid" id="featured-articles">
+        <!-- 默认静态推荐内容（API 加载成功后替换） -->
+        <div class="featured-card featured-card--large">
+          <img class="featured-card__image" src="/images/scenery/ancient-architecture.svg" alt="福溪古建筑群" loading="lazy">
+          <div class="featured-card__overlay">
+            <span class="featured-card__category">古建筑</span>
+            <h3 class="featured-card__title"><a href="/article-detail.html?id=3">120 根木柱与门楣之上：福溪古建筑群解码</a></h3>
+            <p class="featured-card__excerpt">从 120 根木柱的木构体系，到央视报道的门楣石雕；从风雨桥的瑶族智慧，到 24 座古戏台的戏曲鼎盛。</p>
+          </div>
+        </div>
+        <div class="featured-card">
+          <img class="featured-card__image" src="/images/culture/zhou-dunyi.svg" alt="理学文化传承" loading="lazy">
+          <div class="featured-card__body">
+            <h4 class="featured-card__title"><a href="/article-detail.html?id=2">周敦颐与福溪：理学沿潇贺古道南传的活证</a></h4>
+            <p class="featured-card__meta">福溪村</p>
+          </div>
+        </div>
+        <div class="featured-card">
+          <img class="featured-card__image" src="/images/ethnic/dance.svg" alt="瑶族民俗文化" loading="lazy">
+          <div class="featured-card__body">
+            <h4 class="featured-card__title"><a href="/article-detail.html?id=4">炸龙闹元宵：千年瑶俗与潇贺古道的回响</a></h4>
+            <p class="featured-card__meta">福溪村</p>
+          </div>
+        </div>
+        <div class="featured-card">
+          <img class="featured-card__image" src="/images/scenery/ancient-architecture.svg" alt="古村旅游攻略" loading="lazy">
+          <div class="featured-card__body">
+            <h4 class="featured-card__title"><a href="/article-detail.html?id=5">福溪村旅游攻略：2 天 1 晚串联潇贺古道三村</a></h4>
+            <p class="featured-card__meta">福溪村</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 最新文章 -->
+  <section class="home-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">新闻动态</h2>
+        <a href="/articles.html" class="section-more">查看更多 →</a>
+      </div>
+      <div class="card-grid" id="latest-articles">
+        <!-- 默认静态文章（API 加载成功后替换） -->
+        <div class="article-card">
+          <img class="article-card__image" src="/images/banners/banner1.svg" alt="千年古村" loading="lazy">
+          <div class="article-card__body">
+            <span class="article-card__category">村内新闻</span>
+            <h3 class="article-card__title"><a href="/article-detail.html?id=1">千年古村 山水人和：央视镜头下的福溪</a></h3>
+            <p class="article-card__excerpt">2025 年央视"文化中国行"以《千年古村 山水人和》为题报道福溪。这座始建于宋代、2012 年列入首批中国传统村落的古村，正焕发新生。</p>
+            <div class="article-card__meta">
+              <span class="article-card__author">
+                <img class="article-card__avatar" src="/images/default/article.svg" alt="">
+                <span>福溪村</span>
+              </span>
+              <span>福溪村</span>
+            </div>
+          </div>
+        </div>
+        <div class="article-card">
+          <img class="article-card__image" src="/images/culture/zhou-dunyi.svg" alt="理学文化" loading="lazy">
+          <div class="article-card__body">
+            <span class="article-card__category">理学文化</span>
+            <h3 class="article-card__title"><a href="/article-detail.html?id=2">周敦颐与福溪：理学沿潇贺古道南传的活证</a></h3>
+            <p class="article-card__excerpt">周敦颐父亲曾任贺州桂岭县令，理学思想沿古道南传至福溪，村中讲学堂遗址、周氏宗祠、爱莲堂构成完整的理学文化轴。</p>
+            <div class="article-card__meta">
+              <span class="article-card__author">
+                <img class="article-card__avatar" src="/images/default/article.svg" alt="">
+                <span>福溪村</span>
+              </span>
+              <span>福溪村</span>
+            </div>
+          </div>
+        </div>
+        <div class="article-card">
+          <img class="article-card__image" src="/images/ethnic/dance.svg" alt="民俗风情" loading="lazy">
+          <div class="article-card__body">
+            <span class="article-card__category">民俗风情</span>
+            <h3 class="article-card__title"><a href="/article-detail.html?id=4">炸龙闹元宵：千年瑶俗与潇贺古道的回响</a></h3>
+            <p class="article-card__excerpt">正月初十到十五的炸龙狂欢已传承千年，据传沿秦潇贺古道传入富川。叠加盘王节、芦笙长鼓舞、二声部民歌。</p>
+            <div class="article-card__meta">
+              <span class="article-card__author">
+                <img class="article-card__avatar" src="/images/default/article.svg" alt="">
+                <span>福溪村</span>
+              </span>
+              <span>福溪村</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 图片画廊预览 -->
+  <section class="home-section home-section--gray">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">福溪印象</h2>
+        <a href="/gallery.html" class="section-more">查看更多 →</a>
+      </div>
+      <div class="gallery-grid" id="gallery-preview">
+        <!-- 默认静态图片（API 加载成功后替换） -->
+        <div class="gallery-item"><img src="/images/scenery/ancient-architecture.svg" alt="古建筑群" loading="lazy"></div>
+        <div class="gallery-item"><img src="/images/culture/ai-lian-tang.svg" alt="爱莲堂" loading="lazy"></div>
+        <div class="gallery-item"><img src="/images/default/article.svg" alt="石板古街" loading="lazy"></div>
+        <div class="gallery-item"><img src="/images/default/article.svg" alt="风雨桥" loading="lazy"></div>
+        <div class="gallery-item"><img src="/images/ethnic/yao-people.svg" alt="瑶族风情" loading="lazy"></div>
+        <div class="gallery-item"><img src="/images/about/village-overview.svg" alt="福溪全景" loading="lazy"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 旅游指南 -->
+  <section class="home-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">旅游指南</h2>
+        <p class="section-subtitle">来福溪村，感受千年古村的魅力</p>
+      </div>
+      <div class="travel-grid">
+        <div class="travel-card">
+          <div class="travel-card__icon">🚗</div>
+          <h4 class="travel-card__title">交通指南</h4>
+          <p class="travel-card__desc">从贺州市区出发，沿S203省道约1小时车程可达。</p>
+        </div>
+        <div class="travel-card">
+          <div class="travel-card__icon">🏠</div>
+          <h4 class="travel-card__title">住宿推荐</h4>
+          <p class="travel-card__desc">村内有特色民宿，也可选择富川县城酒店。</p>
+        </div>
+        <div class="travel-card">
+          <div class="travel-card__icon">🍜</div>
+          <h4 class="travel-card__title">美食推荐</h4>
+          <p class="travel-card__desc">油茶、瑶族腊肉、富川脐橙等特色美食。</p>
+        </div>
+        <div class="travel-card">
+          <div class="travel-card__icon">📸</div>
+          <h4 class="travel-card__title">必打卡点</h4>
+          <p class="travel-card__desc">古戏台、爱莲堂、石板古街、风雨桥。</p>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:32px;">
+        <a href="/travel.html" class="btn btn-primary btn-lg">查看完整攻略</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 底部 -->
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <!-- 公共脚本 -->
+  <script src="/js/common/config.js"></script>
+  <script src="/js/common/storage.js"></script>
+  <script src="/js/common/utils.js"></script>
+  <script src="/js/common/api.js"></script>
+  <script src="/js/common/auth.js"></script>
+  <script src="/js/common/toast.js"></script>
+  <script src="/js/components/header.js"></script>
+  <script src="/js/components/footer.js"></script>
+  <script src="/js/components/banner.js"></script>
+  <script src="/js/pages/home.js"></script>
+</body>
+</html>

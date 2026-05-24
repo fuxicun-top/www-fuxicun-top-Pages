@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="c2bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E8F0E8"/>
+      <stop offset="100%" stop-color="#D4E8D4"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#c2bg)"/>
+  <!-- 爱莲堂主体 -->
+  <rect x="100" y="100" width="200" height="130" fill="#D4C5A9" rx="2"/>
+  <!-- 屋顶 -->
+  <path d="M70 100 L200 50 L330 100" fill="#5C4033"/>
+  <path d="M68 100 Q55 96 45 86" stroke="#5C4033" stroke-width="3" fill="none"/>
+  <path d="M332 100 Q345 96 355 86" stroke="#5C4033" stroke-width="3" fill="none"/>
+  <!-- 屋脊 -->
+  <path d="M196 50 Q200 42 204 50" fill="#C8A96E"/>
+  <!-- 匾额 -->
+  <rect x="150" y="108" width="100" height="28" fill="#8B0000" rx="2"/>
+  <text x="200" y="130" text-anchor="middle" font-family="KaiTi,STKaiti,serif" font-size="18" fill="#FFD700" font-weight="bold">爱莲堂</text>
+  <!-- 柱子 -->
+  <rect x="115" y="136" width="8" height="94" fill="#8B0000"/>
+  <rect x="192" y="136" width="8" height="94" fill="#8B0000"/>
+  <rect x="277" y="136" width="8" height="94" fill="#8B0000"/>
+  <!-- 台阶 -->
+  <rect x="120" y="230" width="160" height="6" fill="#C4B49A"/>
+  <rect x="110" y="236" width="180" height="6" fill="#B8A88E"/>
+  <!-- 前景荷塘 -->
+  <ellipse cx="200" cy="262" rx="140" ry="22" fill="#4A90A4" opacity="0.5"/>
+  <!-- 荷花 -->
+  <g transform="translate(160,255)">
+    <ellipse cx="0" cy="-6" rx="5" ry="10" fill="#FFB6C1" transform="rotate(-20)"/>
+    <ellipse cx="0" cy="-6" rx="5" ry="10" fill="#FF69B4" transform="rotate(10)"/>
+    <ellipse cx="0" cy="-6" rx="5" ry="10" fill="#FFB6C1" transform="rotate(-50)"/>
+    <circle cx="0" cy="0" r="3" fill="#FFD700"/>
+  </g>
+  <g transform="translate(240,258)">
+    <ellipse cx="0" cy="-5" rx="4" ry="8" fill="#FFB6C1" transform="rotate(-10)"/>
+    <ellipse cx="0" cy="-5" rx="4" ry="8" fill="#FF69B4" transform="rotate(25)"/>
+    <circle cx="0" cy="0" r="2.5" fill="#FFD700"/>
+  </g>
+  <!-- 荷叶 -->
+  <ellipse cx="140" cy="265" rx="16" ry="10" fill="#2d6a4f" opacity="0.5"/>
+  <ellipse cx="260" cy="260" rx="14" ry="8" fill="#2d6a4f" opacity="0.5"/>
+  <!-- 红灯笼 -->
+  <line x1="118" y1="96" x2="118" y2="100" stroke="#C8A96E" stroke-width="1"/>
+  <ellipse cx="118" cy="112" rx="6" ry="10" fill="#DC143C"/>
+  <line x1="282" y1="96" x2="282" y2="100" stroke="#C8A96E" stroke-width="1"/>
+  <ellipse cx="282" cy="112" rx="6" ry="10" fill="#DC143C"/>
+  <!-- 题词 -->
+  <text x="200" y="295" text-anchor="middle" font-family="KaiTi,STKaiti,serif" font-size="11" fill="#2d6a4f" opacity="0.7">出淤泥而不染 · 濯清涟而不妖</text>
+</svg>
