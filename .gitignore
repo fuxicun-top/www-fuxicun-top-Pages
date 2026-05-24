@@ -70,6 +70,11 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Claude
+# 开发工具
 .claude/
 .workbuddy/
+.codebuddy/
+
+# 文档文件（不上传到生产环境）
+*.md
+!README.md
