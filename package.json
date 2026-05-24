@@ -4,8 +4,7 @@
   "description": "福溪村官方网站 - Cloudflare Pages + D1 + R2 + KV",
   "private": true,
   "scripts": {
-    "dev": "wrangler pages dev . --d1=FUXICUN_DB --kv=FUXICUN_KV --r2=FUXICUN_BUCKET",
-    "deploy": "wrangler pages deploy ."
+    "dev": "wrangler pages dev . --d1=FUXICUN_DB --kv=FUXICUN_KV --r2=FUXICUN_BUCKET"
   },
   "devDependencies": {
     "puppeteer-core": "^25.0.4",
