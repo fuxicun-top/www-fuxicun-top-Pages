@@ -44,7 +44,9 @@
     if (!footer) return;
 
     var year = new Date().getFullYear();
-    var copyright = config.copyright_text || ('© ' + year + ' ' + (config.site_name || '福溪村') + ' All Rights Reserved.');
+    var startYear = 2026;
+    var yearText = year > startYear ? (startYear + ' - ' + year) : String(startYear);
+    var copyright = config.copyright_text || ('© ' + yearText + ' ' + (config.site_name || '福溪村') + ' All Rights Reserved.');
 
     footer.innerHTML = '<div class="footer-content">' +
       '<div class="footer-brand">' +
