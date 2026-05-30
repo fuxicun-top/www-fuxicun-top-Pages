@@ -48,7 +48,7 @@ var API = (function() {
     }
 
     if (!response.ok) {
-      throw new Error(result.error?.message || '请求失败');
+      throw new Error(result.message || '请求失败');
     }
 
     return result;
@@ -76,7 +76,7 @@ var API = (function() {
 
       var result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error?.message || '上传失败');
+        throw new Error(result.message || '上传失败');
       }
       return result;
     }

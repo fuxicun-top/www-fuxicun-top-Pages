@@ -103,7 +103,7 @@
             Toast.success(isEdit ? '更新成功' : '创建成功');
             loadPages();
           } else {
-            Toast.error(result.error?.message || '操作失败');
+            Toast.error(result.message || '操作失败');
           }
         }).catch(function(e) {
           Toast.error('操作失败: ' + e.message);
@@ -125,7 +125,7 @@
             Toast.success('删除成功');
             loadPages();
           } else {
-            Toast.error(result.error?.message || '删除失败');
+            Toast.error(result.message || '删除失败');
           }
         } catch (e) {
           Toast.error('删除失败: ' + e.message);

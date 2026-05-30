@@ -56,3 +56,81 @@ export async function checkRateLimit(kv, key, maxRequests = 10, windowSeconds = 
     return { limited: false, remaining: maxRequests, retryAfter: 0 };
   }
 }
+
+/**
+ * 获取当前限流计数（不递增）
+ * 用于"只统计失败"的场景：先读取计数判断是否超限，失败时才递增
+ * @param {Object} kv - KV 命名空间绑定
+ * @param {string} key - 限流键
+ * @param {number} maxRequests - 最大请求数
+ * @param {number} windowSeconds - 窗口秒数
+ * @returns {Promise<{limited: boolean, remaining: number, retryAfter: number}>}
+ */
+export async function getRateLimitCount(kv, key, maxRequests = 10, windowSeconds = 3600) {
+  if (!kv) return { limited: false, remaining: maxRequests, retryAfter: 0 };
+
+  const rateLimitKey = 'ratelimit:' + key;
+
+  try {
+    const data = await kv.get(rateLimitKey, { type: 'json' });
+    const now = Math.floor(Date.now() / 1000);
+
+    if (!data || now - data.windowStart >= windowSeconds) {
+      return { limited: false, remaining: maxRequests, retryAfter: 0 };
+    }
+
+    if (data.count >= maxRequests) {
+      const retryAfter = windowSeconds - (now - data.windowStart);
+      return { limited: true, remaining: 0, retryAfter };
+    }
+
+    return { limited: false, remaining: maxRequests - data.count, retryAfter: 0 };
+  } catch (e) {
+    return { limited: false, remaining: maxRequests, retryAfter: 0 };
+  }
+}
+
+/**
+ * 递增限流计数（仅在失败时调用）
+ * @param {Object} kv - KV 命名空间绑定
+ * @param {string} key - 限流键
+ * @param {number} windowSeconds - 窗口秒数
+ */
+export async function incrementRateLimit(kv, key, windowSeconds = 3600) {
+  if (!kv) return;
+
+  const rateLimitKey = 'ratelimit:' + key;
+
+  try {
+    const data = await kv.get(rateLimitKey, { type: 'json' });
+    const now = Math.floor(Date.now() / 1000);
+
+    if (!data || now - data.windowStart >= windowSeconds) {
+      await kv.put(rateLimitKey, JSON.stringify({
+        windowStart: now,
+        count: 1
+      }), { expirationTtl: windowSeconds + 60 });
+    } else {
+      await kv.put(rateLimitKey, JSON.stringify({
+        windowStart: data.windowStart,
+        count: data.count + 1
+      }), { expirationTtl: windowSeconds + 60 });
+    }
+  } catch (e) {
+    // 忽略
+  }
+}
+
+/**
+ * 清除限流计数（成功登录时调用）
+ * @param {Object} kv - KV 命名空间绑定
+ * @param {string} key - 限流键
+ */
+export async function clearRateLimit(kv, key) {
+  if (!kv) return;
+  try {
+    await kv.delete('ratelimit:' + key);
+  } catch (e) {
+    // 忽略
+  }
+}

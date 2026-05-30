@@ -13,13 +13,78 @@
   <link rel="stylesheet" href="/css/components/form.css">
   <link rel="stylesheet" href="/css/admin/admin-layout.css">
   <style>
-    .config-section { margin-bottom: 32px; }
-    .config-section__title { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--color-primary); }
-    .config-section__desc { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 16px; }
-    .position-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .position-row label { min-width: 60px; font-weight: 500; font-size: 14px; }
-    .position-row select { flex: 1; }
-    .save-bar { margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--color-border-light); }
+    .module-list { display: flex; flex-direction: column; gap: 8px; }
+    .module-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; background: #fff; border: 1px solid var(--color-border-light);
+      border-radius: 8px; cursor: grab; transition: box-shadow 0.2s;
+    }
+    .module-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .module-item.dragging { opacity: 0.5; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    .module-item__drag { cursor: grab; color: var(--color-text-placeholder); font-size: 18px; padding: 4px; }
+    .module-item__icon { font-size: 20px; width: 32px; text-align: center; }
+    .module-item__info { flex: 1; min-width: 0; }
+    .module-item__title { font-weight: 600; font-size: 14px; }
+    .module-item__subtitle { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+    .module-item__badge {
+      font-size: 11px; padding: 2px 8px; border-radius: 10px;
+      background: var(--color-primary-bg); color: var(--color-primary);
+    }
+    .module-item__badge--inactive { background: #f5f5f5; color: var(--color-text-placeholder); }
+    .module-item__actions { display: flex; gap: 4px; }
+    .module-item__btn {
+      padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer;
+      font-size: 13px; background: transparent; color: var(--color-text-secondary);
+    }
+    .module-item__btn:hover { background: var(--color-bg-hover); }
+    .module-item__btn--danger:hover { background: #fef2f2; color: #ef4444; }
+    .module-item--fixed { cursor: default; background: var(--color-primary-bg); border-color: var(--color-primary); border-style: dashed; }
+
+    .add-module-bar { margin-top: 16px; }
+    .add-module-bar select { margin-right: 8px; }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal {
+      background: #fff; border-radius: 12px; padding: 24px;
+      width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;
+    }
+    .modal__title { font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+    .modal__actions { margin-top: 20px; display: flex; gap: 8px; justify-content: flex-end; }
+
+    .article-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+    .article-row select { flex: 1; }
+    .article-row__remove {
+      padding: 6px 8px; border: none; background: none; cursor: pointer;
+      color: var(--color-text-placeholder); font-size: 16px;
+    }
+    .article-row__remove:hover { color: #ef4444; }
+
+    .intro-card-row {
+      display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start;
+    }
+    .intro-card-row input { flex: 1; }
+
+    .travel-card-row {
+      display: flex; gap: 8px; margin-bottom: 8px; align-items: flex-start;
+    }
+    .travel-card-row input { flex: 1; }
+
+    .type-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;
+    }
+    .type-option {
+      padding: 16px; border: 2px solid var(--color-border-light); border-radius: 8px;
+      text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .type-option:hover { border-color: var(--color-primary); }
+    .type-option.selected { border-color: var(--color-primary); background: var(--color-primary-bg); }
+    .type-option__icon { font-size: 24px; margin-bottom: 4px; }
+    .type-option__label { font-size: 13px; font-weight: 500; }
   </style>
 </head>
 <body>
@@ -34,24 +99,14 @@
           </div>
         </div>
 
-        <div style="max-width:700px;">
-          <!-- 精选推荐配置 -->
-          <div class="config-section">
-            <h3 class="config-section__title">精选推荐（最多 5 篇）</h3>
-            <p class="config-section__desc">为每个位置选择文章，或设为"自动"按点赞量排行显示。自定义文章优先于自动排行。</p>
-            <div id="featured-positions"></div>
-          </div>
+        <p style="color:var(--color-text-secondary);font-size:13px;margin-bottom:16px;">
+          拖拽调整模块顺序，点击编辑修改模块内容。模块更改后会实时反映在首页。
+        </p>
 
-          <!-- 新闻动态配置 -->
-          <div class="config-section">
-            <h3 class="config-section__title">新闻动态（最多 4 篇）</h3>
-            <p class="config-section__desc">为每个位置选择文章，或设为"自动"按最新发布时间显示。自定义文章优先于自动排行。</p>
-            <div id="news-positions"></div>
-          </div>
+        <div class="module-list" id="module-list"></div>
 
-          <div class="save-bar">
-            <button class="btn btn-primary" onclick="HomepageConfig.save()">保存配置</button>
-          </div>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="HomepageConfig.showAddModal()">+ 添加模块</button>
         </div>
       </main>
     </div>

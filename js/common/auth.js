@@ -54,17 +54,30 @@ var Auth = (function() {
 
   function updateUI() {
     var user = getUser();
+    var loggedIn = isLoggedIn();
     var authElements = document.querySelectorAll('[data-auth]');
     authElements.forEach(function(el) {
       var auth = el.getAttribute('data-auth');
-      if (auth === 'logged-in' && !isLoggedIn()) el.style.display = 'none';
-      if (auth === 'logged-out' && isLoggedIn()) el.style.display = 'none';
-      if (auth === 'admin' && !isAdmin()) el.style.display = 'none';
+      if (auth === 'logged-in') {
+        el.style.display = loggedIn ? '' : 'none';
+      } else if (auth === 'logged-out') {
+        el.style.display = loggedIn ? 'none' : '';
+      } else if (auth === 'admin') {
+        el.style.display = isAdmin() ? '' : 'none';
+      }
     });
 
-    var usernameEls = document.querySelectorAll('[data-username]');
     if (user) {
-      usernameEls.forEach(function(el) { el.textContent = user.username; });
+      var displayName = user.display_name || user.username;
+      var usernameEls = document.querySelectorAll('[data-username]');
+      usernameEls.forEach(function(el) { el.textContent = displayName; });
+
+      var avatarEls = document.querySelectorAll('[data-avatar]');
+      avatarEls.forEach(function(el) {
+        if (user.avatar) {
+          el.src = user.avatar;
+        }
+      });
     }
   }
 

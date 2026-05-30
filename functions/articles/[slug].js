@@ -45,7 +45,7 @@ export async function onRequest(context) {
     var article = await env.FUXICUN_DB.prepare(
       `SELECT a.id, a.title, a.slug, a.content, a.excerpt, a.cover_image,
               a.published_at, a.updated_at, a.views, a.likes,
-              u.username AS author_name,
+              COALESCE(u.display_name, u.username) AS author_name,
               c.name AS category_name, c.slug AS category_slug
        FROM articles a
        LEFT JOIN users u ON a.author_id = u.id
@@ -58,7 +58,7 @@ export async function onRequest(context) {
       article = await env.FUXICUN_DB.prepare(
         `SELECT a.id, a.title, a.slug, a.content, a.excerpt, a.cover_image,
                 a.published_at, a.updated_at, a.views, a.likes,
-                u.username AS author_name,
+                COALESCE(u.display_name, u.username) AS author_name,
                 c.name AS category_name, c.slug AS category_slug
          FROM articles a
          LEFT JOIN users u ON a.author_id = u.id
@@ -218,7 +218,10 @@ function generateArticlePage(article) {
     // 评论区
     '      <section class="comments-section" id="comments-section">\n' +
     '        <h3 class="comments-title">评论</h3>\n' +
-    '        <div class="comment-form" id="comment-form" style="display:none;">\n' +
+    '        <div class="comment-form" id="comment-form">\n' +
+    '          <div class="comment-guest-fields" id="comment-guest-fields">\n' +
+    '            <input type="text" class="form-input" id="comment-guest-name" placeholder="昵称（必填）" maxlength="20">\n' +
+    '          </div>\n' +
     '          <textarea class="form-input form-textarea" id="comment-content" placeholder="写下你的评论..." rows="3"></textarea>\n' +
     '          <button class="btn btn-primary" id="btn-submit-comment">发表评论</button>\n' +
     '        </div>\n' +

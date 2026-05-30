@@ -24,7 +24,7 @@
       category_name: '村内新闻', author_name: '福溪村',
       cover_image: '/images/banners/banner1.svg',
       published_at: '2026-05-17', created_at: '2026-05-17',
-      content: '<h2>央视"文化中国行"专题报道</h2><p>2025 年 2 月 17 日，<strong>央视新闻</strong>"文化中国行"以《<strong>千年古村 山水人和</strong>》为题对福溪村进行专题报道，将这座沉睡千年的古村落带到全国观众眼前。同日，共产党员网以《门楣之上》为专题聚焦福溪门楣石雕，展现石头里的家训与智慧。</p><h2>千年福溪 三朝积淀</h2><p>福溪村位于广西贺州市富川瑶族自治县朝东镇，地理坐标东经111°16′27″、北纬24°49′13″，地处湘、桂、粤三省交界，自古即有"三省通衢"之称。村落始建于宋代，距今已有千余年历史。五代时期，楚王马殷率部至此，留下124名汉族士兵驻守，与原本的瑶族居民共同奠定了瑶汉融合的村落基础。</p><h2>2012 年首批中国传统村落</h2><p>2012 年 12 月 17 日，福溪村被住建部、文化部、财政部等部委联合列入<strong>第一批中国传统村落名录</strong>。2022年，富川县入选"传统村落集中连片保护利用示范县"，福溪古建筑群获得"修旧如旧"的系统性修缮，周敦颐讲学堂、爱莲堂、周氏宗祠、风雨桥重新焕发活力。</p><h2>核心文化 IP</h2><p>福溪村以"千年古村·理学圣地"为主IP，"瑶乡古韵·潇贺明珠"为副IP，是宋代理学鼻祖周敦颐讲学堂所在地，也是周氏后裔聚居地。村中保存着120根木柱撑起的明清古建筑群、24座古戏台遗存、千年风雨桥和潇贺古道遗迹，是瑶汉文化融合的活态博物馆。</p>'
+      content: '<h2>央视"文化中国行"专题报道</h2><p>2025 年 2 月 17 日，<strong>央视新闻</strong>"文化中国行"以《<strong>千年古村 山水人和</strong>》为题对福溪村进行专题报道，将这座沉睡千年的古村落带到全国观众眼前。同日，共产党员网以《门楣之上》为专题聚焦福溪门楣石雕，展现石头里的家训与智慧。</p><h2>千年福溪 三朝积淀</h2><p>福溪村位于广西贺州市富川瑶族自治县朝东镇，地理坐标东经111°16′27″、北纬24°49′13″，地处湘、桂、粤三省交界，自古即有"三省通衢"之称。村落始建于宋代，距今已有千余年历史。五代时期，楚王马殷率部至此，留下124名汉族士兵驻守，与原本的瑶族居民共同奠定了瑶汉融合的村落基础。</p><h2>2012 年首批中国传统村落</h2><p>2012 年 12 月 17 日，福溪村被住建部、文化部、财政部等部委联合列入<strong>第一批中国传统村落名录</strong>。2022年，富川县入选"传统村落集中连片保护利用示范县"，福溪古建筑群获得"修旧如旧"的系统性修缮，周敦颐讲学堂、爱莲堂、周氏宗祠、风雨桥重新焕发活力。</p><h2>核心文化 IP</h2><p>福溪村以"千年古村·理学圣地"为主IP，"瑶乡古韵·潇贺明珠"为副IP，是宋代理学鼻祖周敦颐后裔聚居地，村中保存有纪念性讲学堂遗址，以及120根木柱撑起的明清古建筑群、24座古戏台遗存、千年风雨桥和潇贺古道遗迹，是瑶汉文化融合的活态博物馆。</p>'
     },
     2: {
       id: 2, title: '周敦颐与福溪：理学沿潇贺古道南传的活证',
@@ -66,7 +66,7 @@
       category_name: '通知公告', author_name: '福溪村',
       cover_image: '/images/about/village-overview.svg',
       published_at: '2026-05-23', created_at: '2026-05-23',
-      content: '<h2>网站正式上线</h2><p>经村委会研究决定，<strong>福溪村官方网站</strong>（www.fuxicun.top）即日起正式上线运行。本站系统展示福溪村千年历史文化、古建筑风貌、瑶族民俗风情与旅游服务信息，支持游客与注册用户两种互动方式。</p><h2>关于福溪村</h2><p>福溪村位于广西贺州市富川瑶族自治县朝东镇，地处湘、桂、粤三省交界，自古有"三省通衢"之称。村落始建于宋代，距今已有千年历史，2012年列入首批中国传统村落名录。这里是宋代理学鼻祖周敦颐讲学堂所在地，保存着120根木柱撑起的明清古建筑群、24座古戏台遗存、千年风雨桥和潇贺古道遗迹，是瑶汉文化融合的活态博物馆。</p><h2>网站主要栏目</h2><ul><li><strong>走进福溪</strong>：村庄概况、历史沿革、地理区位</li><li><strong>理学文化</strong>：周敦颐讲学堂、爱莲堂、周氏宗祠、理学思想传承</li><li><strong>古村风貌</strong>：120根木柱建筑、门楣石雕、风雨桥、古戏台、青石板古街</li><li><strong>民族文化</strong>：瑶族传统、盘王节、炸龙习俗、芦笙长鼓舞、二声部民歌</li><li><strong>旅游指南</strong>：交通、住宿、美食、行程推荐、最佳时节</li><li><strong>新闻动态</strong>：村内新闻、活动资讯、媒体报道</li></ul><h2>联系我们</h2><p>如有任何问题或建议，欢迎通过网站联系我们。福溪村期待您的到来！</p>'
+      content: '<h2>网站正式上线</h2><p>经村委会研究决定，<strong>福溪村官方网站</strong>（www.fuxicun.top）即日起正式上线运行。本站系统展示福溪村千年历史文化、古建筑风貌、瑶族民俗风情与旅游服务信息，支持游客与注册用户两种互动方式。</p><h2>关于福溪村</h2><p>福溪村位于广西贺州市富川瑶族自治县朝东镇，地处湘、桂、粤三省交界，自古有"三省通衢"之称。村落始建于宋代，距今已有千年历史，2012年列入首批中国传统村落名录。这里是宋代理学鼻祖周敦颐后裔聚居地，村中保存有纪念性讲学堂遗址，以及120根木柱撑起的明清古建筑群、24座古戏台遗存、千年风雨桥和潇贺古道遗迹，是瑶汉文化融合的活态博物馆。</p><h2>网站主要栏目</h2><ul><li><strong>走进福溪</strong>：村庄概况、历史沿革、地理区位</li><li><strong>理学文化</strong>：周敦颐讲学堂、爱莲堂、周氏宗祠、理学思想传承</li><li><strong>古村风貌</strong>：120根木柱建筑、门楣石雕、风雨桥、古戏台、青石板古街</li><li><strong>民族文化</strong>：瑶族传统、盘王节、炸龙习俗、芦笙长鼓舞、二声部民歌</li><li><strong>旅游指南</strong>：交通、住宿、美食、行程推荐、最佳时节</li><li><strong>新闻动态</strong>：村内新闻、活动资讯、媒体报道</li></ul><h2>联系我们</h2><p>如有任何问题或建议，欢迎通过网站联系我们。福溪村期待您的到来！</p>'
     }
   };
 
@@ -329,38 +329,116 @@
 
     document.getElementById('article-detail').innerHTML = html;
 
-    // 绑定点赞按钮事件
-    document.getElementById('btn-like').onclick = function() {
-      likeArticle();
-    };
+    // 绑定点赞按钮事件并检查点赞状态
+    bindLikeButton();
   }
 
   /**
-   * 绑定点赞按钮事件（服务端渲染模式使用）
-   * 查找页面上已渲染的点赞按钮并绑定点击事件
+   * 从 localStorage 读取当前浏览器已点赞的文章 ID 列表
+   * @returns {number[]}
+   */
+  function getLikedArticles() {
+    try {
+      return JSON.parse(localStorage.getItem('liked_articles') || '[]');
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /**
+   * 保存点赞文章 ID 到 localStorage
+   * @param {number} id
+   */
+  function addLikedArticle(id) {
+    var list = getLikedArticles();
+    if (list.indexOf(id) === -1) {
+      list.push(id);
+      localStorage.setItem('liked_articles', JSON.stringify(list));
+    }
+  }
+
+  /**
+   * 从 localStorage 移除点赞文章 ID
+   * @param {number} id
+   */
+  function removeLikedArticle(id) {
+    var list = getLikedArticles().filter(function(i) { return i !== id; });
+    localStorage.setItem('liked_articles', JSON.stringify(list));
+  }
+
+  /**
+   * 绑定点赞按钮事件
+   * 查找页面上已渲染的点赞按钮并绑定点击事件，同时检查点赞状态
+   * 游客：同时检查 localStorage（本地）和 API（后端），取"已赞"的那个
+   *        localStorage 防止共享 IP 串台，API 防止清缓存丢状态
+   * 登录用户：仅用 API（跨设备同步）
    */
   function bindLikeButton() {
     var btn = document.getElementById('btn-like');
-    if (btn) {
-      btn.onclick = function() {
-        likeArticle();
-      };
-    }
+    if (!btn) return;
+
+    btn.onclick = function() {
+      likeArticle();
+    };
+
+    // 先用 localStorage 立即恢复状态（无需网络，无闪烁）
+    var localLiked = getLikedArticles().indexOf(articleId) !== -1;
+    if (localLiked) btn.classList.add('liked');
+
+    // 再调 API 获取后端真实状态
+    API.get('/articles/' + articleId + '/like-status').then(function(result) {
+      if (!result.success) return;
+      var apiLiked = result.data.liked;
+
+      if (apiLiked && !localLiked) {
+        // API 说已赞但本地没有 → 恢复（清缓存/换浏览器场景）
+        btn.classList.add('liked');
+        addLikedArticle(articleId);
+      } else if (!apiLiked && localLiked) {
+        // 本地说已赞但 API 没有 → 以 API 为准（数据库重置/IP 变化场景）
+        btn.classList.remove('liked');
+        removeLikedArticle(articleId);
+      }
+      // 两者一致则无需操作
+    }).catch(function() {
+      // API 失败，保留 localStorage 的状态（已有 localLiked 判断）
+    });
   }
 
   /**
    * 点赞/取消点赞文章
-   * 需要用户登录，未登录则跳转到登录页
+   * 游客：只能点赞，取消需登录（保留点赞数据，引导注册）
    */
   async function likeArticle() {
-    if (!Auth.isLoggedIn()) {
-      Toast.warning('请先登录');
-      window.location.href = '/login.html';
+    // 游客已赞 → 直接引导登录，不调 API
+    if (!Auth.isLoggedIn() && getLikedArticles().indexOf(articleId) !== -1) {
+      Toast.warning('请先登录后再取消点赞');
+      setTimeout(function() {
+        window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
+      }, 1000);
       return;
     }
 
     try {
-      var result = await API.post('/articles/' + articleId + '/like');
+      // 使用 fetch 直接调用，自定义处理 401（不走 API 客户端的自动跳转）
+      var headers = { 'Content-Type': 'application/json' };
+      var token = Storage.get('token');
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      var response = await fetch(CONFIG.API_BASE + '/articles/' + articleId + '/like', {
+        method: 'POST',
+        headers: headers
+      });
+      var result = await response.json();
+
+      if (response.status === 401) {
+        Toast.warning(result.message || '请先登录后再取消点赞');
+        setTimeout(function() {
+          window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
+        }, 1000);
+        return;
+      }
+
       if (result.success) {
         var btn = document.getElementById('btn-like');
         var count = document.getElementById('like-count');
@@ -369,10 +447,14 @@
         if (result.data.liked) {
           btn.classList.add('liked');
           count.textContent = currentCount + 1;
+          addLikedArticle(articleId);
         } else {
           btn.classList.remove('liked');
           count.textContent = Math.max(0, currentCount - 1);
+          removeLikedArticle(articleId);
         }
+      } else {
+        Toast.error(result.message || '操作失败');
       }
     } catch (e) {
       Toast.error('操作失败');
@@ -381,16 +463,44 @@
 
   /**
    * 初始化评论表单显示状态
-   * 已登录用户显示评论输入框，未登录显示登录提示
+   * 根据评论策略（open/login_required/closed）控制表单可见性
+   * 已登录用户隐藏昵称输入框，未登录用户显示昵称输入框
    */
-  function setupCommentForm() {
-    if (Auth.isLoggedIn()) {
-      document.getElementById('comment-form').style.display = 'block';
-      document.getElementById('comment-login-tip').style.display = 'none';
-    } else {
-      document.getElementById('comment-form').style.display = 'none';
-      document.getElementById('comment-login-tip').style.display = 'block';
+  async function setupCommentForm() {
+    var form = document.getElementById('comment-form');
+    var guestFields = document.getElementById('comment-guest-fields');
+    var loginTip = document.getElementById('comment-login-tip');
+    var isLoggedIn = Auth.isLoggedIn();
+
+    // 根据登录状态设置游客昵称框
+    if (guestFields) {
+      guestFields.style.display = isLoggedIn ? 'none' : 'block';
     }
+
+    // 获取评论策略，决定是否显示表单
+    try {
+      var policyResult = await API.get('/articles/' + articleId + '/comment-policy');
+      if (policyResult.success) {
+        var policy = policyResult.data.policy;
+        if (policy === 'closed') {
+          // 关闭评论：隐藏整个表单
+          if (form) form.style.display = 'none';
+          return;
+        }
+        if (policy === 'login_required' && !isLoggedIn) {
+          // 需要登录但未登录：隐藏表单，显示登录提示
+          if (form) form.style.display = 'none';
+          if (loginTip) loginTip.style.display = 'block';
+          return;
+        }
+      }
+    } catch (e) {
+      // 策略获取失败，默认显示表单（后端会校验）
+    }
+
+    // open 策略或已登录用户：显示表单
+    if (form) form.style.display = 'block';
+    if (loginTip) loginTip.style.display = 'none';
 
     document.getElementById('btn-submit-comment').onclick = function() {
       submitComment();
@@ -440,7 +550,8 @@
    * @returns {string} 评论 HTML 字符串
    */
   function renderCommentItem(comment) {
-    var initial = (comment.username || '匿')[0].toUpperCase();
+    var displayName = comment.username || comment.guest_name || '匿名';
+    var initial = displayName[0].toUpperCase();
     var time = Utils.formatDate(comment.created_at);
 
     var repliesHtml = '';
@@ -452,16 +563,18 @@
       '</div>';
     }
 
+    var replyBtnText = Auth.isLoggedIn() ? '回复' : '登录后回复';
+
     return '<div class="comment-item">' +
       '<div class="comment-avatar">' + initial + '</div>' +
       '<div class="comment-body">' +
         '<div class="comment-header">' +
-          '<span class="comment-username">' + Utils.escapeHtml(comment.username || '匿名') + '</span>' +
+          '<span class="comment-username">' + Utils.escapeHtml(displayName) + '</span>' +
           '<span class="comment-time">' + time + '</span>' +
         '</div>' +
         '<div class="comment-content">' + Utils.escapeHtml(comment.content) + '</div>' +
         '<div class="comment-actions">' +
-          '<button class="comment-reply-btn" onclick="showReplyForm(' + comment.id + ')">回复</button>' +
+          '<button class="comment-reply-btn" onclick="showReplyForm(' + comment.id + ')">' + replyBtnText + '</button>' +
         '</div>' +
       '</div>' +
     '</div>' + repliesHtml;
@@ -480,9 +593,22 @@
       return;
     }
 
+    // 游客需要填写昵称
+    var guestName = null;
+    if (!Auth.isLoggedIn()) {
+      var guestNameEl = document.getElementById('comment-guest-name');
+      guestName = guestNameEl.value.trim();
+      if (!guestName) {
+        Toast.warning('请输入昵称');
+        guestNameEl.focus();
+        return;
+      }
+    }
+
     try {
       var data = { content: content };
       if (parentId) data.parent_id = parentId;
+      if (guestName) data.guest_name = guestName;
 
       var result = await API.post('/articles/' + articleId + '/comments', data);
       if (result.success) {
@@ -490,7 +616,7 @@
         contentEl.value = '';
         loadComments();
       } else {
-        Toast.error(result.error?.message || '评论失败');
+        Toast.error(result.message || '评论失败');
       }
     } catch (e) {
       Toast.error(e.message);
@@ -499,17 +625,20 @@
 
   /**
    * 全局回复表单显示函数
-   * 通过 prompt 获取回复内容并提交
+   * 游客点击回复时引导登录，已登录用户弹出回复输入框
    * @param {number} parentId - 父评论 ID
    */
   window.showReplyForm = function(parentId) {
     if (!Auth.isLoggedIn()) {
-      Toast.warning('请先登录');
+      Toast.warning('请先登录后再回复');
+      setTimeout(function() {
+        window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.href);
+      }, 1000);
       return;
     }
     var content = prompt('请输入回复内容：');
-    if (content) {
-      submitCommentWithContent(parentId, content);
+    if (content && content.trim()) {
+      submitCommentWithContent(parentId, content.trim(), null);
     }
   };
 
@@ -517,13 +646,16 @@
    * 带内容提交回复
    * @param {number} parentId - 父评论 ID
    * @param {string} content - 回复内容
+   * @param {string} [guestName] - 游客昵称
    */
-  async function submitCommentWithContent(parentId, content) {
+  async function submitCommentWithContent(parentId, content, guestName) {
     try {
-      var result = await API.post('/articles/' + articleId + '/comments', {
+      var data = {
         content: content,
         parent_id: parentId
-      });
+      };
+      if (guestName) data.guest_name = guestName;
+      var result = await API.post('/articles/' + articleId + '/comments', data);
       if (result.success) {
         Toast.success('回复成功');
         loadComments();

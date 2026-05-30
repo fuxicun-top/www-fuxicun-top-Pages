@@ -20,11 +20,11 @@ var Admin = (function() {
       { icon: '🏠', text: '首页配置', href: '/admin/homepage.html' },
       { icon: '🧭', text: '导航管理', href: '/admin/nav.html' },
       { icon: '📄', text: '页面管理', href: '/admin/pages.html' },
-      { icon: '🎨', text: '轮播图管理', href: '/admin/banners.html' },
       { icon: '⚙️', text: '网站设置', href: '/admin/settings.html' }
     ]},
     { group: '系统', items: [
       { icon: '👥', text: '用户管理', href: '/admin/users.html' },
+      { icon: '💾', text: '数据库管理', href: '/admin/database.html' },
       { icon: '📋', text: '操作日志', href: '/admin/logs.html' }
     ]}
   ];
@@ -50,7 +50,7 @@ var Admin = (function() {
 
   function renderLayout() {
     var user = Auth.getUser();
-    var initial = user ? user.username.charAt(0).toUpperCase() : 'A';
+    var initial = user ? (user.display_name || user.username).charAt(0).toUpperCase() : 'A';
     var isAdmin = user && user.role === 'admin';
 
     var sidebar = document.getElementById('admin-sidebar');
@@ -61,7 +61,7 @@ var Admin = (function() {
       var filteredItems = group.items.filter(function(item) {
         if (!isAdmin) {
           // editor 无法访问的菜单
-          var adminOnly = ['/admin/users.html', '/admin/settings.html', '/admin/homepage.html', '/admin/nav.html', '/admin/pages.html'];
+          var adminOnly = ['/admin/settings.html', '/admin/homepage.html', '/admin/nav.html', '/admin/pages.html', '/admin/database.html'];
           return adminOnly.indexOf(item.href) === -1;
         }
         return true;
@@ -98,7 +98,7 @@ var Admin = (function() {
         '<a href="/" target="_blank" style="font-size:13px;color:var(--color-text-secondary);">访问前台</a>' +
         '<div class="admin-user" onclick="Auth.logout()">' +
           '<div class="admin-user__avatar">' + initial + '</div>' +
-          '<span class="admin-user__name">' + Utils.escapeHtml(user ? user.username : '') + '</span>' +
+          '<span class="admin-user__name">' + Utils.escapeHtml(user ? (user.display_name || user.username) : '') + '</span>' +
         '</div>' +
       '</div>';
     }

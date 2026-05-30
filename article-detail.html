@@ -71,12 +71,12 @@
       <section class="comments-section" id="comments-section">
         <h3 class="comments-title">评论</h3>
 
-        <div class="comment-form" id="comment-form" style="display:none;">
+        <div class="comment-form" id="comment-form">
+          <div class="comment-guest-fields" id="comment-guest-fields">
+            <input type="text" class="form-input" id="comment-guest-name" placeholder="昵称（必填）" maxlength="20">
+          </div>
           <textarea class="form-input form-textarea" id="comment-content" placeholder="写下你的评论..." rows="3"></textarea>
           <button class="btn btn-primary" id="btn-submit-comment">发表评论</button>
-        </div>
-        <div class="comment-login-tip" id="comment-login-tip" style="display:none;">
-          <a href="/login.html">登录</a>后可以发表评论
         </div>
 
         <div class="comments-list" id="comments-list">

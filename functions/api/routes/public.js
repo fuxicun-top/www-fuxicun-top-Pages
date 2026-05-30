@@ -6,6 +6,7 @@
 import { successResponse, errorResponse } from '../utils/response.js';
 import { dbQuery, dbQueryFirst } from '../utils/db.js';
 import { sanitizeHtml } from '../utils/helpers.js';
+import { isCacheEnabled, withCacheHeader } from '../utils/cache.js';
 
 export async function handlePublic(request, env, path, method) {
   if (method !== 'GET') {
@@ -28,6 +29,10 @@ export async function handlePublic(request, env, path, method) {
     return await getNavItems(env);
   }
 
+  if (path === '/home-modules') {
+    return await getHomeModules(env);
+  }
+
   // 自定义页面：/pages/:slug
   const pageMatch = path.match(/^\/pages\/([^\/]+)$/);
   if (pageMatch && method === 'GET') {
@@ -43,27 +48,60 @@ export async function handlePublic(request, env, path, method) {
 }
 
 async function getCategories(env) {
+  const cacheEnabled = await isCacheEnabled(env);
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      const cached = await env.FUXICUN_KV.get('cache:categories', 'json');
+      if (cached) return withCacheHeader(successResponse(cached), 'HIT');
+    } catch (e) { /* 降级到数据库 */ }
+  }
+
   const categories = await dbQuery(
     env.FUXICUN_DB,
     'SELECT id, name, slug, description FROM categories ORDER BY sort_order'
   );
-  return successResponse(categories.results || []);
+  const list = categories.results || [];
+
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      await env.FUXICUN_KV.put('cache:categories', JSON.stringify(list), { expirationTtl: 600 });
+    } catch (e) { /* 忽略缓存写入失败 */ }
+  }
+
+  return withCacheHeader(successResponse(list), 'MISS');
 }
 
 async function getBanners(env) {
+  const cacheEnabled = await isCacheEnabled(env);
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      const cached = await env.FUXICUN_KV.get('cache:banners', 'json');
+      if (cached) return withCacheHeader(successResponse(cached), 'HIT');
+    } catch (e) { /* 降级到数据库 */ }
+  }
+
   const banners = await dbQuery(
     env.FUXICUN_DB,
     "SELECT id, title, subtitle, image_url, link_url FROM banners WHERE status = 'active' ORDER BY sort_order"
   );
-  return successResponse(banners.results || []);
+  const list = banners.results || [];
+
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      await env.FUXICUN_KV.put('cache:banners', JSON.stringify(list), { expirationTtl: 600 });
+    } catch (e) { /* 忽略缓存写入失败 */ }
+  }
+
+  return withCacheHeader(successResponse(list), 'MISS');
 }
 
 async function getPublicConfig(env) {
   // 尝试从 KV 缓存读取
-  if (env.FUXICUN_KV) {
+  const cacheEnabled = await isCacheEnabled(env);
+  if (cacheEnabled && env.FUXICUN_KV) {
     try {
       const cached = await env.FUXICUN_KV.get('cache:config', 'json');
-      if (cached) return successResponse(cached);
+      if (cached) return withCacheHeader(successResponse(cached), 'HIT');
     } catch (e) { /* 降级到数据库 */ }
   }
 
@@ -77,22 +115,23 @@ async function getPublicConfig(env) {
   });
 
   // 写入 KV 缓存（10分钟）
-  if (env.FUXICUN_KV) {
+  if (cacheEnabled && env.FUXICUN_KV) {
     try {
       await env.FUXICUN_KV.put('cache:config', JSON.stringify(result), { expirationTtl: 600 });
     } catch (e) { /* 忽略缓存写入失败 */ }
   }
 
-  return successResponse(result);
+  return withCacheHeader(successResponse(result), 'MISS');
 }
 
 // 获取导航菜单（公开，带 KV 缓存）
 async function getNavItems(env) {
   // 尝试从 KV 缓存读取
-  if (env.FUXICUN_KV) {
+  const cacheEnabled = await isCacheEnabled(env);
+  if (cacheEnabled && env.FUXICUN_KV) {
     try {
       const cached = await env.FUXICUN_KV.get('cache:nav', 'json');
-      if (cached) return successResponse(cached);
+      if (cached) return withCacheHeader(successResponse(cached), 'HIT');
     } catch (e) { /* 降级到数据库 */ }
   }
 
@@ -103,23 +142,24 @@ async function getNavItems(env) {
   const list = items.results || [];
 
   // 写入 KV 缓存（10分钟）
-  if (env.FUXICUN_KV) {
+  if (cacheEnabled && env.FUXICUN_KV) {
     try {
       await env.FUXICUN_KV.put('cache:nav', JSON.stringify(list), { expirationTtl: 600 });
     } catch (e) { /* 忽略缓存写入失败 */ }
   }
 
-  return successResponse(list);
+  return withCacheHeader(successResponse(list), 'MISS');
 }
 
 // 通过 slug 获取自定义页面（公开，带 KV 缓存）
 async function getPageBySlug(env, slug) {
   // 尝试从 KV 缓存读取
   const cacheKey = 'cache:page:' + slug;
-  if (env.FUXICUN_KV) {
+  const cacheEnabled = await isCacheEnabled(env);
+  if (cacheEnabled && env.FUXICUN_KV) {
     try {
       const cached = await env.FUXICUN_KV.get(cacheKey, 'json');
-      if (cached) return successResponse(cached);
+      if (cached) return withCacheHeader(successResponse(cached), 'HIT');
     } catch (e) { /* 降级到数据库 */ }
   }
 
@@ -137,13 +177,13 @@ async function getPageBySlug(env, slug) {
   page.content = sanitizeHtml(page.content);
 
   // 写入 KV 缓存（10分钟）
-  if (env.FUXICUN_KV) {
+  if (cacheEnabled && env.FUXICUN_KV) {
     try {
       await env.FUXICUN_KV.put(cacheKey, JSON.stringify(page), { expirationTtl: 600 });
     } catch (e) { /* 忽略缓存写入失败 */ }
   }
 
-  return successResponse(page);
+  return withCacheHeader(successResponse(page), 'MISS');
 }
 
 // 公开媒体列表（仅返回图片，用于首页画廊预览）
@@ -153,6 +193,15 @@ async function getPublicMedia(request, env) {
   const pageSize = Math.min(50, Math.max(1, parseInt(url.searchParams.get('pageSize')) || 8));
   const type = url.searchParams.get('type') || 'image';
   const offset = (page - 1) * pageSize;
+
+  const cacheKey = 'cache:media:' + type + ':' + page + ':' + pageSize;
+  const cacheEnabled = await isCacheEnabled(env);
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      const cached = await env.FUXICUN_KV.get(cacheKey, 'json');
+      if (cached) return withCacheHeader(successResponse(cached), 'HIT');
+    } catch (e) { /* 降级到数据库 */ }
+  }
 
   const countResult = await dbQueryFirst(
     env.FUXICUN_DB,
@@ -166,8 +215,53 @@ async function getPublicMedia(request, env) {
     [type + '%', pageSize, offset]
   );
 
-  return successResponse({
+  const data = {
     list: result.results || [],
     total: countResult?.count || 0
+  };
+
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      await env.FUXICUN_KV.put(cacheKey, JSON.stringify(data), { expirationTtl: 300 });
+    } catch (e) { /* 忽略缓存写入失败 */ }
+  }
+
+  return withCacheHeader(successResponse(data), 'MISS');
+}
+
+// 首页模块列表（公开，仅返回 active 模块）
+async function getHomeModules(env) {
+  // 尝试从 KV 缓存读取
+  const cacheKey = 'cache:home-modules';
+  const cacheEnabled = await isCacheEnabled(env);
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      const cached = await env.FUXICUN_KV.get(cacheKey, 'json');
+      if (cached) return withCacheHeader(successResponse(cached), 'HIT');
+    } catch (e) { /* 降级到数据库 */ }
+  }
+
+  const modules = await dbQuery(
+    env.FUXICUN_DB,
+    "SELECT id, type, title, subtitle, sort_order, config FROM home_modules WHERE status = 'active' ORDER BY sort_order"
+  );
+
+  const list = (modules.results || []).map(function(m) {
+    // 解析 config JSON
+    if (m.config) {
+      try { m.config = JSON.parse(m.config); } catch (e) { m.config = {}; }
+    } else {
+      m.config = {};
+    }
+    return m;
   });
+
+  // 写入 KV 缓存（5分钟）
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      await env.FUXICUN_KV.put(cacheKey, JSON.stringify(list), { expirationTtl: 300 });
+    } catch (e) { /* 忽略缓存写入失败 */ }
+  }
+
+  return withCacheHeader(successResponse(list), 'MISS');
 }

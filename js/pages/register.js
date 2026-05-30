@@ -24,8 +24,12 @@
     var container = document.getElementById('turnstile-container');
     if (!container) return;
 
-    // 检测是否为本地开发环境
-    var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    // 检测是否为本地开发环境（localhost / 127.0.0.1 / 局域网 IP）
+    var hostname = window.location.hostname;
+    var isLocal = hostname === 'localhost' || hostname === '127.0.0.1' ||
+      /^192\.168\.\d+\.\d+$/.test(hostname) ||
+      /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
+      /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(hostname);
 
     if (window.turnstile) {
       try {
@@ -52,13 +56,22 @@
     var data = Form.getData(form);
 
     var rules = {
-      username: { required: true, minLength: 2, maxLength: 20, message: '用户名长度为2-20个字符' },
+      username: { required: true, minLength: 3, maxLength: 20, message: '用户名长度为3-20个字符' },
       phone: { required: true, pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' },
       password: { required: true, minLength: 8, message: '密码长度不能少于8位' },
       passwordConfirm: { required: true, confirm: 'password', message: '两次密码不一致' }
     };
 
     var errors = Form.validate(rules, data);
+
+    // 用户名格式校验
+    if (data.username && !errors.username) {
+      if (!/^[a-zA-Z0-9_-]+$/.test(data.username)) {
+        errors.username = '用户名只能包含字母、数字、连字符和下划线';
+      } else if (/^\d{11}$/.test(data.username)) {
+        errors.username = '用户名不能为11位纯数字';
+      }
+    }
     if (!data.agree) {
       errors.agree = '请同意用户协议和隐私政策';
     }
@@ -79,10 +92,13 @@
         email: data.email
       };
 
-      // Turnstile token (本地开发时可能为空)
-      if (window._turnstileToken) {
-        postData.turnstile_token = window._turnstileToken;
-      }
+      // Turnstile token（本地开发环境自动使用测试 token）
+      var hostname = window.location.hostname;
+      var isLocalDev = hostname === 'localhost' || hostname === '127.0.0.1' ||
+        /^192\.168\.\d+\.\d+$/.test(hostname) ||
+        /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
+        /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(hostname);
+      postData.turnstile_token = window._turnstileToken || (isLocalDev ? 'XXXX.DUMMY.TOKEN.XXXX' : null);
 
       var result = await API.post('/auth/register', postData);
 
@@ -94,7 +110,7 @@
           window.location.href = '/';
         }, 500);
       } else {
-        Toast.error(result.error?.message || '注册失败');
+        Toast.error(result.message || '注册失败');
         resetTurnstile();
       }
     } catch (e) {

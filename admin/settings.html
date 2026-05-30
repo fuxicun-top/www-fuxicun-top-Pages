@@ -103,6 +103,56 @@
                 手动开启黑白模式（忽略日期，立即生效）
               </label>
             </div>
+
+            <div class="divider" style="margin:24px 0;border-top:1px solid var(--color-border);"></div>
+            <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">评论与点赞设置</h3>
+            <div class="form-group">
+              <label class="form-label">评论策略</label>
+              <select name="comment_policy" class="form-input">
+                <option value="open">开放（任何人可评论）</option>
+                <option value="login_required">需登录</option>
+                <option value="closed">关闭评论</option>
+              </select>
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;">全局默认策略，单篇文章可在文章编辑中单独覆盖</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="comment_review" style="width:auto;">
+                评论审核（所有评论需人工审核后才显示）
+              </label>
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;">开启后所有新评论默认为待审核状态，需在评论管理中手动通过。敏感词命中不受此开关影响，始终自动转待审核。</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">点赞策略</label>
+              <select name="like_policy" class="form-input">
+                <option value="open">开放（任何人可点赞）</option>
+                <option value="login_required">需登录</option>
+                <option value="closed">关闭点赞</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">违禁词库</label>
+              <textarea name="sensitive_words" class="form-input form-textarea" rows="5" placeholder="每行一个违禁词，或用逗号/顿号分隔&#10;例如：&#10;赌博, 色情, 毒品"></textarea>
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;">评论内容命中违禁词将自动转为待审核状态，并记录到操作日志。系统内置约 30 个基础违禁词，此处可扩展自定义词库。admin 角色发表的评论不受违禁词检测。</p>
+            </div>
+
+            <div class="divider" style="margin:24px 0;border-top:1px solid var(--color-border);"></div>
+            <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">限流设置</h3>
+            <div class="form-group">
+              <label class="form-label">限流豁免 IP</label>
+              <input type="text" name="rate_limit_exempt_ips" class="form-input" placeholder="多个 IP 用英文逗号分隔，如：127.0.0.1,192.168.1.100">
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;">这些 IP 的登录/注册/找回密码操作不受频率限制，多个 IP 用英文逗号分隔</p>
+            </div>
+
+            <div class="divider" style="margin:24px 0;border-top:1px solid var(--color-border);"></div>
+            <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">缓存设置</h3>
+            <div class="form-group">
+              <label class="form-label" style="display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="cache_enabled" name="cache_enabled" style="width:auto;">
+                启用 KV 缓存
+              </label>
+              <p style="font-size:13px;color:var(--color-text-secondary);margin-top:4px;">开启后将缓存公开接口数据以提升性能。开发环境建议关闭，避免缓存导致数据不一致。</p>
+            </div>
           </form>
         </div>
 

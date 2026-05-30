@@ -8,7 +8,7 @@ import { successResponse, errorResponse, listResponse } from '../utils/response.
 import { dbQuery, dbQueryFirst, dbRun } from '../utils/db.js';
 import { authenticate } from '../middleware/auth.js';
 import { generateSlug, sanitizeHtml, escapeHtml } from '../utils/helpers.js';
-import { clearArticlesCache } from '../utils/cache.js';
+import { clearArticlesCache, isCacheEnabled, withCacheHeader } from '../utils/cache.js';
 
 /**
  * 文章路由分发
@@ -68,6 +68,18 @@ export async function handleArticles(request, env, path, method) {
     return await likeArticle(request, env, likeMatch[1]);
   }
 
+  // 点赞状态查询（公开接口，用于页面加载时恢复按钮高亮）
+  const likeStatusMatch = path.match(/^\/articles\/(\d+)\/like-status$/);
+  if (likeStatusMatch && method === 'GET') {
+    return await getLikeStatus(request, env, likeStatusMatch[1]);
+  }
+
+  // 评论策略查询（公开接口，前端用于控制表单显示）
+  const policyMatch = path.match(/^\/articles\/(\d+)\/comment-policy$/);
+  if (policyMatch && method === 'GET') {
+    return await getCommentPolicy(env, policyMatch[1]);
+  }
+
   return errorResponse('接口不存在', 404);
 }
 
@@ -88,11 +100,12 @@ async function getArticles(request, env) {
   const cacheKey = 'articles:list:' + page + ':' + pageSize + ':' + category + ':' + keyword + ':' + featured + ':' + sort;
 
   // 尝试从 KV 缓存读取（仅在无关键词搜索时使用缓存）
-  if (!keyword && env.FUXICUN_KV) {
+  const cacheEnabled = await isCacheEnabled(env);
+  if (!keyword && cacheEnabled && env.FUXICUN_KV) {
     try {
       const cached = await env.FUXICUN_KV.get(cacheKey, 'json');
       if (cached) {
-        return listResponse(cached.list, cached.total, page, pageSize);
+        return withCacheHeader(listResponse(cached.list, cached.total, page, pageSize), 'HIT');
       }
     } catch (e) {
       console.error('KV 读取失败:', e.message);
@@ -133,7 +146,7 @@ async function getArticles(request, env) {
   // 查询文章列表
   const articles = await dbQuery(
     env.FUXICUN_DB,
-    'SELECT a.id, a.title, a.slug, a.excerpt, a.cover_image, a.views, a.likes, a.is_top, a.created_at, a.published_at, u.username as author_name, c.name as category_name, c.slug as category_slug FROM articles a LEFT JOIN users u ON a.author_id = u.id LEFT JOIN categories c ON a.category_id = c.id WHERE ' + where + ' ORDER BY ' + orderBy + ' LIMIT ? OFFSET ?',
+    'SELECT a.id, a.title, a.slug, a.excerpt, a.cover_image, a.views, a.likes, a.is_top, a.created_at, a.published_at, COALESCE(u.display_name, u.username) as author_name, c.name as category_name, c.slug as category_slug FROM articles a LEFT JOIN users u ON a.author_id = u.id LEFT JOIN categories c ON a.category_id = c.id WHERE ' + where + ' ORDER BY ' + orderBy + ' LIMIT ? OFFSET ?',
     [...params, pageSize, offset]
   );
 
@@ -153,7 +166,7 @@ async function getArticles(request, env) {
   }
 
   // 写入 KV 缓存（TTL 5分钟，仅缓存无关键词的查询）
-  if (!keyword && env.FUXICUN_KV) {
+  if (!keyword && cacheEnabled && env.FUXICUN_KV) {
     try {
       await env.FUXICUN_KV.put(cacheKey, JSON.stringify({ list: resultList, total: total }), {
         expirationTtl: 300
@@ -163,7 +176,7 @@ async function getArticles(request, env) {
     }
   }
 
-  return listResponse(resultList, total, page, pageSize);
+  return withCacheHeader(listResponse(resultList, total, page, pageSize), 'MISS');
 }
 
 // ==============================
@@ -172,7 +185,7 @@ async function getArticles(request, env) {
 async function getArticleDetail(env, id) {
   const article = await dbQueryFirst(
     env.FUXICUN_DB,
-    'SELECT a.*, u.username as author_name, u.avatar as author_avatar, c.name as category_name, c.slug as category_slug FROM articles a LEFT JOIN users u ON a.author_id = u.id LEFT JOIN categories c ON a.category_id = c.id WHERE a.id = ? AND a.status = \'published\'',
+    'SELECT a.*, COALESCE(u.display_name, u.username) as author_name, u.avatar as author_avatar, c.name as category_name, c.slug as category_slug FROM articles a LEFT JOIN users u ON a.author_id = u.id LEFT JOIN categories c ON a.category_id = c.id WHERE a.id = ? AND a.status = \'published\'',
     [id]
   );
 
@@ -210,7 +223,7 @@ async function getArticleDetail(env, id) {
 async function getArticleDetailBySlug(env, slug) {
   const article = await dbQueryFirst(
     env.FUXICUN_DB,
-    "SELECT a.*, u.username as author_name, u.avatar as author_avatar, c.name as category_name, c.slug as category_slug FROM articles a LEFT JOIN users u ON a.author_id = u.id LEFT JOIN categories c ON a.category_id = c.id WHERE a.slug = ? AND a.status = 'published'",
+    "SELECT a.*, COALESCE(u.display_name, u.username) as author_name, u.avatar as author_avatar, c.name as category_name, c.slug as category_slug FROM articles a LEFT JOIN users u ON a.author_id = u.id LEFT JOIN categories c ON a.category_id = c.id WHERE a.slug = ? AND a.status = 'published'",
     [slug]
   );
 
@@ -247,6 +260,18 @@ async function createArticle(request, env) {
 
     if (title.length > 200) {
       return errorResponse('标题不能超过200个字符');
+    }
+
+    // 通知公告和村内新闻分类只允许编辑者和管理员发布
+    if (category_id) {
+      const restricted = await dbQueryFirst(
+        env.FUXICUN_DB,
+        "SELECT slug FROM categories WHERE id = ? AND slug IN ('announcements', 'village-news')",
+        [category_id]
+      );
+      if (restricted && !['editor', 'admin'].includes(auth.user.role)) {
+        return errorResponse('该分类仅允许编辑者和管理员发布文章', 403);
+      }
     }
 
     // 普通用户发的文章需要审核，编辑者和管理员直接发布
@@ -299,6 +324,18 @@ async function updateArticle(request, env, id) {
     }
 
     const { title, content, excerpt, cover_image, category_id, is_top } = await request.json();
+
+    // 通知公告和村内新闻分类只允许编辑者和管理员操作
+    if (category_id && category_id !== article.category_id) {
+      const restricted = await dbQueryFirst(
+        env.FUXICUN_DB,
+        "SELECT slug FROM categories WHERE id = ? AND slug IN ('announcements', 'village-news')",
+        [category_id]
+      );
+      if (restricted && !['editor', 'admin'].includes(auth.user.role)) {
+        return errorResponse('该分类仅允许编辑者和管理员发布文章', 403);
+      }
+    }
 
     // 只有编辑者和管理员可以修改精选状态
     const topValue = ['editor', 'admin'].includes(auth.user.role)
@@ -360,13 +397,31 @@ async function deleteArticle(request, env, id) {
 }
 
 // ==============================
-// 点赞/取消点赞
+// 点赞/取消点赞（支持游客，按 IP 去重）
 // ==============================
 async function likeArticle(request, env, id) {
-  const auth = await authenticate(request, env);
-  if (auth.error) return auth.error;
+  // 认证可选：尝试获取登录用户
+  let auth = null;
+  try {
+    const authResult = await authenticate(request, env);
+    if (!authResult.error) {
+      auth = authResult;
+    }
+  } catch (e) { /* 未登录 */ }
 
   try {
+    // 检查点赞全局开关
+    const likePolicy = await dbQueryFirst(
+      env.FUXICUN_DB,
+      "SELECT value FROM site_config WHERE key = 'like_policy'"
+    );
+    if (likePolicy?.value === 'closed') {
+      return errorResponse('点赞功能已关闭', 403);
+    }
+    if (likePolicy?.value === 'login_required' && !auth) {
+      return errorResponse('需要登录后才能点赞', 403);
+    }
+
     const article = await dbQueryFirst(
       env.FUXICUN_DB,
       'SELECT id FROM articles WHERE id = ?',
@@ -377,26 +432,131 @@ async function likeArticle(request, env, id) {
       return errorResponse('文章不存在', 404);
     }
 
-    // 检查是否已点赞
-    const existing = await dbQueryFirst(
-      env.FUXICUN_DB,
-      'SELECT id FROM likes WHERE user_id = ? AND article_id = ?',
-      [auth.user.id, id]
-    );
+    const clientIp = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
 
-    if (existing) {
-      // 取消点赞
-      await dbRun(env.FUXICUN_DB, 'DELETE FROM likes WHERE user_id = ? AND article_id = ?', [auth.user.id, id]);
-      await dbRun(env.FUXICUN_DB, 'UPDATE articles SET likes = MAX(0, likes - 1) WHERE id = ?', [id]);
-      return successResponse({ liked: false }, '已取消点赞');
+    if (auth) {
+      // 登录用户：按 user_id 去重
+      const existing = await dbQueryFirst(
+        env.FUXICUN_DB,
+        'SELECT id FROM likes WHERE user_id = ? AND article_id = ?',
+        [auth.user.id, id]
+      );
+
+      if (existing) {
+        await dbRun(env.FUXICUN_DB, 'DELETE FROM likes WHERE user_id = ? AND article_id = ?', [auth.user.id, id]);
+        await dbRun(env.FUXICUN_DB, 'UPDATE articles SET likes = MAX(0, likes - 1) WHERE id = ?', [id]);
+        return successResponse({ liked: false }, '已取消点赞');
+      } else {
+        await dbRun(env.FUXICUN_DB, 'INSERT INTO likes (user_id, article_id) VALUES (?, ?)', [auth.user.id, id]);
+        await dbRun(env.FUXICUN_DB, 'UPDATE articles SET likes = likes + 1 WHERE id = ?', [id]);
+        return successResponse({ liked: true }, '点赞成功');
+      }
     } else {
-      // 点赞
-      await dbRun(env.FUXICUN_DB, 'INSERT INTO likes (user_id, article_id) VALUES (?, ?)', [auth.user.id, id]);
-      await dbRun(env.FUXICUN_DB, 'UPDATE articles SET likes = likes + 1 WHERE id = ?', [id]);
-      return successResponse({ liked: true }, '点赞成功');
+      // 游客：按 IP 去重
+      const existing = await dbQueryFirst(
+        env.FUXICUN_DB,
+        'SELECT id FROM likes WHERE guest_ip = ? AND article_id = ?',
+        [clientIp, id]
+      );
+
+      if (existing) {
+        // 游客已点赞，取消需登录（保留点赞数据，引导注册）
+        return errorResponse('请先登录后再取消点赞', 401);
+      } else {
+        await dbRun(env.FUXICUN_DB, 'INSERT INTO likes (guest_ip, article_id) VALUES (?, ?)', [clientIp, id]);
+        await dbRun(env.FUXICUN_DB, 'UPDATE articles SET likes = likes + 1 WHERE id = ?', [id]);
+        return successResponse({ liked: true }, '点赞成功');
+      }
     }
   } catch (e) {
     console.error('点赞操作失败:', e);
     return errorResponse('操作失败');
+  }
+}
+
+// ==============================
+// 获取文章评论策略（公开接口）
+// 返回文章级策略，未设置则返回全局策略
+// ==============================
+async function getCommentPolicy(env, articleId) {
+  try {
+    const cacheKey = 'cache:comment-policy:' + articleId;
+    const cacheEnabled = await isCacheEnabled(env);
+    if (cacheEnabled && env.FUXICUN_KV) {
+      try {
+        const cached = await env.FUXICUN_KV.get(cacheKey, 'json');
+        if (cached) return withCacheHeader(successResponse(cached), 'HIT');
+      } catch (e) { /* 降级到数据库 */ }
+    }
+
+    const article = await dbQueryFirst(
+      env.FUXICUN_DB,
+      'SELECT comment_policy FROM articles WHERE id = ?',
+      [articleId]
+    );
+
+    if (!article) {
+      return errorResponse('文章不存在', 404);
+    }
+
+    let policy = article.comment_policy;
+    if (!policy) {
+      const globalPolicy = await dbQueryFirst(
+        env.FUXICUN_DB,
+        "SELECT value FROM site_config WHERE key = 'comment_policy'"
+      );
+      policy = globalPolicy?.value || 'open';
+    }
+
+    const data = { policy: policy };
+
+    if (cacheEnabled && env.FUXICUN_KV) {
+      try {
+        await env.FUXICUN_KV.put(cacheKey, JSON.stringify(data), { expirationTtl: 600 });
+      } catch (e) { /* 忽略缓存写入失败 */ }
+    }
+
+    return withCacheHeader(successResponse(data), 'MISS');
+  } catch (e) {
+    console.error('获取评论策略失败:', e);
+    return errorResponse('获取失败');
+  }
+}
+
+// ==============================
+// 查询当前用户/游客是否已点赞（公开接口）
+// 登录用户按 user_id 查询，游客按 IP 查询
+// ==============================
+async function getLikeStatus(request, env, articleId) {
+  try {
+    // 尝试获取登录用户
+    let auth = null;
+    try {
+      const authResult = await authenticate(request, env);
+      if (!authResult.error) auth = authResult;
+    } catch (e) { /* 未登录 */ }
+
+    let liked = false;
+    if (auth) {
+      const existing = await dbQueryFirst(
+        env.FUXICUN_DB,
+        'SELECT id FROM likes WHERE user_id = ? AND article_id = ?',
+        [auth.user.id, articleId]
+      );
+      liked = !!existing;
+    } else {
+      const clientIp = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || 'unknown';
+      const existing = await dbQueryFirst(
+        env.FUXICUN_DB,
+        'SELECT id FROM likes WHERE guest_ip = ? AND article_id = ?',
+        [clientIp, articleId]
+      );
+      liked = !!existing;
+    }
+
+    return successResponse({ liked: liked });
+  } catch (e) {
+    console.error('查询点赞状态失败:', e);
+    return successResponse({ liked: false });
   }
 }

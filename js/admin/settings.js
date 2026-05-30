@@ -160,6 +160,18 @@
         if (memorialMode) {
           memorialMode.checked = data.theme_memorial_mode === 'true';
         }
+
+        // 填充评论审核开关
+        var commentReview = document.getElementById('comment_review');
+        if (commentReview) {
+          commentReview.checked = data.comment_review === 'true';
+        }
+
+        // 填充缓存开关
+        var cacheEnabled = document.getElementById('cache_enabled');
+        if (cacheEnabled) {
+          cacheEnabled.checked = data.cache_enabled !== 'false'; // 默认启用
+        }
       }
     } catch (e) {
       Toast.error('加载配置失败');
@@ -183,6 +195,14 @@
     // 收集黑白模式开关
     var memorialMode = document.getElementById('theme_memorial_mode');
     data.theme_memorial_mode = memorialMode.checked ? 'true' : 'false';
+
+    // 收集评论审核开关
+    var commentReview = document.getElementById('comment_review');
+    data.comment_review = commentReview.checked ? 'true' : 'false';
+
+    // 收集缓存开关
+    var cacheEnabled = document.getElementById('cache_enabled');
+    data.cache_enabled = cacheEnabled.checked ? 'true' : 'false';
 
     Form.setLoading(btn, true);
 
@@ -208,7 +228,7 @@
           window.ThemeLoader.applyTheme(themeConfig);
         }
       } else {
-        Toast.error(result.error?.message || '保存失败');
+        Toast.error(result.message || '保存失败');
       }
     } catch (e) {
       Toast.error(e.message);

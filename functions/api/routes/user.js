@@ -55,6 +55,11 @@ export async function handleUser(request, env, path, method) {
     return await changePassword(request, env, auth.user);
   }
 
+  // === 我的评论 ===
+  if (path === '/user/comments' && method === 'GET') {
+    return await getUserComments(request, env, auth.user.id);
+  }
+
   return errorResponse('接口不存在', 404);
 }
 
@@ -250,6 +255,37 @@ async function uploadAvatar(request, env, user) {
     console.error('头像上传失败:', e);
     return errorResponse('头像上传失败');
   }
+}
+
+// ==============================
+// 获取用户评论列表
+// ==============================
+async function getUserComments(request, env, userId) {
+  const url = new URL(request.url);
+  const page = parseInt(url.searchParams.get('page')) || 1;
+  const pageSize = Math.min(100, Math.max(1, parseInt(url.searchParams.get('pageSize')) || 10));
+  const offset = (page - 1) * pageSize;
+
+  // 统计总数
+  const countResult = await dbQueryFirst(
+    env.FUXICUN_DB,
+    'SELECT COUNT(*) as count FROM comments WHERE user_id = ?',
+    [userId]
+  );
+
+  // 查询评论列表，联表获取文章标题
+  const comments = await dbQuery(
+    env.FUXICUN_DB,
+    `SELECT c.id, c.content, c.status, c.created_at, c.article_id, a.title AS article_title
+     FROM comments c
+     LEFT JOIN articles a ON c.article_id = a.id
+     WHERE c.user_id = ?
+     ORDER BY c.created_at DESC
+     LIMIT ? OFFSET ?`,
+    [userId, pageSize, offset]
+  );
+
+  return listResponse(comments.results || [], countResult?.count || 0, page, pageSize);
 }
 
 // ==============================

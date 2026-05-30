@@ -261,7 +261,7 @@
         input.value = input.value.substring(0, pos) + md + input.value.substring(pos);
         Toast.success('图片上传成功');
       } else {
-        Toast.error('上传失败: ' + (result.error?.message || file.name));
+        Toast.error('上传失败: ' + (result.message || file.name));
       }
     } catch (e) {
       Toast.error('上传失败: ' + e.message);
@@ -294,7 +294,7 @@
         input.value = input.value.substring(0, pos) + md + input.value.substring(pos);
         Toast.success('视频上传成功');
       } else {
-        Toast.error('上传失败: ' + (result.error?.message || file.name));
+        Toast.error('上传失败: ' + (result.message || file.name));
       }
     } catch (e) {
       Toast.error('上传失败: ' + e.message);
@@ -426,7 +426,7 @@
         Toast.success(articleId ? '文章更新成功' : '文章创建成功');
         setTimeout(function() { window.location.href = '/admin/articles.html'; }, 1000);
       } else {
-        Toast.error(result.error?.message || '保存失败');
+        Toast.error(result.message || '保存失败');
       }
     } catch (e) {
       Toast.error('保存失败: ' + e.message);

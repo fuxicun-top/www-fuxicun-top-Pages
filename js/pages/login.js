@@ -28,8 +28,12 @@
     var container = document.getElementById('turnstile-container');
     if (!container) return;
 
-    // 检测是否为本地开发环境
-    var isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    // 检测是否为本地开发环境（localhost / 127.0.0.1 / 局域网 IP）
+    var hostname = window.location.hostname;
+    var isLocal = hostname === 'localhost' || hostname === '127.0.0.1' ||
+      /^192\.168\.\d+\.\d+$/.test(hostname) ||
+      /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
+      /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(hostname);
 
     if (window.turnstile) {
       try {
@@ -77,10 +81,13 @@
         password: data.password
       };
 
-      // Turnstile token (本地开发时可能为空)
-      if (window._turnstileToken) {
-        postData.turnstile_token = window._turnstileToken;
-      }
+      // Turnstile token（本地开发环境自动使用测试 token）
+      var hostname = window.location.hostname;
+      var isLocalDev = hostname === 'localhost' || hostname === '127.0.0.1' ||
+        /^192\.168\.\d+\.\d+$/.test(hostname) ||
+        /^10\.\d+\.\d+\.\d+$/.test(hostname) ||
+        /^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(hostname);
+      postData.turnstile_token = window._turnstileToken || (isLocalDev ? 'XXXX.DUMMY.TOKEN.XXXX' : null);
 
       var result = await API.post('/auth/login', postData);
 
@@ -94,7 +101,7 @@
           window.location.href = redirect;
         }, 500);
       } else {
-        Toast.error(result.error?.message || '登录失败');
+        Toast.error(result.message || '登录失败');
         resetTurnstile();
       }
     } catch (e) {

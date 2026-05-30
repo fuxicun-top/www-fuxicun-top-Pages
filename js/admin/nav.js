@@ -96,7 +96,7 @@
             Toast.success(isEdit ? '更新成功' : '添加成功');
             loadNav();
           } else {
-            Toast.error(result.error?.message || '操作失败');
+            Toast.error(result.message || '操作失败');
           }
         }).catch(function(e) {
           Toast.error('操作失败: ' + e.message);
@@ -118,7 +118,7 @@
             Toast.success('删除成功');
             loadNav();
           } else {
-            Toast.error(result.error?.message || '删除失败');
+            Toast.error(result.message || '删除失败');
           }
         } catch (e) {
           Toast.error('删除失败: ' + e.message);

@@ -7,7 +7,7 @@
 
 /* === 通用板块 === */
 .home-section {
-  padding: var(--spacing-4xl) 0;
+  padding: var(--spacing-3xl) 0;
 }
 
 .home-section--gray {
@@ -16,7 +16,7 @@
 
 .section-header {
   text-align: center;
-  margin-bottom: var(--spacing-2xl);
+  margin-bottom: var(--spacing-xl);
   position: relative;
 }
 

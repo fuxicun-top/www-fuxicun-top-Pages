@@ -179,7 +179,7 @@
             Toast.success('轮播图添加成功');
             loadBanners();
           } else {
-            Toast.error(result.error?.message || '添加失败');
+            Toast.error(result.message || '添加失败');
           }
         } catch (e) {
           Toast.error(e.message);
@@ -204,7 +204,7 @@
             Toast.success('轮播图更新成功');
             loadBanners();
           } else {
-            Toast.error(result.error?.message || '更新失败');
+            Toast.error(result.message || '更新失败');
           }
         } catch (e) {
           Toast.error(e.message);
@@ -224,7 +224,7 @@
           Toast.success('轮播图删除成功');
           loadBanners();
         } else {
-          Toast.error(result.error?.message || '删除失败');
+          Toast.error(result.message || '删除失败');
         }
       } catch (e) {
         Toast.error(e.message);

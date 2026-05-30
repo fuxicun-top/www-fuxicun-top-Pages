@@ -19,7 +19,7 @@ var Banner = (function() {
 
   // 默认轮播图（API 加载失败或未安装时的降级方案）
   var defaultBanners = [
-    { title: '千年古村 · 山水人和', subtitle: '宋代理学鼻祖周敦颐讲学堂所在地', image_url: '/images/banners/banner1.svg' },
+    { title: '千年古村 · 山水人和', subtitle: '宋代理学鼻祖周敦颐后裔聚居地', image_url: '/images/banners/banner1.svg' },
     { title: '120 根木柱 · 24 座古戏台', subtitle: '明清古建筑群与岭南瑶族建筑融合的典范', image_url: '/images/banners/banner2.svg' },
     { title: '潇贺古道 · 三省通衢', subtitle: '湘桂粤三省交界处的中国传统村落', image_url: '/images/banners/banner3.svg' }
   ];

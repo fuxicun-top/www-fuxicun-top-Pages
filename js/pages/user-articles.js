@@ -9,21 +9,9 @@
   var currentPage = 1;
 
   function init() {
-    if (!Auth.isLoggedIn()) {
-      window.location.href = '/login.html';
-      return;
-    }
+    if (!UserPanel.init()) return;
 
-    loadUserInfo();
     loadArticles();
-  }
-
-  function loadUserInfo() {
-    var user = Auth.getUser();
-    if (user) {
-      document.getElementById('user-name').textContent = user.username;
-      document.getElementById('user-avatar').textContent = user.username[0].toUpperCase();
-    }
   }
 
   async function loadArticles() {
@@ -94,7 +82,7 @@
         Toast.success('删除成功');
         loadArticles();
       } else {
-        Toast.error(result.error?.message || '删除失败');
+        Toast.error(result.message || '删除失败');
       }
     } catch (e) {
       Toast.error(e.message);

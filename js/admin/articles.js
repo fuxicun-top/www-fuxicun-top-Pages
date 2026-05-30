@@ -310,7 +310,7 @@
         Toast.success(isTop ? '已设为精选' : '已取消精选');
         loadArticles();
       } else {
-        Toast.error(result.error?.message || '操作失败');
+        Toast.error(result.message || '操作失败');
       }
     } catch (e) {
       Toast.error(e.message);
@@ -332,7 +332,7 @@
         Toast.success('文章已' + action);
         loadArticles();
       } else {
-        Toast.error(result.error?.message || '操作失败');
+        Toast.error(result.message || '操作失败');
       }
     } catch (e) {
       Toast.error(e.message);
@@ -360,7 +360,7 @@
         Toast.success('文章已删除');
         loadArticles();
       } else {
-        Toast.error(result.error?.message || '删除失败');
+        Toast.error(result.message || '删除失败');
       }
     } catch (e) {
       Toast.error('删除失败: ' + e.message);

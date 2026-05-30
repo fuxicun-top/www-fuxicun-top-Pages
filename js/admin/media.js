@@ -111,7 +111,7 @@
       if (result.success) {
         Toast.success('上传成功: ' + file.name);
       } else {
-        Toast.error('上传失败: ' + (result.error?.message || file.name));
+        Toast.error('上传失败: ' + (result.message || file.name));
       }
     } catch (e) {
       Toast.error('上传失败: ' + file.name + ' (' + e.message + ')');
@@ -223,7 +223,7 @@
         Toast.success('媒体文件已删除');
         loadMedia();
       } else {
-        Toast.error(result.error?.message || '删除失败');
+        Toast.error(result.message || '删除失败');
       }
     } catch (e) {
       Toast.error('删除失败: ' + e.message);

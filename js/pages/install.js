@@ -158,7 +158,7 @@
         nextBtn.onclick = function() { goToStep(4); };
         btn.parentNode.appendChild(nextBtn);
       } else {
-        updateCheckItem(createStatus, false, result.error?.message || '创建失败');
+        updateCheckItem(createStatus, false, result.message || '创建失败');
         btn.disabled = false;
         btn.textContent = '重试';
       }
@@ -203,36 +203,34 @@
       p.classList.remove('active');
     });
     document.getElementById('step-manage').classList.add('active');
-    document.getElementById('btn-clear-db').onclick = clearDatabase;
+    document.getElementById('btn-reset-data').onclick = resetData;
     document.getElementById('btn-reinstall').onclick = reinstall;
   }
 
-  // 清空数据库
-  async function clearDatabase() {
-    if (!confirm('确定要清空数据库吗？\n\n此操作将删除所有数据表和数据，不可恢复！')) return;
+  // 重置数据（保留管理员和安装密码，恢复默认数据）
+  async function resetData() {
+    if (!confirm('确定要重置数据吗？\n\n将清除所有内容数据并恢复为默认状态，管理员账号和安装管理密码保留不变。')) return;
 
-    var btn = document.getElementById('btn-clear-db');
+    var btn = document.getElementById('btn-reset-data');
     Form.setLoading(btn, true);
 
     try {
-      var result = await API.post('/install/clear-database');
+      var result = await API.post('/install/reset-data');
       if (result.success) {
-        Toast.success('数据库已清空');
-        // 刷新页面进入安装流程
-        setTimeout(function() { window.location.reload(); }, 1000);
+        Toast.success('数据已重置为默认状态');
       } else {
-        Toast.error(result.error?.message || '清空失败');
+        Toast.error(result.message || '重置失败');
       }
     } catch (e) {
-      Toast.error('清空失败: ' + e.message);
+      Toast.error('重置失败: ' + e.message);
     } finally {
       Form.setLoading(btn, false);
     }
   }
 
-  // 重新安装
+  // 重新安装（清除一切，进入全新安装流程）
   async function reinstall() {
-    if (!confirm('确定要重新安装吗？\n\n此操作将清空所有数据并重新开始安装流程。')) return;
+    if (!confirm('确定要重新安装吗？\n\n此操作将清除所有数据（包括管理员账号和安装管理密码），不可恢复！')) return;
 
     var btn = document.getElementById('btn-reinstall');
     Form.setLoading(btn, true);
@@ -243,7 +241,7 @@
         Toast.success('数据库已清空，即将进入安装流程');
         setTimeout(function() { window.location.reload(); }, 1000);
       } else {
-        Toast.error(result.error?.message || '操作失败');
+        Toast.error(result.message || '操作失败');
       }
     } catch (e) {
       Toast.error('操作失败: ' + e.message);
@@ -290,9 +288,11 @@
         document.getElementById('success-info').innerHTML =
           '<p><strong>后台地址：</strong><a href="' + result.data.adminUrl + '">' + result.data.adminUrl + '</a></p>' +
           '<p><strong>管理员账号：</strong>' + Utils.escapeHtml(result.data.username) + '</p>' +
-          '<p style="color:var(--color-danger);margin-top:8px;">请妥善保管以上信息！</p>';
+          '<p><strong>管理员密码：</strong>' + Utils.escapeHtml(data.adminPassword) + '</p>' +
+          '<p><strong>安装管理密码：</strong>' + Utils.escapeHtml(data.installPassword) + '</p>' +
+          '<p style="color:var(--color-danger);margin-top:8px;">请妥善保管以上信息！密码仅显示一次，丢失后需重新安装。</p>';
       } else {
-        Toast.error(result.error?.message || '创建失败');
+        Toast.error(result.message || '创建失败');
       }
     } catch (e) {
       Toast.error(e.message || '创建失败');

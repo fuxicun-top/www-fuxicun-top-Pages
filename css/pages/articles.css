@@ -4,9 +4,15 @@
  * ======================================== */
 
 .main-content {
-  padding-top: 80px;
+  padding-top: 20px;
   min-height: 100vh;
   background: var(--color-bg);
+}
+
+.main-content .breadcrumb {
+  margin-top: 0;
+  padding-top: 0;
+  padding-bottom: 12px;
 }
 
 .articles-filter {

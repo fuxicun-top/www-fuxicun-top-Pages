@@ -56,7 +56,7 @@
           '<a href="/login.html" class="btn btn-primary" style="margin-top:20px;">前往登录</a>' +
         '</div>';
       } else {
-        Toast.error(result.error?.message || '重置失败');
+        Toast.error(result.message || '重置失败');
       }
     } catch (e) {
       Toast.error(e.message || '重置失败');

@@ -226,7 +226,7 @@
         Toast.success('评论已' + statusText);
         loadComments();
       } else {
-        Toast.error(result.error?.message || '操作失败');
+        Toast.error(result.message || '操作失败');
       }
     } catch (e) {
       Toast.error('操作失败: ' + e.message);
@@ -245,7 +245,7 @@
         Toast.success('评论已删除');
         loadComments();
       } else {
-        Toast.error(result.error?.message || '删除失败');
+        Toast.error(result.message || '删除失败');
       }
     } catch (e) {
       Toast.error('删除失败: ' + e.message);

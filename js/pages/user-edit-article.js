@@ -9,10 +9,7 @@
   var articleId = null;
 
   function init() {
-    if (!Auth.isLoggedIn()) {
-      window.location.href = '/login.html';
-      return;
-    }
+    if (!UserPanel.init()) return;
 
     var params = new URLSearchParams(window.location.search);
     articleId = params.get('id');
@@ -25,7 +22,6 @@
 
     document.getElementById('article-id').value = articleId;
 
-    loadUserInfo();
     loadCategories();
     loadArticle();
 
@@ -37,14 +33,6 @@
     document.getElementById('cover-file').onchange = function() {
       uploadCover(this.files[0]);
     };
-  }
-
-  function loadUserInfo() {
-    var user = Auth.getUser();
-    if (user) {
-      document.getElementById('user-name').textContent = user.username;
-      document.getElementById('user-avatar').textContent = user.username[0].toUpperCase();
-    }
   }
 
   async function loadCategories() {
@@ -160,7 +148,7 @@
           window.location.href = '/user/articles.html';
         }, 1500);
       } else {
-        Toast.error(result.error?.message || '保存失败');
+        Toast.error(result.message || '保存失败');
       }
     } catch (e) {
       Toast.error(e.message);

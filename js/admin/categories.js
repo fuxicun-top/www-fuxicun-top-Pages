@@ -169,7 +169,7 @@
             Toast.success('分类添加成功');
             loadCategories();
           } else {
-            Toast.error(result.error?.message || '添加失败');
+            Toast.error(result.message || '添加失败');
           }
         } catch (e) {
           Toast.error(e.message);
@@ -199,7 +199,7 @@
             Toast.success('分类更新成功');
             loadCategories();
           } else {
-            Toast.error(result.error?.message || '更新失败');
+            Toast.error(result.message || '更新失败');
           }
         } catch (e) {
           Toast.error(e.message);
@@ -224,7 +224,7 @@
           Toast.success('分类删除成功');
           loadCategories();
         } else {
-          Toast.error(result.error?.message || '删除失败');
+          Toast.error(result.message || '删除失败');
         }
       } catch (e) {
         Toast.error(e.message);

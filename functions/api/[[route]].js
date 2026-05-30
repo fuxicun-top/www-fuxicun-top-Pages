@@ -27,6 +27,7 @@ import { handleUpload } from './routes/upload.js';
 import { handlePublic } from './routes/public.js';
 import { handleUser } from './routes/user.js';
 import { errorResponse } from './utils/response.js';
+import { migrateDatabase } from './utils/schema.js';
 
 /**
  * API 请求处理入口
@@ -48,6 +49,11 @@ export async function onRequest(context) {
   }
 
   try {
+    // 数据库增量迁移（幂等，每次请求执行）
+    if (env.FUXICUN_DB) {
+      await migrateDatabase(env.FUXICUN_DB, env);
+    }
+
     // 认证相关路由（注册/登录/找回密码/个人信息）
     if (path.startsWith('/auth')) {
       return await handleAuth(request, env, path, method);
@@ -63,8 +69,8 @@ export async function onRequest(context) {
       return await handleInstall(request, env, path, method);
     }
 
-    // 公开接口（无需认证）：分类、轮播图、网站配置、导航菜单、自定义页面
-    if (['/categories', '/banners', '/config', '/nav', '/media'].includes(path) || path.startsWith('/pages/')) {
+    // 公开接口（无需认证）：分类、轮播图、网站配置、导航菜单、首页模块、自定义页面
+    if (['/categories', '/banners', '/config', '/nav', '/media', '/home-modules'].includes(path) || path.startsWith('/pages/')) {
       return await handlePublic(request, env, path, method);
     }
 

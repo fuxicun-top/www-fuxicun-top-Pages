@@ -4,13 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
-  <title>我的文章 - 福溪村</title>
-
+  <title>我的评论 - 福溪村用户中心</title>
   <link rel="icon" href="/images/favicon.ico">
   <link rel="stylesheet" href="/css/common/reset.css">
   <link rel="stylesheet" href="/css/common/variables.css">
   <link rel="stylesheet" href="/css/common/typography.css">
   <link rel="stylesheet" href="/css/common/utilities.css">
+  <link rel="stylesheet" href="/css/components/form.css">
   <link rel="stylesheet" href="/css/components/user-panel.css">
   <link rel="stylesheet" href="/css/components/pagination.css">
   <script src="/js/common/theme-loader.js"></script>
@@ -21,20 +21,17 @@
     <div class="user-panel-main">
       <header class="user-panel-header" id="user-panel-header"></header>
       <main class="user-panel-content">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-          <h2 class="user-main__title" style="margin-bottom:0;">我的文章</h2>
-          <a href="/user/publish.html" class="btn btn-primary">发表文章</a>
-        </div>
+        <h2 style="font-size:20px;font-weight:600;margin-bottom:24px;">我的评论</h2>
 
         <div class="user-card">
-          <div id="articles-list">
+          <div id="comments-list">
             <div class="skeleton" style="height:80px;margin-bottom:16px;"></div>
             <div class="skeleton" style="height:80px;margin-bottom:16px;"></div>
             <div class="skeleton" style="height:80px;"></div>
           </div>
         </div>
 
-        <div class="pagination" id="pagination"></div>
+        <div class="pagination" id="comments-pagination"></div>
       </main>
     </div>
   </div>
@@ -47,6 +44,6 @@
   <script src="/js/common/toast.js"></script>
   <script src="/js/components/user-panel.js"></script>
   <script src="/js/components/pagination.js"></script>
-  <script src="/js/pages/user-articles.js"></script>
+  <script src="/js/pages/user-comments.js"></script>
 </body>
 </html>

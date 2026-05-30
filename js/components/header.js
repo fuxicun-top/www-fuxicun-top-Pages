@@ -14,7 +14,7 @@
     { name: '古村风貌', url: '/scenery.html', is_external: 0 },
     { name: '民族文化', url: '/ethnic.html', is_external: 0 },
     { name: '旅游指南', url: '/travel.html', is_external: 0 },
-    { name: '新闻动态', url: '/articles.html?category=village-news', is_external: 0 },
+    { name: '新闻动态', url: '/news.html', is_external: 0 },
     { name: '全部文章', url: '/articles.html', is_external: 0 }
   ];
 
@@ -59,10 +59,19 @@
       '<nav class="header-nav">' + navHtml + '</nav>' +
       '<div class="header-actions">' +
         '<div data-auth="logged-out"><a href="/login.html" class="btn btn-outline btn-sm">登录</a></div>' +
-        '<div data-auth="logged-in" style="display:none">' +
-          '<a href="/user/profile.html" class="header-nav__link" data-username></a>' +
-          '<a href="/admin/index.html" data-auth="admin" style="display:none" class="btn btn-primary btn-sm">后台</a>' +
-          '<button onclick="Auth.logout()" class="btn btn-outline btn-sm">退出</button>' +
+        '<div data-auth="logged-in" style="display:none" class="header-user">' +
+          '<button class="header-user__toggle" onclick="toggleUserDropdown(this)" aria-label="用户菜单">' +
+            '<img class="header-user__avatar" data-avatar src="/images/default/avatar.svg" alt="">' +
+          '</button>' +
+          '<div class="header-user__dropdown" id="user-dropdown">' +
+            '<div class="header-user__dropdown-header">' +
+              '<span class="header-user__dropdown-name" data-username></span>' +
+            '</div>' +
+            '<a href="/user/profile.html" class="header-user__dropdown-item">个人中心</a>' +
+            '<a href="/admin/index.html" data-auth="admin" style="display:none" class="header-user__dropdown-item">后台管理</a>' +
+            '<div class="header-user__dropdown-divider"></div>' +
+            '<button class="header-user__dropdown-item header-user__dropdown-item--danger" onclick="Auth.logout()">退出登录</button>' +
+          '</div>' +
         '</div>' +
         '<button class="header-menu-btn" onclick="toggleMobileMenu(this)">' +
           '<span></span><span></span><span></span>' +
@@ -71,7 +80,11 @@
     '</div>' +
     '<div class="mobile-nav" id="mobile-nav">' +
       mobileHtml +
-      '<div data-auth="logged-in" style="display:none;margin-top:16px;">' +
+      '<div data-auth="logged-in" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--color-border-light);">' +
+        '<div style="display:flex;align-items:center;gap:8px;padding:0 16px 12px;">' +
+          '<img class="header-user__avatar" data-avatar src="/images/default/avatar.svg" alt="" style="width:32px;height:32px;">' +
+          '<span data-username style="font-weight:600;"></span>' +
+        '</div>' +
         '<a href="/user/profile.html" class="mobile-nav__link">个人中心</a>' +
         '<a href="/admin/index.html" data-auth="admin" style="display:none" class="mobile-nav__link">后台管理</a>' +
         '<a href="#" onclick="Auth.logout();return false;" class="mobile-nav__link">退出登录</a>' +
@@ -108,6 +121,23 @@
     btn.classList.toggle('active');
     document.getElementById('mobile-nav').classList.toggle('active');
   };
+
+  window.toggleUserDropdown = function(btn) {
+    var dropdown = document.getElementById('user-dropdown');
+    if (!dropdown) return;
+    var isOpen = dropdown.classList.toggle('header-user__dropdown--open');
+    btn.classList.toggle('header-user__toggle--active', isOpen);
+  };
+
+  // 点击下拉菜单外部关闭
+  document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('user-dropdown');
+    if (!dropdown || !dropdown.classList.contains('header-user__dropdown--open')) return;
+    if (e.target.closest('.header-user')) return;
+    dropdown.classList.remove('header-user__dropdown--open');
+    var toggle = dropdown.parentElement.querySelector('.header-user__toggle');
+    if (toggle) toggle.classList.remove('header-user__toggle--active');
+  });
 
   document.addEventListener('DOMContentLoaded', initHeader);
 })();

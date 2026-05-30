@@ -9,7 +9,7 @@ import { successResponse, errorResponse, listResponse } from '../utils/response.
 import { dbQuery, dbQueryFirst, dbRun } from '../utils/db.js';
 import { requireAdmin, requireEditor } from '../middleware/auth.js';
 import { generateSlug, sanitizeHtml, escapeHtml } from '../utils/helpers.js';
-import { clearArticlesCache, clearNavCache, clearPageCache, clearConfigCache } from '../utils/cache.js';
+import { clearArticlesCache, clearNavCache, clearPageCache, clearConfigCache, clearCategoriesCache, clearBannersCache, clearCommentsCache, clearCommentPolicyCache, clearAllCommentPolicyCache, clearMediaCache } from '../utils/cache.js';
 
 /**
  * 后台管理路由分发
@@ -27,8 +27,10 @@ export async function handleAdmin(request, env, path, method) {
     '/admin/users',
     '/admin/config',
     '/admin/homepage',
+    '/admin/home-modules',
     '/admin/nav',
-    '/admin/pages'
+    '/admin/pages',
+    '/admin/database'
   ];
   const isAdminOnly = adminOnlyPaths.some(function(p) { return path.startsWith(p); });
 
@@ -59,6 +61,10 @@ export async function handleAdmin(request, env, path, method) {
   }
   if (path.match(/^\/admin\/users\/\d+$/) && method === 'DELETE') {
     return await deleteUser(env, path, user);
+  }
+  // 重置用户密码（编辑者和管理员均可操作）
+  if (path === '/admin/reset-user-password' && method === 'POST') {
+    return await adminResetPassword(request, env);
   }
 
   // === 分类管理 ===
@@ -107,12 +113,29 @@ export async function handleAdmin(request, env, path, method) {
     return await updateConfig(request, env, user);
   }
 
-  // === 首页配置（admin-only） ===
+  // === 首页配置（admin-only，旧版兼容） ===
   if (path === '/admin/homepage' && method === 'GET') {
     return await getHomepageConfig(env);
   }
   if (path === '/admin/homepage' && method === 'PUT') {
     return await updateHomepageConfig(request, env);
+  }
+
+  // === 首页模块管理（admin-only） ===
+  if (path === '/admin/home-modules' && method === 'GET') {
+    return await getHomeModulesAdmin(env);
+  }
+  if (path === '/admin/home-modules' && method === 'POST') {
+    return await createHomeModule(request, env);
+  }
+  if (path === '/admin/home-modules/sort' && method === 'PUT') {
+    return await sortHomeModules(request, env);
+  }
+  if (path.match(/^\/admin\/home-modules\/\d+$/) && method === 'PUT') {
+    return await updateHomeModule(request, env, path);
+  }
+  if (path.match(/^\/admin\/home-modules\/\d+$/) && method === 'DELETE') {
+    return await deleteHomeModule(env, path);
   }
 
   // === 文章管理 ===
@@ -156,9 +179,18 @@ export async function handleAdmin(request, env, path, method) {
     return await getLogs(request, env);
   }
 
-  // === 数据备份 ===
-  if (path === '/admin/backup' && method === 'GET') {
+  // === 数据库管理 ===
+  if (path === '/admin/database/export' && method === 'GET') {
     return await exportBackup(env);
+  }
+  if (path === '/admin/database/import' && method === 'POST') {
+    return await importBackup(request, env, user);
+  }
+  if (path === '/admin/database/clear' && method === 'POST') {
+    return await clearAllData(env, user);
+  }
+  if (path === '/admin/database/reinstall' && method === 'POST') {
+    return await reinstallSite(request, env, user);
   }
 
   // === 导航管理（admin-only） ===
@@ -251,7 +283,7 @@ async function getUsers(request, env) {
 
   const users = await dbQuery(
     env.FUXICUN_DB,
-    'SELECT id, username, phone, email, role, status, created_at FROM users WHERE ' + where + ' ORDER BY created_at DESC LIMIT ? OFFSET ?',
+    'SELECT id, username, display_name, phone, email, role, status, created_at FROM users WHERE ' + where + ' ORDER BY created_at DESC LIMIT ? OFFSET ?',
     [...params, pageSize, offset]
   );
 
@@ -387,6 +419,7 @@ async function createCategory(request, env, user) {
 
   // 写入操作日志
   await writeAuditLog(env, user.id, 'category_create', 'category', null, '创建分类: ' + name);
+  await clearCategoriesCache(env);
 
   return successResponse(null, '分类创建成功');
 }
@@ -406,6 +439,7 @@ async function updateCategory(request, env, path) {
 
   // 清除文章列表缓存（分类变更可能影响文章显示）
   await clearArticlesCache(env);
+  await clearCategoriesCache(env);
 
   return successResponse(null, '分类更新成功');
 }
@@ -432,6 +466,7 @@ async function sortCategories(request, env, user) {
     }
 
     await clearArticlesCache(env);
+    await clearCategoriesCache(env);
 
     await writeAuditLog(env, user.id, 'category_sort', 'category', null, '更新分类排序');
 
@@ -460,6 +495,7 @@ async function deleteCategory(env, path) {
 
   await dbRun(env.FUXICUN_DB, 'DELETE FROM categories WHERE id = ?', [id]);
   await clearArticlesCache(env);
+  await clearCategoriesCache(env);
 
   return successResponse(null, '分类删除成功');
 }
@@ -485,15 +521,16 @@ async function createBanner(request, env, user) {
     return errorResponse('标题和图片为必填项');
   }
 
-  await dbRun(
+  const result = await dbRun(
     env.FUXICUN_DB,
     'INSERT INTO banners (title, subtitle, image_url, link_url, sort_order, status) VALUES (?, ?, ?, ?, ?, ?)',
     [title, subtitle || '', image_url, link_url || '', sort_order || 0, status || 'active']
   );
 
   await writeAuditLog(env, user.id, 'banner_create', 'banner', null, '创建轮播图: ' + title);
+  await clearBannersCache(env);
 
-  return successResponse(null, '轮播图创建成功');
+  return successResponse({ id: result.meta.last_row_id }, '轮播图创建成功');
 }
 
 // ==============================
@@ -519,6 +556,7 @@ async function sortBanners(request, env, user) {
     }
 
     await writeAuditLog(env, user.id, 'banner_sort', 'banner', null, '更新轮播图排序');
+    await clearBannersCache(env);
 
     return successResponse(null, '排序更新成功');
   } catch (e) {
@@ -539,6 +577,8 @@ async function updateBanner(request, env, path) {
     [title, subtitle || '', image_url, link_url || '', sort_order || 0, status || 'active', id]
   );
 
+  await clearBannersCache(env);
+
   return successResponse(null, '轮播图更新成功');
 }
 
@@ -548,6 +588,7 @@ async function updateBanner(request, env, path) {
 async function deleteBanner(env, path) {
   const id = path.match(/\/admin\/banners\/(\d+)/)[1];
   await dbRun(env.FUXICUN_DB, 'DELETE FROM banners WHERE id = ?', [id]);
+  await clearBannersCache(env);
   return successResponse(null, '轮播图删除成功');
 }
 
@@ -573,7 +614,10 @@ async function updateConfig(request, env, user) {
     'icp_number', 'copyright_text', 'footer_text',
     'theme_primary_color', 'theme_primary_light', 'theme_primary_bg',
     'theme_secondary_color', 'theme_memorial_dates', 'theme_memorial_mode',
-    'home_featured', 'home_news'
+    'home_featured', 'home_news',
+    'rate_limit_exempt_ips',
+    'comment_policy', 'comment_review', 'like_policy', 'sensitive_words',
+    'cache_enabled'
   ];
 
   const data = await request.json();
@@ -587,8 +631,18 @@ async function updateConfig(request, env, user) {
     );
   }
 
+  // 同步 cache_enabled 到 KV（快速读取，避免每次查 DB）
+  if (data.cache_enabled !== undefined && env.FUXICUN_KV) {
+    try { await env.FUXICUN_KV.put('setting:cache_enabled', String(data.cache_enabled)); } catch (e) {}
+  }
+
   // 清除配置缓存
   await clearConfigCache(env);
+
+  // 全局评论策略变更时，清除所有文章的评论策略缓存
+  if (data.comment_policy !== undefined) {
+    await clearAllCommentPolicyCache(env);
+  }
 
   await writeAuditLog(env, user.id, 'config_update', 'config', null, '更新网站设置');
 
@@ -654,7 +708,7 @@ async function createArticle(request, env, user) {
   const result = await dbRun(
     env.FUXICUN_DB,
     "INSERT INTO articles (title, slug, content, excerpt, cover_image, category_id, author_id, status, is_top, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    [title, slug, content, excerpt || '', cover_image || '', category_id || null, user.id, articleStatus, topValue, publishedAt]
+    [title, slug, sanitizeHtml(content), excerpt || '', cover_image || '', category_id || null, user.id, articleStatus, topValue, publishedAt]
   );
 
   // 清除文章列表缓存
@@ -683,7 +737,7 @@ async function updateArticle(request, env, path) {
   await dbRun(
     env.FUXICUN_DB,
     "UPDATE articles SET title = ?, content = ?, excerpt = ?, cover_image = ?, category_id = ?, is_top = ?, updated_at = datetime('now') WHERE id = ?",
-    [title || article.title, content || article.content, excerpt ?? article.excerpt, cover_image ?? article.cover_image, category_id ?? article.category_id, topValue, id]
+    [title || article.title, content ? sanitizeHtml(content) : article.content, excerpt ?? article.excerpt, cover_image ?? article.cover_image, category_id ?? article.category_id, topValue, id]
   );
 
   await clearArticlesCache(env);
@@ -797,8 +851,12 @@ async function updateCommentStatus(request, env, path, user) {
     return errorResponse('无效的状态');
   }
 
+  // 获取评论所属文章 ID 以清除对应缓存
+  const comment = await dbQueryFirst(env.FUXICUN_DB, 'SELECT article_id FROM comments WHERE id = ?', [id]);
+
   await dbRun(env.FUXICUN_DB, 'UPDATE comments SET status = ? WHERE id = ?', [status, id]);
 
+  if (comment) await clearCommentsCache(env, comment.article_id);
   await writeAuditLog(env, user.id, 'comment_status_change', 'comment', id, '评论状态变更为: ' + status);
 
   return successResponse(null, '评论状态更新成功');
@@ -810,9 +868,13 @@ async function updateCommentStatus(request, env, path, user) {
 async function deleteComment(env, path, user) {
   const id = path.match(/\/admin\/comments\/(\d+)/)[1];
 
+  // 获取评论所属文章 ID 以清除对应缓存
+  const comment = await dbQueryFirst(env.FUXICUN_DB, 'SELECT article_id FROM comments WHERE id = ?', [id]);
+
   await dbRun(env.FUXICUN_DB, 'DELETE FROM comments WHERE parent_id = ?', [id]);
   await dbRun(env.FUXICUN_DB, 'DELETE FROM comments WHERE id = ?', [id]);
 
+  if (comment) await clearCommentsCache(env, comment.article_id);
   await writeAuditLog(env, user.id, 'comment_delete', 'comment', id, '删除评论');
 
   return successResponse(null, '评论删除成功');
@@ -877,6 +939,7 @@ async function deleteMedia(env, path, user) {
 
   await dbRun(env.FUXICUN_DB, 'DELETE FROM media WHERE id = ?', [id]);
 
+  await clearMediaCache(env);
   await writeAuditLog(env, user.id, 'media_delete', 'media', id, '删除媒体: ' + media.original_name);
 
   return successResponse(null, '媒体文件删除成功');
@@ -1024,7 +1087,7 @@ async function createPage(request, env) {
     await dbRun(
       env.FUXICUN_DB,
       'INSERT INTO pages (title, slug, content, cover_image, status) VALUES (?, ?, ?, ?, ?)',
-      [title, slug, content || '', cover_image || '', status || 'published']
+      [title, slug, sanitizeHtml(content) || '', cover_image || '', status || 'published']
     );
 
     await writeAuditLog(env, null, 'page_create', 'page', null, '创建页面: ' + title);
@@ -1060,7 +1123,7 @@ async function updatePage(request, env, path) {
     await dbRun(
       env.FUXICUN_DB,
       "UPDATE pages SET title = ?, slug = ?, content = ?, cover_image = ?, status = ?, updated_at = datetime('now') WHERE id = ?",
-      [title, slug, content, cover_image || '', status || 'published', id]
+      [title, slug, content ? sanitizeHtml(content) : '', cover_image || '', status || 'published', id]
     );
 
     // 清除新旧两个 slug 的 KV 缓存
@@ -1127,11 +1190,10 @@ async function writeAuditLog(env, userId, action, targetType, targetId, detail) 
 // ==============================
 async function exportBackup(env) {
   try {
-    // 需要备份的表清单
     const tables = [
       'users', 'password_resets', 'sessions', 'categories',
       'articles', 'comments', 'media', 'likes', 'banners',
-      'site_config', 'audit_logs', 'nav_items', 'pages'
+      'site_config', 'audit_logs', 'nav_items', 'pages', 'home_modules'
     ];
 
     const backup = {};
@@ -1139,24 +1201,20 @@ async function exportBackup(env) {
     for (const table of tables) {
       try {
         let query = 'SELECT * FROM ' + table;
-        // 排除敏感字段
         if (table === 'users') {
-          query = 'SELECT id, username, phone, email, avatar, role, status, created_at, updated_at FROM users';
+          query = 'SELECT id, username, display_name, phone, email, avatar, role, status, created_at, updated_at FROM users';
         } else if (table === 'password_resets') {
           query = 'SELECT id, user_id, expires_at, used, created_at FROM password_resets';
         }
         const result = await dbQuery(env.FUXICUN_DB, query);
         backup[table] = result.results || [];
       } catch (e) {
-        // 表不存在则跳过
         backup[table] = [];
       }
     }
 
-    // 写入操作日志
     await writeAuditLog(env, null, 'backup_export', 'system', null, '导出数据备份');
 
-    // 返回 JSON 格式的备份数据
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     return new Response(JSON.stringify(backup, null, 2), {
       status: 200,
@@ -1167,6 +1225,225 @@ async function exportBackup(env) {
     });
   } catch (e) {
     return errorResponse('备份导出失败: ' + e.message);
+  }
+}
+
+// 导入备份
+async function importBackup(request, env, currentUser) {
+  try {
+    const { data } = await request.json();
+
+    if (!data || typeof data !== 'object') {
+      return errorResponse('无效的备份数据');
+    }
+
+    const db = env.FUXICUN_DB;
+    const tables = [
+      'audit_logs', 'password_resets', 'sessions',
+      'likes', 'comments', 'media',
+      'articles', 'categories', 'users',
+      'banners', 'site_config', 'nav_items', 'pages', 'home_modules'
+    ];
+
+    // 临时关闭外键约束
+    await db.prepare('PRAGMA foreign_keys = OFF').run();
+
+    // 按依赖关系倒序清空
+    for (const table of tables) {
+      try {
+        await dbRun(db, `DELETE FROM ${table}`);
+      } catch (e) { /* 表不存在则跳过 */ }
+    }
+
+    // 恢复外键约束
+    await db.prepare('PRAGMA foreign_keys = ON').run();
+
+    // 按依赖关系正序插入
+    const insertOrder = [
+      'users', 'categories', 'articles', 'comments', 'likes',
+      'media', 'banners', 'site_config', 'sessions', 'password_resets',
+      'audit_logs', 'nav_items', 'pages', 'home_modules'
+    ];
+
+    let importedCount = 0;
+    for (const table of insertOrder) {
+      const rows = data[table];
+      if (!rows || !Array.isArray(rows) || rows.length === 0) continue;
+
+      try {
+        const columns = Object.keys(rows[0]);
+        const placeholders = columns.map(() => '?').join(', ');
+        const sql = `INSERT OR IGNORE INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`;
+
+        for (const row of rows) {
+          const values = columns.map(c => row[c] !== undefined ? row[c] : null);
+          await dbRun(db, sql, values);
+          importedCount++;
+        }
+      } catch (e) {
+        console.error(`Import table ${table} error:`, e.message);
+      }
+    }
+
+    // 清除所有 KV 缓存
+    if (env.FUXICUN_KV) {
+      try {
+        await env.FUXICUN_KV.delete('install:completed');
+        await env.FUXICUN_KV.put('install:completed', 'true');
+        await clearArticlesCache(env);
+        await clearConfigCache(env);
+        await clearNavCache(env);
+        await clearCategoriesCache(env);
+        await clearBannersCache(env);
+        await clearAllCommentPolicyCache(env);
+        await clearMediaCache(env);
+        await clearHomeModulesCache(env);
+      } catch (e) { /* 忽略 */ }
+    }
+
+    await writeAuditLog(env, currentUser.id, 'backup_import', 'system', null, `导入数据备份，共 ${importedCount} 条记录`);
+
+    return successResponse({ imported: importedCount }, '数据导入成功');
+  } catch (e) {
+    return errorResponse('导入失败: ' + e.message);
+  }
+}
+
+// 重置数据（保留管理员和安装密码，恢复默认数据）
+async function clearAllData(env, currentUser) {
+  try {
+    const db = env.FUXICUN_DB;
+
+    // 备份管理员用户和 install_password_hash
+    const adminUser = await dbQueryFirst(
+      db,
+      "SELECT id, username, display_name, password_hash, phone, email, avatar, role, status FROM users WHERE role = 'admin' LIMIT 1"
+    );
+    const installPwdHash = await dbQueryFirst(
+      db,
+      "SELECT value FROM site_config WHERE key = 'install_password_hash'"
+    );
+
+    // DROP 所有表（彻底清除，避免外键约束问题）
+    const tables = [
+      'audit_logs', 'password_resets', 'sessions',
+      'likes', 'comments', 'media',
+      'articles', 'categories', 'users',
+      'banners', 'site_config', 'nav_items', 'pages', 'home_modules'
+    ];
+
+    for (const table of tables) {
+      try {
+        await db.prepare(`DROP TABLE IF EXISTS ${table}`).run();
+      } catch (e) { /* 忽略 */ }
+    }
+
+    // 重建表结构 + 索引 + 种子数据
+    const { initDatabase, insertArticlesSeed } = await import('../utils/schema.js');
+    await initDatabase(db);
+
+    // 恢复管理员用户
+    if (adminUser) {
+      const result = await dbRun(
+        db,
+        'INSERT INTO users (username, display_name, password_hash, phone, email, avatar, role, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [adminUser.username, adminUser.display_name || adminUser.username, adminUser.password_hash, adminUser.phone, adminUser.email, adminUser.avatar, adminUser.role, adminUser.status]
+      );
+      const newAdminId = result.meta.last_row_id;
+
+      // 恢复安装管理密码
+      if (installPwdHash) {
+        await dbRun(
+          db,
+          "INSERT INTO site_config (key, value, updated_at) VALUES ('install_password_hash', ?, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+          [installPwdHash.value]
+        );
+      }
+
+      // 插入默认文章
+      await insertArticlesSeed(db, newAdminId);
+    }
+
+    // 清除所有 KV 缓存
+    if (env.FUXICUN_KV) {
+      try {
+        await clearArticlesCache(env);
+        await clearConfigCache(env);
+        await clearNavCache(env);
+        await clearCategoriesCache(env);
+        await clearBannersCache(env);
+        await clearAllCommentPolicyCache(env);
+        await clearMediaCache(env);
+        await clearHomeModulesCache(env);
+      } catch (e) { /* 忽略 */ }
+    }
+
+    return successResponse(null, '数据已重置为默认状态');
+  } catch (e) {
+    return errorResponse('重置失败: ' + e.message);
+  }
+}
+
+// 重装网站（验证密码 → DROP 所有表 → 清除安装标记 → 跳转安装页面）
+async function reinstallSite(request, env, currentUser) {
+  try {
+    const { password } = await request.json();
+
+    if (!password) {
+      return errorResponse('请输入管理员密码');
+    }
+
+    // 验证当前管理员密码
+    const { verifyPassword } = await import('../utils/hash.js');
+    const adminUser = await dbQueryFirst(
+      env.FUXICUN_DB,
+      'SELECT password_hash FROM users WHERE id = ?',
+      [currentUser.id]
+    );
+
+    if (!adminUser) {
+      return errorResponse('管理员账号异常');
+    }
+
+    const valid = await verifyPassword(password, adminUser.password_hash);
+    if (!valid) {
+      return errorResponse('密码错误');
+    }
+
+    const db = env.FUXICUN_DB;
+
+    // DROP 所有表
+    const tables = [
+      'audit_logs', 'password_resets', 'sessions',
+      'likes', 'comments', 'media',
+      'articles', 'categories', 'users',
+      'banners', 'site_config', 'nav_items', 'pages', 'home_modules'
+    ];
+
+    for (const table of tables) {
+      try {
+        await db.prepare(`DROP TABLE IF EXISTS ${table}`).run();
+      } catch (e) { /* 忽略 */ }
+    }
+
+    // 清除所有 KV 缓存
+    if (env.FUXICUN_KV) {
+      try {
+        await env.FUXICUN_KV.delete('install:completed');
+        await clearArticlesCache(env);
+        await clearConfigCache(env);
+        await clearNavCache(env);
+        await clearCategoriesCache(env);
+        await clearBannersCache(env);
+        await clearAllCommentPolicyCache(env);
+        await clearMediaCache(env);
+        await clearHomeModulesCache(env);
+      } catch (e) { /* 忽略 */ }
+    }
+
+    return successResponse(null, '数据库已清空，请重新安装');
+  } catch (e) {
+    return errorResponse('重装失败: ' + e.message);
   }
 }
 
@@ -1229,5 +1506,250 @@ async function updateHomepageConfig(request, env) {
     return successResponse(null, '首页配置已保存');
   } catch (e) {
     return errorResponse('保存失败: ' + e.message);
+  }
+}
+
+// ==============================
+// 首页模块管理 - 获取所有模块
+// ==============================
+async function getHomeModulesAdmin(env) {
+  const modules = await dbQuery(
+    env.FUXICUN_DB,
+    'SELECT id, type, title, subtitle, sort_order, status, protected, config FROM home_modules ORDER BY sort_order'
+  );
+
+  const list = (modules.results || []).map(function(m) {
+    if (m.config) {
+      try { m.config = JSON.parse(m.config); } catch (e) { m.config = {}; }
+    } else {
+      m.config = {};
+    }
+    return m;
+  });
+
+  // 查询已发布文章供选择
+  const articles = await dbQuery(
+    env.FUXICUN_DB,
+    'SELECT a.id, a.title, c.name as category_name FROM articles a LEFT JOIN categories c ON a.category_id = c.id WHERE a.status = ? ORDER BY a.published_at DESC',
+    ['published']
+  );
+
+  return successResponse({
+    modules: list,
+    articles: articles.results || []
+  });
+}
+
+// ==============================
+// 首页模块管理 - 新增模块
+// ==============================
+async function createHomeModule(request, env) {
+  try {
+    const { type, title, subtitle, config } = await request.json();
+
+    if (!type || !title) {
+      return errorResponse('模块类型和标题为必填项');
+    }
+
+    const validTypes = ['banner', 'intro', 'articles', 'gallery', 'travel', 'custom'];
+    if (!validTypes.includes(type)) {
+      return errorResponse('无效的模块类型');
+    }
+
+    // 获取当前最大排序号
+    const maxSort = await dbQueryFirst(
+      env.FUXICUN_DB,
+      'SELECT MAX(sort_order) as max_sort FROM home_modules'
+    );
+    const nextSort = (maxSort?.max_sort || 0) + 1;
+
+    const configJson = config ? JSON.stringify(config) : '{}';
+
+    const result = await dbRun(
+      env.FUXICUN_DB,
+      'INSERT INTO home_modules (type, title, subtitle, sort_order, status, config) VALUES (?, ?, ?, ?, ?, ?)',
+      [type, title, subtitle || null, nextSort, 'active', configJson]
+    );
+
+    // 清除首页模块缓存
+    await clearHomeModulesCache(env);
+
+    return successResponse({ id: result.meta.last_row_id }, '模块添加成功');
+  } catch (e) {
+    return errorResponse('添加失败: ' + e.message);
+  }
+}
+
+// ==============================
+// 首页模块管理 - 更新模块
+// ==============================
+async function updateHomeModule(request, env, path) {
+  const idMatch = path.match(/\/admin\/home-modules\/(\d+)/);
+  if (!idMatch) return errorResponse('无效的模块ID');
+  const id = idMatch[1];
+
+  try {
+    const { title, subtitle, status, config } = await request.json();
+
+    const existing = await dbQueryFirst(
+      env.FUXICUN_DB,
+      'SELECT id FROM home_modules WHERE id = ?',
+      [id]
+    );
+    if (!existing) return errorResponse('模块不存在', 404);
+
+    const configJson = config !== undefined ? JSON.stringify(config) : undefined;
+
+    if (configJson !== undefined) {
+      await dbRun(
+        env.FUXICUN_DB,
+        "UPDATE home_modules SET title = COALESCE(?, title), subtitle = COALESCE(?, subtitle), status = COALESCE(?, status), config = ? WHERE id = ?",
+        [title || null, subtitle !== undefined ? subtitle : null, status || null, configJson, id]
+      );
+    } else {
+      await dbRun(
+        env.FUXICUN_DB,
+        "UPDATE home_modules SET title = COALESCE(?, title), subtitle = COALESCE(?, subtitle), status = COALESCE(?, status) WHERE id = ?",
+        [title || null, subtitle !== undefined ? subtitle : null, status || null, id]
+      );
+    }
+
+    await clearHomeModulesCache(env);
+    return successResponse(null, '模块更新成功');
+  } catch (e) {
+    return errorResponse('更新失败: ' + e.message);
+  }
+}
+
+// ==============================
+// 首页模块管理 - 删除模块
+// ==============================
+async function deleteHomeModule(env, path) {
+  const idMatch = path.match(/\/admin\/home-modules\/(\d+)/);
+  if (!idMatch) return errorResponse('无效的模块ID');
+  const id = idMatch[1];
+
+  try {
+    // 检查是否为受保护的默认模块
+    const module = await dbQueryFirst(
+      env.FUXICUN_DB,
+      'SELECT protected FROM home_modules WHERE id = ?',
+      [id]
+    );
+    if (!module) return errorResponse('模块不存在', 404);
+    if (module.protected) return errorResponse('默认模块不可删除，只能隐藏或编辑');
+
+    await dbRun(env.FUXICUN_DB, 'DELETE FROM home_modules WHERE id = ?', [id]);
+    await clearHomeModulesCache(env);
+    return successResponse(null, '模块删除成功');
+  } catch (e) {
+    return errorResponse('删除失败: ' + e.message);
+  }
+}
+
+// ==============================
+// 首页模块管理 - 批量排序
+// ==============================
+async function sortHomeModules(request, env) {
+  try {
+    const { ids } = await request.json();
+
+    if (!Array.isArray(ids)) {
+      return errorResponse('排序数据格式错误');
+    }
+
+    for (var i = 0; i < ids.length; i++) {
+      await dbRun(
+        env.FUXICUN_DB,
+        'UPDATE home_modules SET sort_order = ? WHERE id = ?',
+        [i + 1, ids[i]]
+      );
+    }
+
+    await clearHomeModulesCache(env);
+    return successResponse(null, '排序已更新');
+  } catch (e) {
+    return errorResponse('排序失败: ' + e.message);
+  }
+}
+
+// 清除首页模块 KV 缓存
+async function clearHomeModulesCache(env) {
+  if (env.FUXICUN_KV) {
+    try {
+      await env.FUXICUN_KV.delete('cache:home-modules');
+    } catch (e) { /* 忽略 */ }
+  }
+}
+
+/**
+ * 管理员/编辑者手动重置用户密码
+ * 向指定邮箱发送重置链接，邮件中包含修改手机号指引
+ */
+async function adminResetPassword(request, env) {
+  try {
+    const { user_id, username, email } = await request.json();
+
+    if ((!user_id && !username) || !email) {
+      return errorResponse('请提供用户名（或用户ID）和接收邮箱');
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return errorResponse('请输入有效的邮箱地址');
+    }
+
+    const targetUser = user_id
+      ? await dbQueryFirst(env.FUXICUN_DB, 'SELECT id, username FROM users WHERE id = ?', [user_id])
+      : await dbQueryFirst(env.FUXICUN_DB, 'SELECT id, username FROM users WHERE username = ?', [username]);
+
+    if (!targetUser) {
+      return errorResponse('用户不存在');
+    }
+
+    // 生成重置 token
+    const token = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    await dbRun(
+      env.FUXICUN_DB,
+      'INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)',
+      [targetUser.id, token, expiresAt]
+    );
+
+    // 发送邮件
+    if (env.RESEND_API_KEY) {
+      try {
+        const resetUrl = request.headers.get('origin') || 'https://fuxicun.top';
+        await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + env.RESEND_API_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            from: env.EMAIL_FROM || 'noreply@fuxicun.top',
+            to: email,
+            subject: '福溪村官网 - 密码重置（管理员发起）',
+            html: '<p>您好 ' + escapeHtml(targetUser.username) + '，</p>' +
+              '<p>管理员为您的账号发起了密码重置，请点击以下链接设置新密码（24小时内有效）：</p>' +
+              '<p><a href="' + resetUrl + '/reset-password.html?token=' + token + '">重置密码</a></p>' +
+              '<hr style="border:none;border-top:1px solid #eee;margin:20px 0;">' +
+              '<p style="color:#666;font-size:13px;">温馨提示：</p>' +
+              '<ul style="color:#666;font-size:13px;">' +
+              '<li>如需修改注册时绑定的手机号，请登录后到「个人中心 → 修改手机号」进行更新</li>' +
+              '<li>如无法登录或忘记手机号，请回复此邮件或联系 <a href="mailto:www@fuxicun.top">www@fuxicun.top</a> 寻求帮助</li>' +
+              '</ul>' +
+              '<p style="color:#999;font-size:12px;margin-top:20px;">如非本人操作，请忽略此邮件。</p>'
+          })
+        });
+      } catch (e) {
+        console.error('Send email error:', e);
+      }
+    }
+
+    return successResponse(null, '重置链接已发送到 ' + email);
+  } catch (e) {
+    console.error('Admin reset password error:', e);
+    return errorResponse('操作失败');
   }
 }

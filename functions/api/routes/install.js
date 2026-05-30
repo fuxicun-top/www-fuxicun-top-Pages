@@ -6,7 +6,7 @@
 import { successResponse, errorResponse } from '../utils/response.js';
 import { dbQueryFirst, dbRun } from '../utils/db.js';
 import { hashPassword, verifyPassword } from '../utils/hash.js';
-import { initDatabase } from '../utils/schema.js';
+import { initDatabase, insertArticlesSeed } from '../utils/schema.js';
 
 // 检查是否已安装（防止重复安装）
 // 仅检查 D1 管理员是否存在，不依赖 KV 标记（避免 KV 缓存导致无法重装）
@@ -49,6 +49,9 @@ export async function handleInstall(request, env, path, method) {
   }
   if (path === '/install/clear-database' && method === 'POST') {
     return await clearDatabase(env);
+  }
+  if (path === '/install/reset-data' && method === 'POST') {
+    return await resetData(env);
   }
 
   return errorResponse('接口不存在', 404);
@@ -195,11 +198,14 @@ async function createAdmin(request, env) {
     // 创建管理员
     const passwordHash = await hashPassword(adminPassword);
 
-    await dbRun(
+    const adminResult = await dbRun(
       db,
-      'INSERT INTO users (username, password_hash, phone, email, role) VALUES (?, ?, ?, ?, ?)',
-      [adminUsername, passwordHash, adminPhone, adminEmail || null, 'admin']
+      'INSERT INTO users (username, display_name, password_hash, phone, email, role) VALUES (?, ?, ?, ?, ?, ?)',
+      [adminUsername, adminUsername, passwordHash, adminPhone, adminEmail || null, 'admin']
     );
+
+    const adminId = adminResult.meta.last_row_id;
+    console.log('Admin created, id:', adminId, 'meta:', JSON.stringify(adminResult.meta));
 
     // 保存安装管理密码哈希
     const installPasswordHash = await hashPassword(installPassword);
@@ -218,6 +224,35 @@ async function createAdmin(request, env) {
       );
     }
 
+    // 插入默认文章
+    // 先测试单条 INSERT 是否受 FK 约束
+    try {
+      await db.prepare("INSERT INTO articles (title, slug, content, category_id, author_id, status) VALUES ('_test', '_test', 'test', 1, ?, 'draft')").bind(adminId).run();
+      await db.prepare("DELETE FROM articles WHERE slug = '_test'").run();
+      console.log('FK 测试通过，开始插入种子数据');
+    } catch (fkErr) {
+      console.error('FK 测试失败:', fkErr.message);
+      const catSample = await dbQueryFirst(db, 'SELECT id, name FROM categories LIMIT 1');
+      return errorResponse('FK 测试失败: ' + fkErr.message + ' | catSample=' + JSON.stringify(catSample));
+    }
+
+    try {
+      await insertArticlesSeed(db, adminId);
+    } catch (seedErr) {
+      // 查询数据库详细状态用于调试
+      const userCount = await dbQueryFirst(db, 'SELECT COUNT(*) as c FROM users');
+      const catCount = await dbQueryFirst(db, 'SELECT COUNT(*) as c FROM categories');
+      const adminCheck = await dbQueryFirst(db, 'SELECT id FROM users WHERE role = ?', ['admin']);
+      const catSample = await dbQueryFirst(db, 'SELECT id, name FROM categories LIMIT 1');
+      const fkCheck = await dbQueryFirst(db, 'PRAGMA foreign_key_list(articles)');
+      return errorResponse('文章种子插入失败: ' + seedErr.message +
+        ' | adminId=' + adminId +
+        ' | users=' + (userCount?.c) +
+        ' | categories=' + (catCount?.c) +
+        ' | catSample=' + JSON.stringify(catSample) +
+        ' | adminExists=' + !!adminCheck);
+    }
+
     // 标记安装完成
     await markInstalled(env);
 
@@ -226,8 +261,7 @@ async function createAdmin(request, env) {
       username: adminUsername
     }, '管理员创建成功！');
   } catch (e) {
-    console.error('Create admin error:', e);
-    return errorResponse('创建失败');
+    return errorResponse('创建失败: ' + e.message);
   }
 }
 
@@ -273,7 +307,8 @@ async function clearDatabase(env) {
       'audit_logs', 'password_resets', 'sessions',
       'likes', 'comments', 'media',
       'articles', 'categories', 'users',
-      'banners', 'site_config', 'nav_items', 'pages'
+      'banners', 'site_config', 'nav_items', 'pages',
+      'home_modules'
     ];
 
     for (const table of tables) {
@@ -295,5 +330,69 @@ async function clearDatabase(env) {
   } catch (e) {
     console.error('Clear database error:', e);
     return errorResponse('清空数据库失败');
+  }
+}
+
+// 重置数据（保留管理员和安装管理密码，恢复默认数据）
+async function resetData(env) {
+  try {
+    const db = env.FUXICUN_DB;
+    if (!db) {
+      return errorResponse('D1 绑定不存在');
+    }
+
+    // 备份管理员用户和 install_password_hash
+    const adminUser = await dbQueryFirst(
+      db,
+      "SELECT id, username, display_name, password_hash, phone, email, avatar, role, status FROM users WHERE role = 'admin' LIMIT 1"
+    );
+    const installPwdHash = await dbQueryFirst(
+      db,
+      "SELECT value FROM site_config WHERE key = 'install_password_hash'"
+    );
+
+    // DROP 所有表（彻底清除，避免外键约束问题）
+    const tables = [
+      'audit_logs', 'password_resets', 'sessions',
+      'likes', 'comments', 'media',
+      'articles', 'categories', 'users',
+      'banners', 'site_config', 'nav_items', 'pages', 'home_modules'
+    ];
+
+    for (const table of tables) {
+      try {
+        await db.prepare(`DROP TABLE IF EXISTS ${table}`).run();
+      } catch (e) { /* 忽略 */ }
+    }
+
+    // 重建表结构 + 索引 + 种子数据
+    await initDatabase(db);
+
+    // 恢复管理员用户
+    if (adminUser) {
+      const result = await dbRun(
+        db,
+        'INSERT INTO users (username, display_name, password_hash, phone, email, avatar, role, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [adminUser.username, adminUser.display_name || adminUser.username, adminUser.password_hash, adminUser.phone, adminUser.email, adminUser.avatar, adminUser.role, adminUser.status]
+      );
+      const newAdminId = result.meta.last_row_id;
+
+      // 恢复安装管理密码
+      if (installPwdHash) {
+        await dbRun(
+          db,
+          "INSERT INTO site_config (key, value, updated_at) VALUES ('install_password_hash', ?, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+          [installPwdHash.value]
+        );
+      }
+
+      // 插入默认文章
+      await insertArticlesSeed(db, newAdminId);
+    }
+
+    return successResponse(null, '数据已重置为默认状态');
+  } catch (e) {
+    console.error('Reset data error:', e.message);
+    return errorResponse('重置数据失败: ' + e.message);
   }
 }

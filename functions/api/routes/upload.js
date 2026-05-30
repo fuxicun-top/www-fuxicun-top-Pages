@@ -7,6 +7,7 @@
 import { successResponse, errorResponse } from '../utils/response.js';
 import { dbRun } from '../utils/db.js';
 import { authenticate } from '../middleware/auth.js';
+import { clearMediaCache } from '../utils/cache.js';
 
 /** 允许的图片类型 */
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -112,6 +113,8 @@ async function uploadFile(request, env, type) {
       'INSERT INTO media (filename, original_name, type, size, url, uploaded_by) VALUES (?, ?, ?, ?, ?, ?)',
       [key, file.name, file.type, file.size, fileUrl, auth.user.id]
     );
+
+    await clearMediaCache(env);
 
     return successResponse({
       url: fileUrl,

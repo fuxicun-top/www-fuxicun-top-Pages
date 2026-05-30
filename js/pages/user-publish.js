@@ -7,12 +7,8 @@
   'use strict';
 
   function init() {
-    if (!Auth.isLoggedIn()) {
-      window.location.href = '/login.html';
-      return;
-    }
+    if (!UserPanel.init()) return;
 
-    loadUserInfo();
     loadCategories();
 
     document.getElementById('publish-form').onsubmit = function(e) {
@@ -28,14 +24,6 @@
     document.getElementById('cover-file').onchange = function() {
       uploadCover(this.files[0]);
     };
-  }
-
-  function loadUserInfo() {
-    var user = Auth.getUser();
-    if (user) {
-      document.getElementById('user-name').textContent = user.username;
-      document.getElementById('user-avatar').textContent = user.username[0].toUpperCase();
-    }
   }
 
   async function loadCategories() {
@@ -125,7 +113,7 @@
           window.location.href = '/user/articles.html';
         }, 1500);
       } else {
-        Toast.error(result.error?.message || '提交失败');
+        Toast.error(result.message || '提交失败');
       }
     } catch (e) {
       Toast.error(e.message);

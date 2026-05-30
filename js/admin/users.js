@@ -56,6 +56,16 @@
       };
     }
 
+    // 根据角色隐藏批量删除按钮
+    var user = Auth.getUser();
+    var isAdmin = user && user.role === 'admin';
+    if (!isAdmin) {
+      var batchDeleteBtn = document.getElementById('batch-delete');
+      if (batchDeleteBtn) {
+        batchDeleteBtn.style.display = 'none';
+      }
+    }
+
     // 批量操作按钮
     bindBatchActions();
   }
@@ -116,17 +126,28 @@
     var tbody = document.getElementById('users-tbody');
 
     if (!users || users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--color-text-placeholder);">暂无用户</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--color-text-placeholder);">暂无用户</td></tr>';
       return;
     }
 
     var statusMap = { active: '正常', disabled: '已禁用' };
+    var user = Auth.getUser();
+    var isAdmin = user && user.role === 'admin';
 
     tbody.innerHTML = users.map(function(u) {
+      var actionsHtml = '<button onclick="UsersPage.toggleStatus(' + u.id + ',\'' + u.status + '\')">' + (u.status === 'active' ? '禁用' : '启用') + '</button>' +
+        '<button onclick="UsersPage.showResetPassword(' + u.id + ',\'' + Utils.escapeHtml(u.username) + '\')">重置密码</button>';
+
+      // 只有管理员可以删除用户
+      if (isAdmin) {
+        actionsHtml += '<button class="btn-danger-text" onclick="UsersPage.deleteUser(' + u.id + ')">删除</button>';
+      }
+
       return '<tr>' +
         '<td><input type="checkbox" class="row-checkbox" data-id="' + u.id + '" ' + (selectedIds.has(u.id) ? 'checked' : '') + ' onchange="UsersPage.toggleSelect(' + u.id + ',this.checked)"></td>' +
         '<td>' + u.id + '</td>' +
         '<td>' + Utils.escapeHtml(u.username) + '</td>' +
+        '<td>' + Utils.escapeHtml(u.display_name || u.username) + '</td>' +
         '<td>' + (u.phone || '-') + '</td>' +
         '<td><select class="filter-select" onchange="UsersPage.changeRole(' + u.id + ',this.value)" style="padding:4px 8px;font-size:12px;">' +
           '<option value="user"' + (u.role === 'user' ? ' selected' : '') + '>普通用户</option>' +
@@ -135,10 +156,7 @@
         '</select></td>' +
         '<td><span class="status-badge status-badge--' + (u.status === 'active' ? 'published' : 'draft') + '">' + statusMap[u.status] + '</span></td>' +
         '<td>' + Utils.formatDate(u.created_at) + '</td>' +
-        '<td class="actions">' +
-          '<button onclick="UsersPage.toggleStatus(' + u.id + ',\'' + u.status + '\')">' + (u.status === 'active' ? '禁用' : '启用') + '</button>' +
-          '<button class="btn-danger-text" onclick="UsersPage.deleteUser(' + u.id + ')">删除</button>' +
-        '</td>' +
+        '<td class="actions">' + actionsHtml + '</td>' +
       '</tr>';
     }).join('');
   }
@@ -271,7 +289,7 @@
       if (result.success) {
         Toast.success('角色更新成功');
       } else {
-        Toast.error(result.error?.message || '更新失败');
+        Toast.error(result.message || '更新失败');
         loadUsers();
       }
     } catch (e) {
@@ -297,7 +315,7 @@
         Toast.success(action + '成功');
         loadUsers();
       } else {
-        Toast.error(result.error?.message || '操作失败');
+        Toast.error(result.message || '操作失败');
       }
     } catch (e) {
       Toast.error(e.message);
@@ -317,7 +335,7 @@
         Toast.success('用户已删除');
         loadUsers();
       } else {
-        Toast.error(result.error?.message || '删除失败');
+        Toast.error(result.message || '删除失败');
       }
     } catch (e) {
       Toast.error('删除失败: ' + e.message);
@@ -330,8 +348,72 @@
     toggleSelect: toggleSelect,
     changeRole: changeRole,
     toggleStatus: toggleStatus,
-    deleteUser: deleteUser
+    deleteUser: deleteUser,
+    showResetPassword: showResetPassword,
+    doResetPassword: doResetPassword
   };
+
+  /**
+   * 显示重置密码弹窗
+   * @param {number} userId - 用户 ID
+   * @param {string} username - 用户名
+   */
+  function showResetPassword(userId, username) {
+    Modal.show({
+      title: '重置密码 - ' + username,
+      content:
+        '<p style="margin-bottom:16px;color:var(--color-text-secondary);font-size:14px;">' +
+          '向指定邮箱发送密码重置链接，邮件中将包含修改手机号的指引。' +
+        '</p>' +
+        '<div class="form-group">' +
+          '<label class="form-label">接收重置链接的邮箱</label>' +
+          '<input type="email" id="reset-email" class="form-input" placeholder="输入接收邮箱地址">' +
+        '</div>' +
+        '<input type="hidden" id="reset-user-id" value="' + userId + '">' +
+        '<input type="hidden" id="reset-username" value="' + Utils.escapeHtml(username) + '">',
+      confirmText: '发送重置邮件',
+      closeOnConfirm: false,
+      onConfirm: function() { doResetPassword(); }
+    });
+  }
+
+  /**
+   * 执行重置密码
+   */
+  async function doResetPassword() {
+    var userId = document.getElementById('reset-user-id').value;
+    var username = document.getElementById('reset-username').value;
+    var email = (document.getElementById('reset-email').value || '').trim();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      Toast.error('请输入有效的邮箱地址');
+      return;
+    }
+
+    var btn = document.getElementById('modal-confirm-btn');
+    btn.disabled = true;
+    btn.textContent = '发送中...';
+
+    try {
+      var result = await API.post('/admin/reset-user-password', {
+        user_id: parseInt(userId),
+        email: email
+      });
+
+      if (result.success) {
+        Toast.success('重置链接已发送到 ' + email);
+        Modal.close();
+      } else {
+        Toast.error(result.message || '发送失败');
+        btn.disabled = false;
+        btn.textContent = '发送重置邮件';
+      }
+    } catch (e) {
+      Toast.error(e.message || '发送失败');
+      btn.disabled = false;
+      btn.textContent = '发送重置邮件';
+    }
+  }
 
   document.addEventListener('DOMContentLoaded', init);
 })();

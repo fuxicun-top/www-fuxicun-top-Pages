@@ -1,0 +1,220 @@
+/* ========================================
+   文件说明：用户中心面板布局样式
+   文件路径：css/components/user-panel.css
+   ======================================== */
+
+/* 布局容器 */
+.user-panel-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* 侧边栏 */
+.user-panel-sidebar {
+  width: 240px;
+  background: var(--color-primary);
+  color: #fff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: var(--z-fixed);
+  display: flex;
+  flex-direction: column;
+  transition: width var(--transition-base), transform var(--transition-base);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.user-panel-logo {
+  padding: 20px 16px;
+  font-size: 18px;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.user-panel-menu {
+  flex: 1;
+  padding: 8px 0;
+}
+
+.user-panel-menu__title {
+  padding: 16px 16px 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.user-panel-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  border-left: 3px solid transparent;
+}
+
+.user-panel-menu__item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.user-panel-menu__item--active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-left-color: #fff;
+  font-weight: 500;
+}
+
+.user-panel-menu__icon {
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.user-panel-menu__text {
+  font-size: 14px;
+}
+
+.user-panel-footer {
+  padding: 16px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  white-space: nowrap;
+}
+
+/* 主内容区 */
+.user-panel-main {
+  flex: 1;
+  margin-left: 240px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* 顶部栏 */
+.user-panel-header {
+  height: 64px;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--color-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: var(--z-sticky);
+}
+
+.user-panel-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-panel-header__toggle {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-base);
+  color: var(--color-text-primary);
+}
+
+.user-panel-header__toggle:hover {
+  background: var(--color-bg-hover);
+}
+
+.user-panel-header__breadcrumb {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.user-panel-header__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-panel-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-panel-user__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-border-light);
+}
+
+.user-panel-user__name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* 内容区 */
+.user-panel-content {
+  flex: 1;
+  padding: 24px;
+  background: var(--color-bg);
+}
+
+/* 侧边栏折叠 */
+.user-panel-sidebar--collapsed {
+  width: 64px;
+}
+
+.user-panel-sidebar--collapsed .user-panel-logo span,
+.user-panel-sidebar--collapsed .user-panel-menu__title,
+.user-panel-sidebar--collapsed .user-panel-menu__text,
+.user-panel-sidebar--collapsed .user-panel-footer {
+  display: none;
+}
+
+.user-panel-sidebar--collapsed .user-panel-menu__item {
+  justify-content: center;
+  padding: 12px;
+}
+
+.user-panel-sidebar--collapsed + .user-panel-main {
+  margin-left: 64px;
+}
+
+/* 移动端 */
+@media (max-width: 768px) {
+  .user-panel-sidebar {
+    transform: translateX(-100%);
+  }
+
+  .user-panel-sidebar--mobile-open {
+    transform: translateX(0);
+  }
+
+  .user-panel-main {
+    margin-left: 0 !important;
+  }
+
+  .user-panel-content {
+    padding: 16px;
+  }
+
+  .user-panel-header {
+    padding: 0 16px;
+  }
+}

@@ -7,6 +7,7 @@
 CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT NOT NULL UNIQUE,
+  display_name TEXT NOT NULL DEFAULT '',
   password_hash TEXT NOT NULL,
   phone TEXT UNIQUE,
   email TEXT,
