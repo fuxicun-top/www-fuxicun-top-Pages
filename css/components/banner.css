@@ -116,7 +116,12 @@
 .banner__arrow--next { right: var(--spacing-lg); }
 
 @media (max-width: 768px) {
-  .banner { height: 280px; }
+  .banner {
+    height: auto;
+    aspect-ratio: 16 / 5;
+    min-height: 200px;
+    max-height: 320px;
+  }
   .banner__title {
     font-size: var(--font-size-2xl);
     letter-spacing: 2px;
@@ -124,5 +129,15 @@
   .banner__subtitle {
     font-size: var(--font-size-base);
     letter-spacing: 1px;
+  }
+  .banner__arrow {
+    width: 32px;
+    height: 32px;
+    font-size: var(--font-size-base);
+  }
+  .banner__arrow--prev { left: var(--spacing-sm); }
+  .banner__arrow--next { right: var(--spacing-sm); }
+  .banner__overlay {
+    padding: var(--spacing-md);
   }
 }
