@@ -181,7 +181,7 @@ export async function handleAdmin(request, env, path, method) {
 
   // === 数据库管理 ===
   if (path === '/admin/database/export' && method === 'GET') {
-    return await exportBackup(env);
+    return await exportBackup(request, env);
   }
   if (path === '/admin/database/import' && method === 'POST') {
     return await importBackup(request, env, user);
@@ -1188,8 +1188,11 @@ async function writeAuditLog(env, userId, action, targetType, targetId, detail) 
 // ==============================
 // 数据备份 - 导出所有表为 JSON
 // ==============================
-async function exportBackup(env) {
+async function exportBackup(request, env) {
   try {
+    const url = new URL(request.url);
+    const format = url.searchParams.get('format') || 'json';
+
     const tables = [
       'users', 'password_resets', 'sessions', 'categories',
       'articles', 'comments', 'media', 'likes', 'banners',
@@ -1213,9 +1216,44 @@ async function exportBackup(env) {
       }
     }
 
-    await writeAuditLog(env, null, 'backup_export', 'system', null, '导出数据备份');
+    await writeAuditLog(env, null, 'backup_export', 'system', null, '导出数据备份（' + format.toUpperCase() + '）');
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+
+    if (format === 'sql') {
+      // SQL 格式导出
+      let sql = '-- 福溪村数据库备份\n-- 导出时间: ' + new Date().toISOString() + '\n\n';
+
+      for (const table of tables) {
+        const rows = backup[table];
+        if (!rows || rows.length === 0) continue;
+
+        sql += `-- ${table} (${rows.length} 条记录)\n`;
+
+        for (const row of rows) {
+          const columns = Object.keys(row);
+          const values = columns.map(function(c) {
+            const v = row[c];
+            if (v === null || v === undefined) return 'NULL';
+            if (typeof v === 'number') return String(v);
+            // 转义单引号
+            return "'" + String(v).replace(/'/g, "''") + "'";
+          });
+          sql += `INSERT OR IGNORE INTO ${table} (${columns.join(', ')}) VALUES (${values.join(', ')});\n`;
+        }
+        sql += '\n';
+      }
+
+      return new Response(sql, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/sql; charset=utf-8',
+          'Content-Disposition': 'attachment; filename="fuxicun-backup-' + timestamp + '.sql"'
+        }
+      });
+    }
+
+    // JSON 格式导出（默认）
     return new Response(JSON.stringify(backup, null, 2), {
       status: 200,
       headers: {
