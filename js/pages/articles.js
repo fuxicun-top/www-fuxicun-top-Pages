@@ -30,30 +30,45 @@
 
   // 根据分类 slug 更新页面标题和面包屑
   function updateCategoryTitle(slug) {
-    var nameMap = {
-      'village-news': '新闻动态',
-      'lixue-culture': '理学文化',
-      'architecture': '古建筑',
-      'folk-custom': '民俗风情',
-      'travel-guide': '旅游攻略',
-      'villager-stories': '村民故事',
-      'announcements': '通知公告'
+    var categoryInfo = {
+      'village-news': { name: '新闻动态', subtitle: '福溪村最新动态和新闻' },
+      'lixue-culture': { name: '理学文化', subtitle: '周敦颐理学思想与福溪村理学传承' },
+      'architecture': { name: '古建筑', subtitle: '福溪村明清古建筑群介绍' },
+      'folk-custom': { name: '民俗风情', subtitle: '瑶族民俗文化与传统节庆' },
+      'travel-guide': { name: '旅游攻略', subtitle: '福溪村旅游指南与推荐路线' },
+      'villager-stories': { name: '村民故事', subtitle: '福溪村村民的故事与生活' },
+      'announcements': { name: '通知公告', subtitle: '村委会通知与重要公告' },
+      'visitor-share': { name: '游客分享', subtitle: '游客游记与体验分享' }
     };
-    var name = nameMap[slug] || '文章列表';
-    document.title = name + ' - 福溪村';
+    var info = categoryInfo[slug] || { name: '文章列表', subtitle: '' };
+    document.title = info.name + ' - 福溪村';
+
+    // 显示面包屑并更新文字
+    var breadcrumbNav = document.querySelector('.main-content .breadcrumb');
+    if (breadcrumbNav) breadcrumbNav.classList.add('is-visible');
     var breadcrumb = document.querySelector('.breadcrumb__current');
-    if (breadcrumb) breadcrumb.textContent = name;
+    if (breadcrumb) breadcrumb.textContent = info.name;
+
+    // 显示分类页面标题
+    var header = document.getElementById('articles-page-header');
+    var title = document.getElementById('articles-page-title');
+    var subtitle = document.getElementById('articles-page-subtitle');
+    if (header && title) {
+      title.textContent = info.name;
+      if (subtitle && info.subtitle) subtitle.textContent = info.subtitle;
+      header.classList.add('is-visible');
+    }
   }
 
   // 默认分类（API 不可用时显示）
   var defaultCategories = [
+    { name: '通知公告', slug: 'announcements' },
     { name: '村内新闻', slug: 'village-news' },
     { name: '理学文化', slug: 'lixue-culture' },
     { name: '古建筑', slug: 'architecture' },
     { name: '民俗风情', slug: 'folk-custom' },
     { name: '旅游攻略', slug: 'travel-guide' },
-    { name: '村民故事', slug: 'villager-stories' },
-    { name: '通知公告', slug: 'announcements' }
+    { name: '村民故事', slug: 'villager-stories' }
   ];
 
   async function loadCategories() {
@@ -126,13 +141,13 @@
   // 默认静态文章（API 不可用时显示，覆盖全部 7 篇种子文章）
   // categorySlug 对应数据库 categories 表的 slug 字段
   var defaultArticlesList = [
-    { title: '千年古村 山水人和：央视镜头下的福溪', category: '村内新闻', categorySlug: 'village-news', excerpt: '2025年央视"文化中国行"以《千年古村 山水人和》为题报道福溪。这座始建于宋代、2012年列入首批中国传统村落的古村，正焕发新生。', image: '/images/banners/banner1.svg', id: 1 },
-    { title: '周敦颐与福溪：理学沿潇贺古道南传的活证', category: '理学文化', categorySlug: 'lixue-culture', excerpt: '周敦颐父亲曾任贺州桂岭县令，理学思想沿古道南传至福溪，村中讲学堂遗址、周氏宗祠、爱莲堂构成完整的理学文化轴。', image: '/images/culture/zhou-dunyi.svg', id: 2 },
+    { title: '千年古村 山水人和：央视镜头下的福溪', category: '村内新闻', categorySlug: 'village-news', excerpt: '2025年央视"文化中国行"以《千年古村 山水人和》为题报道福溪。这座始建于宋代、地处湘桂粤三省交界、2012年列入首批中国传统村落的古村，正以理学文化与潇贺古道为核心IP焕发新生。', image: '/images/banners/banner1.svg', id: 1 },
+    { title: '周敦颐与福溪：理学沿潇贺古道南传的活证', category: '理学文化', categorySlug: 'lixue-culture', excerpt: '周敦颐父亲曾任贺州桂岭县令，本人出生于潇贺古道北端。理学思想沿古道南传至福溪，村中讲学堂遗址、周氏宗祠、爱莲堂构成完整的理学文化轴。', image: '/images/culture/zhou-dunyi.svg', id: 2 },
     { title: '120 根木柱与门楣之上：福溪古建筑群解码', category: '古建筑', categorySlug: 'architecture', excerpt: '从120根木柱的木构体系，到央视报道的门楣石雕；从风雨桥的瑶族智慧，到24座古戏台的戏曲鼎盛。', image: '/images/scenery/ancient-architecture.svg', id: 3 },
-    { title: '炸龙闹元宵：千年瑶俗与潇贺古道的回响', category: '民俗风情', categorySlug: 'folk-custom', excerpt: '正月初十到十五的炸龙狂欢已传承千年，据传沿秦潇贺古道传入富川。叠加盘王节、芦笙长鼓舞、二声部民歌。', image: '/images/ethnic/dance.svg', id: 4 },
+    { title: '火把节与点千灯：福溪村元宵民俗纪实', category: '民俗风情', categorySlug: 'folk-custom', excerpt: '福溪村正月十五火把节：点千灯、耍春牛、哭嫁表演、舞女龙。富川古明城则有著名的炸龙活动。', image: '/images/ethnic/dance.svg', id: 4 },
     { title: '福溪村旅游攻略：2 天 1 晚串联潇贺古道三村', category: '旅游攻略', categorySlug: 'travel-guide', excerpt: '福溪2天1晚行程：第一天深度游讲学堂、爱莲堂、门楣石雕；第二天串联岔山村、秀水状元村。', image: '/images/scenery/ancient-architecture.svg', id: 5 },
     { title: '老人讲古：风雨桥头听来的福溪百年', category: '村民故事', categorySlug: 'villager-stories', excerpt: '风雨桥头听老人讲古：周姓族人从湖南道州迁来、村里曾有24座戏台、五代时期124名汉族士兵驻守。', image: '/images/ethnic/yao-people.svg', id: 6 },
-    { title: '关于福溪村官方网站正式上线的公告', category: '通知公告', categorySlug: 'announcements', excerpt: '福溪村官方网站正式上线。本站系统展示福溪历史文化、古建筑、民族风情与旅游信息。', image: '/images/about/village-overview.svg', id: 7 }
+    { title: '关于福溪村官方网站正式上线的公告', category: '通知公告', categorySlug: 'announcements', excerpt: '福溪村官方网站正式上线。本站系统展示福溪历史文化、古建筑、民族风情与旅游信息，支持游客与注册用户两种互动方式。', image: '/images/about/village-overview.svg', id: 7 }
   ];
 
   function getDefaultArticlesHtml(categorySlug) {

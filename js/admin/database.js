@@ -13,17 +13,14 @@ var Database = (function() {
   }
 
   // 导出备份
-  async function exportBackup(format) {
-    format = format || 'json';
-    var btnId = format === 'sql' ? 'btn-export-sql' : 'btn-export';
-    var btn = document.getElementById(btnId);
-    var originalText = btn.textContent;
+  async function exportBackup() {
+    var btn = document.getElementById('btn-export');
     btn.disabled = true;
     btn.textContent = '导出中...';
 
     try {
       var token = Auth.getToken();
-      var response = await fetch(CONFIG.API_BASE + '/admin/database/export?format=' + format, {
+      var response = await fetch(CONFIG.API_BASE + '/admin/database/export', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
 
@@ -48,7 +45,7 @@ var Database = (function() {
       Toast.error(e.message || '导出失败');
     } finally {
       btn.disabled = false;
-      btn.textContent = originalText;
+      btn.textContent = '导出备份文件';
     }
   }
 

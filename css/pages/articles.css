@@ -4,15 +4,20 @@
  * ======================================== */
 
 .main-content {
-  padding-top: 20px;
+  padding-top: 80px;
   min-height: 100vh;
   background: var(--color-bg);
 }
 
 .main-content .breadcrumb {
+  display: none;
   margin-top: 0;
   padding-top: 0;
   padding-bottom: 12px;
+}
+
+.main-content .breadcrumb.is-visible {
+  display: flex;
 }
 
 .articles-filter {
@@ -74,4 +79,27 @@
 @keyframes skeleton-loading {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* 分类页面标题（按分类筛选时显示） */
+.articles-page__header {
+  display: none;
+  text-align: center;
+  padding: 24px 0 16px;
+}
+
+.articles-page__header.is-visible {
+  display: block;
+}
+
+.articles-page__title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.articles-page__subtitle {
+  font-size: 15px;
+  color: var(--color-text-secondary);
 }

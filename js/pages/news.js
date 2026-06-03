@@ -34,8 +34,8 @@
   // 默认新闻（API 不可用时显示）
   function getDefaultNews() {
     return [
-      { title: '千年古村 山水人和：央视镜头下的福溪', category_name: '村内新闻', excerpt: '2025 年央视"文化中国行"以《千年古村 山水人和》为题报道福溪。这座始建于宋代、2012 年列入首批中国传统村落的古村，正焕发新生。', cover_image: '/images/banners/banner1.svg', author_name: '福溪村', views: 0, id: 1 },
-      { title: '炸龙闹元宵：千年瑶俗与潇贺古道的回响', category_name: '民俗风情', excerpt: '正月初十到十五的炸龙狂欢已传承千年，据传沿秦潇贺古道传入富川。叠加盘王节、芦笙长鼓舞、二声部民歌。', cover_image: '/images/ethnic/dance.svg', author_name: '福溪村', views: 0, id: 4 },
+      { title: '千年古村 山水人和：央视镜头下的福溪', category_name: '村内新闻', excerpt: '2025年央视"文化中国行"以《千年古村 山水人和》为题报道福溪。这座始建于宋代、地处湘桂粤三省交界、2012年列入首批中国传统村落的古村，正以理学文化与潇贺古道为核心IP焕发新生。', cover_image: '/images/banners/banner1.svg', author_name: '福溪村', views: 0, id: 1 },
+      { title: '火把节与点千灯：福溪村元宵民俗纪实', category_name: '民俗风情', excerpt: '福溪村正月十五火把节：点千灯、耍春牛、哭嫁表演、舞女龙。富川古明城则有著名的炸龙活动。', cover_image: '/images/ethnic/dance.svg', author_name: '福溪村', views: 0, id: 4 },
       { title: '关于福溪村官方网站正式上线的公告', category_name: '通知公告', excerpt: '福溪村官方网站正式上线。本站系统展示福溪历史文化、古建筑、民族风情与旅游信息，支持游客与注册用户两种互动方式。', cover_image: '/images/about/village-overview.svg', author_name: '福溪村', views: 0, id: 7 }
     ];
   }

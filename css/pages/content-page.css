@@ -375,6 +375,61 @@
   color: var(--color-text-secondary);
 }
 
+/* 图片上的视频播放按钮 */
+.video-trigger {
+  position: relative;
+  cursor: pointer;
+}
+
+.video-trigger__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: inherit;
+  transition: background 0.3s;
+}
+
+.video-trigger:hover .video-trigger__overlay {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.video-trigger__play {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--color-primary);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.video-trigger:hover .video-trigger__play {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.video-trigger video {
+  width: 100%;
+  display: block;
+  border-radius: inherit;
+}
+
+@media (max-width: 768px) {
+  .video-trigger__play {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+  }
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .page-banner {
