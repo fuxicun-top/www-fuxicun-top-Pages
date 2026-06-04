@@ -34,7 +34,7 @@
       <div class="container">
         <div class="content-grid">
           <div class="content-image">
-            <img src="/images/ethnic/yao-people.svg" alt="瑶族人民" loading="lazy" onerror="this.src='/images/default/article.svg'">
+            <img src="/images/ethnic/yao-people.svg" alt="瑶族人民" loading="lazy" onerror="this.src='/images/default/article.png'">
           </div>
           <div class="content-text">
             <h3>瑶族 · 勉的人民</h3>
@@ -82,7 +82,7 @@
       <div class="container">
         <div class="content-grid content-grid--reverse">
           <div class="content-image">
-            <img src="/images/ethnic/costume.svg" alt="瑶族服饰" loading="lazy" onerror="this.src='/images/default/article.svg'">
+            <img src="/images/ethnic/costume.png" alt="瑶族服饰" loading="lazy" onerror="this.src='/images/default/article.png'">
           </div>
           <div class="content-text">
             <h3>瑶族服饰 · 一族百样</h3>
@@ -102,19 +102,20 @@
         </div>
         <div class="gallery-grid">
           <div class="gallery-item">
-            <img src="/images/ethnic/dance.svg" alt="芦笙长鼓舞" loading="lazy" onerror="this.src='/images/default/article.svg'">
+            <img src="/images/ethnic/dance.svg" alt="火把节·点千灯·舞龙" loading="lazy" onerror="this.src='/images/default/article.png'">
             <div class="gallery-item__overlay">
-              <h4 class="gallery-item__title">芦笙长鼓舞</h4>
+              <h4 class="gallery-item__title">火把节·点千灯·舞龙</h4>
             </div>
           </div>
-          <div class="gallery-item">
-            <img src="/images/ethnic/singing.svg" alt="瑶族二声部民歌" loading="lazy" onerror="this.src='/images/default/article.svg'">
+          <div class="gallery-item video-trigger" onclick="EthnicVideo.play()">
+            <img src="/images/ethnic/singing.svg" alt="传统婚俗·下轿诗" loading="lazy" onerror="this.src='/images/default/article.png'">
             <div class="gallery-item__overlay">
-              <h4 class="gallery-item__title">二声部民歌</h4>
+              <h4 class="gallery-item__title">传统婚俗·下轿诗</h4>
             </div>
+            <div class="video-trigger__badge">▶</div>
           </div>
           <div class="gallery-item">
-            <img src="/images/ethnic/embroidery.svg" alt="瑶族刺绣" loading="lazy" onerror="this.src='/images/default/article.svg'">
+            <img src="/images/ethnic/embroidery.svg" alt="瑶族刺绣" loading="lazy" onerror="this.src='/images/default/article.png'">
             <div class="gallery-item__overlay">
               <h4 class="gallery-item__title">挑花刺绣</h4>
             </div>
@@ -167,6 +168,17 @@
   <script src="/js/common/toast.js"></script>
   <script src="/js/components/header.js"></script>
   <script src="/js/components/footer.js"></script>
+  <!-- 视频弹窗 -->
+  <div class="video-modal" id="ethnic-video-modal" onclick="EthnicVideo.close(event)">
+    <div class="video-modal__body">
+      <button type="button" class="video-modal__close" onclick="EthnicVideo.close(event)">✕</button>
+      <video id="ethnic-video-player" controls playsinline preload="metadata">
+        您的浏览器不支持视频播放
+      </video>
+    </div>
+  </div>
+
   <script src="/js/pages/ethnic.js"></script>
+  <script src="/js/pages/ethnic-video.js"></script>
 </body>
 </html>

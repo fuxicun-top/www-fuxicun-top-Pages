@@ -45,6 +45,7 @@
       var target = item.is_external ? ' target="_blank"' : '';
       return '<a href="' + Utils.escapeHtml(item.url) + '" class="header-nav__link"' + target + '>' + Utils.escapeHtml(item.name) + '</a>';
     }).join('');
+    navHtml += '<div class="header-nav__more" style="display:none;"><button class="header-nav__more-btn" onclick="toggleNavMore(event)">更多 ▾</button><div class="header-nav__dropdown"></div></div>';
 
     var mobileHtml = items.map(function(item) {
       var target = item.is_external ? ' target="_blank"' : '';
@@ -94,7 +95,50 @@
     setActiveNav();
     initScrollEffect(header);
     Auth.updateUI();
+    setTimeout(checkNavOverflow, 100);
+    window.addEventListener('resize', checkNavOverflow);
   }
+
+  function checkNavOverflow() {
+    var nav = document.querySelector('.header-nav');
+    if (!nav) return;
+    var links = Array.from(nav.querySelectorAll('.header-nav__link'));
+    var moreWrap = nav.querySelector('.header-nav__more');
+    var dropdown = nav.querySelector('.header-nav__dropdown');
+    if (!moreWrap || !dropdown) return;
+
+    // 先显示所有链接，隐藏更多按钮
+    links.forEach(function(l) { l.style.display = ''; });
+    moreWrap.style.display = 'none';
+
+    var navWidth = nav.offsetWidth;
+    var moreWidth = 70;
+    var usedWidth = 0;
+    var hiddenLinks = [];
+
+    for (var i = 0; i < links.length; i++) {
+      var linkWidth = links[i].offsetWidth + 4; // gap
+      if (usedWidth + linkWidth + (i < links.length - 1 ? moreWidth : 0) > navWidth) {
+        hiddenLinks.push(links[i]);
+        links[i].style.display = 'none';
+      }
+      usedWidth += linkWidth;
+    }
+
+    if (hiddenLinks.length > 0) {
+      moreWrap.style.display = 'inline-block';
+      dropdown.innerHTML = hiddenLinks.map(function(l) {
+        return '<a href="' + l.getAttribute('href') + '" class="header-nav__dropdown-link">' + l.textContent + '</a>';
+      }).join('');
+    }
+  }
+
+  // 导航更多按钮下拉（全局函数供 onclick 调用）
+  window.toggleNavMore = function(e) {
+    e.stopPropagation();
+    var dropdown = e.target.nextElementSibling;
+    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+  };
 
   function setActiveNav() {
     var path = window.location.pathname;
@@ -131,12 +175,22 @@
 
   // 点击下拉菜单外部关闭
   document.addEventListener('click', function(e) {
+    // 关闭用户下拉
     var dropdown = document.getElementById('user-dropdown');
-    if (!dropdown || !dropdown.classList.contains('header-user__dropdown--open')) return;
-    if (e.target.closest('.header-user')) return;
-    dropdown.classList.remove('header-user__dropdown--open');
-    var toggle = dropdown.parentElement.querySelector('.header-user__toggle');
-    if (toggle) toggle.classList.remove('header-user__toggle--active');
+    if (dropdown && dropdown.classList.contains('header-user__dropdown--open')) {
+      if (!e.target.closest('.header-user')) {
+        dropdown.classList.remove('header-user__dropdown--open');
+        var toggle = dropdown.parentElement.querySelector('.header-user__toggle');
+        if (toggle) toggle.classList.remove('header-user__toggle--active');
+      }
+    }
+    // 关闭导航更多下拉
+    var navDropdown = document.querySelector('.header-nav__dropdown');
+    if (navDropdown && navDropdown.style.display === 'block') {
+      if (!e.target.closest('.header-nav__more')) {
+        navDropdown.style.display = 'none';
+      }
+    }
   });
 
   document.addEventListener('DOMContentLoaded', initHeader);

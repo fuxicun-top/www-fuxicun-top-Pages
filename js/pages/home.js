@@ -306,7 +306,7 @@
   function renderFeaturedArticles(container, articles) {
     container.innerHTML = articles.map(function(article, index) {
       var articleUrl = article.slug ? '/articles/' + article.slug : '/article-detail.html?id=' + article.id;
-      var coverSrc = article.cover_image || '/images/default/article.svg';
+      var coverSrc = article.cover_image || '/images/default/article.png';
 
       if (index === 0) {
         return '<div class="featured-card featured-card--large">' +
@@ -333,7 +333,7 @@
     container.innerHTML = articles.map(function(article) {
       var articleUrl = article.slug ? '/articles/' + article.slug : '/article-detail.html?id=' + article.id;
       return '<div class="article-card">' +
-        '<img class="article-card__image" src="' + (article.cover_image || '/images/default/article.svg') + '" alt="' + Utils.escapeHtml(article.title) + '" loading="lazy">' +
+        '<img class="article-card__image" src="' + (article.cover_image || '/images/default/article.png') + '" alt="' + Utils.escapeHtml(article.title) + '" loading="lazy">' +
         '<div class="article-card__body">' +
           (article.category_name ? '<span class="article-card__category">' + Utils.escapeHtml(article.category_name) + '</span>' : '') +
           '<h3 class="article-card__title"><a href="' + articleUrl + '">' + Utils.escapeHtml(article.title) + '</a></h3>' +
@@ -393,9 +393,9 @@
 
   function renderDefaultGallery(container) {
     var defaultImages = [
-      { src: '/images/scenery/ancient-architecture.svg', alt: '古建筑群' },
-      { src: '/images/culture/ai-lian-tang.svg', alt: '爱莲堂' },
-      { src: '/images/culture/lecture.svg', alt: '讲学堂' },
+      { src: '/images/scenery/ancient-architecture.png', alt: '古建筑群' },
+      { src: '/images/culture/ai-lian-tang.png', alt: '爱莲堂' },
+      { src: '/images/culture/lecture.png', alt: '讲学堂' },
       { src: '/images/ethnic/dance.svg', alt: '民俗活动' },
       { src: '/images/ethnic/yao-people.svg', alt: '瑶族风情' },
       { src: '/images/about/village-overview.svg', alt: '福溪全景' }

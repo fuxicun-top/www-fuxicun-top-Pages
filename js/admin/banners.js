@@ -43,7 +43,7 @@
     tbody.innerHTML = banners.map(function(b, index) {
       return '<tr draggable="true" data-id="' + b.id + '" data-sort="' + b.sort_order + '">' +
         '<td class="drag-handle" title="拖拽排序" style="cursor:grab;">⠿ ' + b.sort_order + '</td>' +
-        '<td><img src="' + Utils.escapeHtml(b.image_url) + '" style="width:120px;height:60px;object-fit:cover;border-radius:4px;" onerror="this.src=\'/images/default/article.svg\'"></td>' +
+        '<td><img src="' + Utils.escapeHtml(b.image_url) + '" style="width:120px;height:60px;object-fit:cover;border-radius:4px;" onerror="this.src=\'/images/default/article.png\'"></td>' +
         '<td>' + Utils.escapeHtml(b.title) + '</td>' +
         '<td>' + Utils.escapeHtml(Utils.truncate(b.subtitle || '-', 20)) + '</td>' +
         '<td>' + (b.link_url ? '<a href="' + Utils.escapeHtml(b.link_url) + '" target="_blank" style="color:var(--color-primary);">查看</a>' : '-') + '</td>' +

@@ -33,8 +33,11 @@
     <section class="content-section">
       <div class="container">
         <div class="content-grid">
-          <div class="content-image">
-            <img src="/images/about/village-overview.svg" alt="福溪村全景" loading="lazy" onerror="this.src='/images/default/article.svg'">
+          <div class="content-image video-trigger" onclick="AboutVideo.play()">
+            <img src="/images/about/village-overview.svg" alt="福溪村全景" loading="lazy" onerror="this.src='/images/default/article.png'">
+            <div class="video-trigger__overlay">
+              <div class="video-trigger__play">▶</div>
+            </div>
           </div>
           <div class="content-text">
             <h3>千年古村 · 三省通衢</h3>
@@ -164,5 +167,6 @@
   <script src="/js/components/header.js"></script>
   <script src="/js/components/footer.js"></script>
   <script src="/js/pages/about.js"></script>
+  <script src="/js/pages/about-video.js"></script>
 </body>
 </html>

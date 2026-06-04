@@ -38,6 +38,7 @@
       'travel-guide': { name: '旅游攻略', subtitle: '福溪村旅游指南与推荐路线' },
       'villager-stories': { name: '村民故事', subtitle: '福溪村村民的故事与生活' },
       'announcements': { name: '通知公告', subtitle: '村委会通知与重要公告' },
+      'villager-share': { name: '村民分享', subtitle: '村民生活分享与交流' },
       'visitor-share': { name: '游客分享', subtitle: '游客游记与体验分享' }
     };
     var info = categoryInfo[slug] || { name: '文章列表', subtitle: '' };
@@ -60,7 +61,7 @@
     }
   }
 
-  // 默认分类（API 不可用时显示）
+  // 默认分类（API 不可用时显示，按 sort_order 排列）
   var defaultCategories = [
     { name: '通知公告', slug: 'announcements' },
     { name: '村内新闻', slug: 'village-news' },
@@ -68,7 +69,9 @@
     { name: '古建筑', slug: 'architecture' },
     { name: '民俗风情', slug: 'folk-custom' },
     { name: '旅游攻略', slug: 'travel-guide' },
-    { name: '村民故事', slug: 'villager-stories' }
+    { name: '村民故事', slug: 'villager-stories' },
+    { name: '村民分享', slug: 'villager-share' },
+    { name: '游客分享', slug: 'visitor-share' }
   ];
 
   async function loadCategories() {
@@ -87,28 +90,107 @@
 
   function renderCategories(categories) {
     var container = document.getElementById('category-filter');
-    var html = '<button class="filter-btn active" data-category="">全部</button>';
+    container.classList.add('articles-filter--responsive');
 
+    var html = '<div class="filter-btns"><button class="filter-btn active" data-category="">全部</button>';
     categories.forEach(function(cat) {
       html += '<button class="filter-btn" data-category="' + cat.slug + '">' + cat.name + '</button>';
     });
+    html += '</div>';
+    html += '<div class="filter-more" style="display:none;"><button class="filter-btn filter-more__btn">更多 ▾</button><div class="filter-more__dropdown"></div></div>';
 
     container.innerHTML = html;
 
     // 绑定筛选事件
+    bindFilterEvents(container);
+
+    // 检测溢出并折叠
+    setTimeout(function() { checkOverflow(container); }, 50);
+    window.addEventListener('resize', function() { checkOverflow(container); });
+  }
+
+  function bindFilterEvents(container) {
     container.querySelectorAll('.filter-btn').forEach(function(btn) {
+      if (btn.classList.contains('filter-more__btn')) return;
       btn.onclick = function() {
         currentCategory = this.dataset.category;
         currentPage = 1;
         container.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
         this.classList.add('active');
-        // 更新页面标题
         document.title = currentCategory ? this.textContent + ' - 福溪村' : '全部文章 - 福溪村';
         var breadcrumb = document.querySelector('.breadcrumb__current');
         if (breadcrumb) breadcrumb.textContent = currentCategory ? this.textContent : '全部文章';
+        // 关闭下拉
+        var dropdown = container.querySelector('.filter-more__dropdown');
+        if (dropdown) dropdown.style.display = 'none';
         loadArticles();
       };
     });
+
+    // 更多按钮点击
+    var moreBtn = container.querySelector('.filter-more__btn');
+    if (moreBtn) {
+      moreBtn.onclick = function(e) {
+        e.stopPropagation();
+        var dropdown = container.querySelector('.filter-more__dropdown');
+        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      };
+    }
+
+    // 点击外部关闭下拉
+    document.addEventListener('click', function() {
+      var dropdown = container.querySelector('.filter-more__dropdown');
+      if (dropdown) dropdown.style.display = 'none';
+    });
+  }
+
+  function checkOverflow(container) {
+    var btnsWrap = container.querySelector('.filter-btns');
+    var moreWrap = container.querySelector('.filter-more');
+    var dropdown = container.querySelector('.filter-more__dropdown');
+    if (!btnsWrap || !moreWrap) return;
+
+    var btns = Array.from(btnsWrap.querySelectorAll('.filter-btn'));
+    var containerWidth = container.offsetWidth;
+    var moreWidth = 80; // "更多"按钮预估宽度
+    var usedWidth = 0;
+    var hiddenBtns = [];
+
+    // 先显示所有按钮测量
+    btns.forEach(function(b) { b.style.display = ''; });
+    moreWrap.style.display = 'none';
+
+    for (var i = 0; i < btns.length; i++) {
+      var btnWidth = btns[i].offsetWidth + 8; // gap
+      if (usedWidth + btnWidth + (i < btns.length - 1 ? moreWidth : 0) > containerWidth) {
+        hiddenBtns.push(btns[i]);
+        btns[i].style.display = 'none';
+      }
+      usedWidth += btnWidth;
+    }
+
+    if (hiddenBtns.length > 0) {
+      moreWrap.style.display = 'inline-block';
+      dropdown.innerHTML = hiddenBtns.map(function(b) {
+        return '<button class="filter-btn filter-dropdown__btn" data-category="' + b.dataset.category + '">' + b.textContent + '</button>';
+      }).join('');
+
+      // 绑定下拉按钮事件
+      dropdown.querySelectorAll('.filter-dropdown__btn').forEach(function(btn) {
+        btn.onclick = function(e) {
+          e.stopPropagation();
+          currentCategory = this.dataset.category;
+          currentPage = 1;
+          container.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+          this.classList.add('active');
+          document.title = currentCategory ? this.textContent + ' - 福溪村' : '全部文章 - 福溪村';
+          var breadcrumb = document.querySelector('.breadcrumb__current');
+          if (breadcrumb) breadcrumb.textContent = currentCategory ? this.textContent : '全部文章';
+          dropdown.style.display = 'none';
+          loadArticles();
+        };
+      });
+    }
   }
 
   async function loadArticles() {
@@ -142,12 +224,14 @@
   // categorySlug 对应数据库 categories 表的 slug 字段
   var defaultArticlesList = [
     { title: '千年古村 山水人和：央视镜头下的福溪', category: '村内新闻', categorySlug: 'village-news', excerpt: '2025年央视"文化中国行"以《千年古村 山水人和》为题报道福溪。这座始建于宋代、地处湘桂粤三省交界、2012年列入首批中国传统村落的古村，正以理学文化与潇贺古道为核心IP焕发新生。', image: '/images/banners/banner1.svg', id: 1 },
-    { title: '周敦颐与福溪：理学沿潇贺古道南传的活证', category: '理学文化', categorySlug: 'lixue-culture', excerpt: '周敦颐父亲曾任贺州桂岭县令，本人出生于潇贺古道北端。理学思想沿古道南传至福溪，村中讲学堂遗址、周氏宗祠、爱莲堂构成完整的理学文化轴。', image: '/images/culture/zhou-dunyi.svg', id: 2 },
-    { title: '120 根木柱与门楣之上：福溪古建筑群解码', category: '古建筑', categorySlug: 'architecture', excerpt: '从120根木柱的木构体系，到央视报道的门楣石雕；从风雨桥的瑶族智慧，到24座古戏台的戏曲鼎盛。', image: '/images/scenery/ancient-architecture.svg', id: 3 },
+    { title: '周敦颐与福溪：理学沿潇贺古道南传的活证', category: '理学文化', categorySlug: 'lixue-culture', excerpt: '周敦颐父亲曾任贺州桂岭县令，本人出生于潇贺古道北端。理学思想沿古道南传至福溪，村中讲学堂遗址、周氏宗祠、爱莲堂构成完整的理学文化轴。', image: '/images/culture/zhou-dunyi.png', id: 2 },
+    { title: '120 根木柱与门楣之上：福溪古建筑群解码', category: '古建筑', categorySlug: 'architecture', excerpt: '从120根木柱的木构体系，到央视报道的门楣石雕；从风雨桥的瑶族智慧，到24座古戏台的戏曲鼎盛。', image: '/images/scenery/ancient-architecture.png', id: 3 },
     { title: '火把节与点千灯：福溪村元宵民俗纪实', category: '民俗风情', categorySlug: 'folk-custom', excerpt: '福溪村正月十五火把节：点千灯、耍春牛、哭嫁表演、舞女龙。富川古明城则有著名的炸龙活动。', image: '/images/ethnic/dance.svg', id: 4 },
-    { title: '福溪村旅游攻略：2 天 1 晚串联潇贺古道三村', category: '旅游攻略', categorySlug: 'travel-guide', excerpt: '福溪2天1晚行程：第一天深度游讲学堂、爱莲堂、门楣石雕；第二天串联岔山村、秀水状元村。', image: '/images/scenery/ancient-architecture.svg', id: 5 },
+    { title: '福溪村旅游攻略：2 天 1 晚串联潇贺古道三村', category: '旅游攻略', categorySlug: 'travel-guide', excerpt: '福溪2天1晚行程：第一天深度游讲学堂、爱莲堂、门楣石雕；第二天串联岔山村、秀水状元村。', image: '/images/scenery/ancient-architecture.png', id: 5 },
     { title: '老人讲古：风雨桥头听来的福溪百年', category: '村民故事', categorySlug: 'villager-stories', excerpt: '风雨桥头听老人讲古：周姓族人从湖南道州迁来、村里曾有24座戏台、五代时期124名汉族士兵驻守。', image: '/images/ethnic/yao-people.svg', id: 6 },
-    { title: '关于福溪村官方网站正式上线的公告', category: '通知公告', categorySlug: 'announcements', excerpt: '福溪村官方网站正式上线。本站系统展示福溪历史文化、古建筑、民族风情与旅游信息，支持游客与注册用户两种互动方式。', image: '/images/about/village-overview.svg', id: 7 }
+    { title: '关于福溪村官方网站正式上线的公告', category: '通知公告', categorySlug: 'announcements', excerpt: '福溪村官方网站正式上线。本站系统展示福溪历史文化、古建筑、民族风情与旅游信息，支持游客与注册用户两种互动方式。', image: '/images/about/village-overview.svg', id: 7 },
+    { title: '福溪村的清晨：青石板路上的烟火气', category: '村民分享', categorySlug: 'villager-share', excerpt: '福溪村民分享清晨的古村生活：油茶早餐、门楣石雕、青石板路、风雨桥，感受千年古村的烟火气。', image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800', id: 8 },
+    { title: '自驾福溪古村：两天一夜的潇贺古道之旅', category: '游客分享', categorySlug: 'visitor-share', excerpt: '自驾两天一夜游福溪村：风雨桥、120根木柱古建筑、门楣石雕、潇贺古道串联岔山秀水，完整攻略分享。', image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800', id: 9 }
   ];
 
   function getDefaultArticlesHtml(categorySlug) {

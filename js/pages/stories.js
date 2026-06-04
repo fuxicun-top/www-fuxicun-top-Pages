@@ -12,12 +12,10 @@
     loadStories();
   }
 
-  // 默认村民故事（API 不可用时显示）
+  // 默认村民故事（API 不可用时显示，仅村民故事分类）
   function getDefaultStories() {
     return [
-      { title: '老人讲古：风雨桥头听来的福溪百年', excerpt: '风雨桥头听老人讲古：周姓族人从湖南道州迁来、村里曾有 24 座戏台、五代时期 124 名汉族士兵驻守。', cover_image: '/images/ethnic/yao-people.svg', author_name: '福溪村', created_at: '2026-05-22', id: 6 },
-      { title: '福溪村旅游攻略：2 天 1 晚串联潇贺古道三村', excerpt: '福溪2天1晚行程：第一天深度游讲学堂、爱莲堂、门楣石雕；第二天串联岔山村、秀水状元村。', cover_image: '/images/scenery/ancient-architecture.svg', author_name: '福溪村', created_at: '2026-05-21', id: 5 },
-      { title: '关于福溪村官方网站正式上线的公告', excerpt: '福溪村官方网站正式上线。本站系统展示福溪历史文化、古建筑、民族风情与旅游信息，支持游客与注册用户两种互动方式。', cover_image: '/images/about/village-overview.svg', author_name: '福溪村', created_at: '2026-05-23', id: 7 }
+      { title: '老人讲古：风雨桥头听来的福溪百年', excerpt: '风雨桥头听老人讲古：周姓族人从湖南道州迁来、村里曾有24座戏台、五代时期124名汉族士兵驻守。', cover_image: '/images/ethnic/yao-people.svg', author_name: '福溪村', created_at: '2026-05-22', id: 6 }
     ];
   }
 
@@ -69,7 +67,7 @@
 
     container.innerHTML = stories.map(function(story) {
       var date = Utils.formatDate(story.published_at || story.created_at);
-      var cover = story.cover_image || '/images/default/article.svg';
+      var cover = story.cover_image || '/images/default/article.png';
       var url = story.slug ? '/articles/' + story.slug : '/article-detail.html?id=' + story.id;
 
       return '<div class="card article-card">' +

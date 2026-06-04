@@ -1,18 +1,18 @@
 // ========================================
-// 文件说明：理学文化页面视频播放器（图片框内播放，三级降级）
-// 文件路径：js/pages/culture-video.js
+// 文件说明：走进福溪页面视频播放器（图片框内播放，三级降级）
+// 文件路径：js/pages/about-video.js
 // ========================================
 
-var CultureVideo = (function() {
+var AboutVideo = (function() {
   'use strict';
 
-  // 视频源（按优先级排列：R2 CDN → 静态文件）
   var videoSources = [
-    '/cdn/videos/zhoudunyi.mp4',
-    '/videos/zhoudunyi.mp4'
+    'https://finder.video.qq.com/251/20302/stodownload?encfilekey=Cvvj5Ix3eewK0tHtibORqcsqchXNh0Gf3sJcaYqC2rQAUBibl0LLq7UOedP9QW56ShgKYTgltAlBBictgicoiaPTHcadJvDC1ItD6TE1wVrggSt9aBjv5bE9tw3HQiaktaQuZh&token=2lt8WBSnjTkVz01Z1DjdzjNC9JIdH9qI8cHU0srAeC1QWhXqUOF1W8lJeGVw4rRHnqyGhqgTXK25PLVlqibPic4lUnHll0QhiaW7pLhFkrlBsQMxJ38X6icZCETujnunXRKALzGd9GLnFiaicR1KguhrhTC04azO5bELea40xShbA5S8I4qwjSPtQORq72q1rC2nnc8IXxwJzN0QbuaBGEW2Mw4nmMAxffqOSwrfHoEYnJxvo',
+    '/cdn/videos/fuxicun.mp4',
+    '/videos/fuxicun.mp4'
   ];
 
-  var LOAD_TIMEOUT = 8000; // 每个源等待 8 秒
+  var LOAD_TIMEOUT = 8000;
   var isPlaying = false;
 
   function play() {
@@ -23,7 +23,6 @@ var CultureVideo = (function() {
     var img = container.querySelector('img');
     var overlay = container.querySelector('.video-trigger__overlay');
 
-    // 创建 video 元素
     var video = document.createElement('video');
     video.controls = true;
     video.preload = 'metadata';
@@ -32,12 +31,10 @@ var CultureVideo = (function() {
     video.style.display = 'block';
     video.style.borderRadius = 'inherit';
 
-    // 隐藏图片和播放按钮，显示视频
     if (img) img.style.display = 'none';
     if (overlay) overlay.style.display = 'none';
     container.appendChild(video);
 
-    // 三级降级加载
     trySource(video, 0);
   }
 
@@ -50,7 +47,6 @@ var CultureVideo = (function() {
     var loaded = false;
     var timer = null;
 
-    // 成功加载元数据 → 取消超时，开始播放（只需前几KB，不需要下载完）
     video.onloadedmetadata = function() {
       if (loaded) return;
       loaded = true;
@@ -58,7 +54,6 @@ var CultureVideo = (function() {
       video.play().catch(function() {});
     };
 
-    // 加载错误 → 尝试下一个源
     video.onerror = function() {
       if (loaded) return;
       loaded = true;
@@ -66,21 +61,17 @@ var CultureVideo = (function() {
       trySource(video, index + 1);
     };
 
-    // 设置 src 自动开始加载（不要手动调用 load()）
     video.src = videoSources[index];
 
-    // 超时 → 尝试下一个源
     timer = setTimeout(function() {
       if (!loaded) {
         loaded = true;
-        video.onerror = null;
         video.onloadedmetadata = null;
+        video.onerror = null;
         trySource(video, index + 1);
       }
     }, LOAD_TIMEOUT);
   }
 
-  return {
-    play: play
-  };
+  return { play: play };
 })();

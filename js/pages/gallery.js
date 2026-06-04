@@ -15,13 +15,13 @@
     bindKeyboard();
   }
 
-  // 默认图片画廊（API 不可用时显示）
+  // 默认图片画廊（API 不可用时显示，与首页一致）
   var defaultGalleryImages = [
-    { url: '/images/scenery/ancient-architecture.svg', name: '古建筑群' },
-    { url: '/images/culture/ai-lian-tang.svg', name: '爱莲堂' },
-    { url: '/images/culture/zhou-dunyi.svg', name: '周敦颐像' },
+    { url: '/images/scenery/ancient-architecture.png', name: '古建筑群' },
+    { url: '/images/culture/ai-lian-tang.png', name: '爱莲堂' },
+    { url: '/images/culture/lecture.png', name: '讲学堂' },
+    { url: '/images/ethnic/dance.svg', name: '民俗活动' },
     { url: '/images/ethnic/yao-people.svg', name: '瑶族风情' },
-    { url: '/images/ethnic/costume.svg', name: '瑶族服饰' },
     { url: '/images/about/village-overview.svg', name: '福溪全景' }
   ];
 

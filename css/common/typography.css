@@ -39,6 +39,42 @@ a:hover {
   color: var(--color-primary-light);
 }
 
+/* 导航、按钮、标题等固定UI元素文字不换行 */
+.header-nav__link,
+.header-logo__text,
+.header-menu-btn,
+.btn,
+.filter-btn,
+.breadcrumb,
+.breadcrumb a,
+.page-banner__title,
+.page-banner__subtitle,
+.section-title,
+.section-subtitle,
+.section-more,
+.card__title,
+.card__category,
+.feature-card__title,
+.stat-item__label,
+.intro-card__title,
+.gallery-item__title,
+.news-item__category,
+.news-item__title,
+.featured-card__category,
+.featured-card__title,
+.article-card__category,
+.article-card__title,
+.mobile-nav__link,
+.footer-section__title,
+.footer-links a,
+.header-user__dropdown-item,
+.header-user__dropdown-name,
+.pagination button,
+.pagination a {
+  white-space: nowrap;
+}
+}
+
 strong {
   font-weight: 600;
 }
