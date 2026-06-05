@@ -60,13 +60,8 @@ Cloudflare免费服务分析报告.md
 # 数据库脚本（仅本地参考，schema.js已包含完整定义）
 sql/
 
-# 大文件（超过50MB的视频不上传仓库，小文件可上传）
-*.mp4
-*.avi
-*.mov
-*.wmv
-*.flv
-*.mkv
+# 视频目录（含大文件，不上传仓库；小视频文件可手动 git add -f 添加）
+videos/
 
 # 浏览器保存的网页副本
 *_files/
