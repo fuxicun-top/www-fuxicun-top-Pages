@@ -57,13 +57,10 @@ Cloudflare免费服务分析报告.md
 
 # 历史归档目录（仅本地参考）
 历史md文件/
-# 数据库重置脚本（仅本地使用）
-sql/reset-database.sql
-sql/update-banners.js
-sql/upgrade-2026-05-23.sql
+# 数据库脚本（仅本地参考，schema.js已包含完整定义）
+sql/
 
-# 视频文件（体积过大，不上传仓库）
-videos/
+# 大文件（超过50MB的视频不上传仓库，小文件可上传）
 *.mp4
 *.avi
 *.mov
@@ -73,7 +70,23 @@ videos/
 
 # 浏览器保存的网页副本
 *_files/
-*.html.下载
+
+# 已被PNG替代的大SVG源文件（本地保留，不上传仓库）
+images/culture/lecture.svg
+images/culture/ai-lian-tang.svg
+images/culture/zhou-dunyi.svg
+images/ethnic/costume.svg
+images/default/article.svg
+images/default-video-cover.svg
+images/scenery/ancient-architecture.svg
+
+# 临时文件
+*.tmp
+*.bak
+*.log
+手动记录优化改进的功能.md
+videos/视频文件说明.txt
+videos/sp.html
 
 # OS
 .DS_Store
