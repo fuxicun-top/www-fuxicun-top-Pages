@@ -60,8 +60,10 @@ Cloudflare免费服务分析报告.md
 # 数据库脚本（仅本地参考，schema.js已包含完整定义）
 sql/
 
-# 视频目录（含大文件，不上传仓库；小视频文件可手动 git add -f 添加）
-videos/
+# 大视频文件（超过100MB不上传仓库）
+videos/fuxicun.mp4
+videos/fuxigz.mp4
+videos/sp.html
 
 # 浏览器保存的网页副本
 *_files/
@@ -80,8 +82,6 @@ images/scenery/ancient-architecture.svg
 *.bak
 *.log
 手动记录优化改进的功能.md
-videos/视频文件说明.txt
-videos/sp.html
 
 # OS
 .DS_Store
