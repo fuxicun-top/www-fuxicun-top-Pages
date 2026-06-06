@@ -60,9 +60,10 @@ Cloudflare免费服务分析报告.md
 # 数据库脚本（仅本地参考，schema.js已包含完整定义）
 sql/
 
-# 大视频文件（超过100MB不上传仓库）
+# 超过25MB的视频文件（Cloudflare Pages限制25MB/文件）
 videos/fuxicun.mp4
 videos/fuxigz.mp4
+videos/fxccths.mp4
 videos/sp.html
 
 # 浏览器保存的网页副本
