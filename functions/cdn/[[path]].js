@@ -51,16 +51,20 @@ export async function onRequest(context) {
     headers.set('Access-Control-Allow-Origin', '*');
     headers.set('Accept-Ranges', 'bytes');
 
-    if (object.size) {
-      headers.set('Content-Length', object.size.toString());
-    }
-
     // Range 请求返回 206
     if (rangeHeader && object.range) {
-      headers.set('Content-Range', `bytes ${object.range.offset}-${object.range.offset + object.range.length - 1}/${object.size}`);
+      const rangeStart = object.range.offset;
+      const rangeLength = object.range.length;
+      const rangeEnd = rangeStart + rangeLength - 1;
+      headers.set('Content-Range', `bytes ${rangeStart}-${rangeEnd}/${object.size}`);
+      headers.set('Content-Length', rangeLength.toString());
       return new Response(object.body, { status: 206, headers });
     }
 
+    // 普通请求返回 200
+    if (object.size) {
+      headers.set('Content-Length', object.size.toString());
+    }
     return new Response(object.body, { headers });
   } catch (e) {
     console.error('R2 get error:', e);
