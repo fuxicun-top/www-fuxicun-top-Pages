@@ -6,11 +6,13 @@
 var EthnicVideo = (function() {
   'use strict';
 
+  // 视频源（按优先级排列：在线CDN → R2 → 静态文件）
   var videoSources = [
+    // 'https://your-cdn-url/fxccths.mp4',  // 在线链接（待CDN托管后填入）
     'https://newcntv.qcloudcdn.com/asp/hls/main/0303000a/3/default/f726d0dc2533498798ccc566d90bdcb1/main.m3u8?maxbr=2048',
     '/cdn/videos/fxccths.mp4',
     '/videos/fxccths.mp4'
-  ];
+  ].filter(function(s) { return s; });
 
   var LOAD_TIMEOUT = 8000;
   var player = null;

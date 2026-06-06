@@ -6,11 +6,12 @@
 var AboutVideo = (function() {
   'use strict';
 
+  // 视频源（按优先级排列：在线CDN → R2 → 静态文件）
   var videoSources = [
-    'https://finder.video.qq.com/251/20302/stodownload?encfilekey=Cvvj5Ix3eewK0tHtibORqcsqchXNh0Gf3sJcaYqC2rQAUBibl0LLq7UOedP9QW56ShgKYTgltAlBBictgicoiaPTHcadJvDC1ItD6TE1wVrggSt9aBjv5bE9tw3HQiaktaQuZh&token=2lt8WBSnjTkVz01Z1DjdzjNC9JIdH9qI8cHU0srAeC1QWhXqUOF1W8lJeGVw4rRHnqyGhqgTXK25PLVlqibPic4lUnHll0QhiaW7pLhFkrlBsQMxJ38X6icZCETujnunXRKALzGd9GLnFiaicR1KguhrhTC04azO5bELea40xShbA5S8I4qwjSPtQORq72q1rC2nnc8IXxwJzN0QbuaBGEW2Mw4nmMAxffqOSwrfHoEYnJxvo',
+    // 'https://your-cdn-url/fuxicun.mp4',  // 在线链接（待CDN托管后填入）
     '/cdn/videos/fuxicun.mp4',
     '/videos/fuxicun.mp4'
-  ];
+  ].filter(function(s) { return s; });
 
   var LOAD_TIMEOUT = 8000;
   var isPlaying = false;

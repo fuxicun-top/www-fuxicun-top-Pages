@@ -1,19 +1,20 @@
 // ========================================
-// 文件说明：理学文化页面视频播放器（图片框内播放，三级降级）
-// 文件路径：js/pages/culture-video.js
+// 文件说明：古村风貌页面视频播放器（图片框内播放，三级降级）
+// 文件路径：js/pages/scenery-video.js
+// 在线链接留空，后续CDN托管后填入
 // ========================================
 
-var CultureVideo = (function() {
+var SceneryVideo = (function() {
   'use strict';
 
-  // 视频源（按优先级排列：在线CDN → R2 → 静态文件）
+  // 视频源（按优先级排列，在线链接留空后续填入）
   var videoSources = [
-    // 'https://your-cdn-url/zhoudunyi.mp4',  // 在线链接（待CDN托管后填入）
-    '/cdn/videos/zhoudunyi.mp4',
-    '/videos/zhoudunyi.mp4'
-  ].filter(function(s) { return s; });
+    // 'https://your-cdn-url/fuxigz.mp4',  // 在线链接（待填入）
+    '/cdn/videos/fuxigz.mp4',
+    '/videos/fuxigz.mp4'
+  ].filter(function(s) { return s; }); // 过滤空值
 
-  var LOAD_TIMEOUT = 8000; // 每个源等待 8 秒
+  var LOAD_TIMEOUT = 8000;
   var isPlaying = false;
 
   function play() {
@@ -24,7 +25,6 @@ var CultureVideo = (function() {
     var img = container.querySelector('img');
     var overlay = container.querySelector('.video-trigger__overlay');
 
-    // 创建 video 元素
     var video = document.createElement('video');
     video.controls = true;
     video.preload = 'metadata';
@@ -33,12 +33,10 @@ var CultureVideo = (function() {
     video.style.display = 'block';
     video.style.borderRadius = 'inherit';
 
-    // 隐藏图片和播放按钮，显示视频
     if (img) img.style.display = 'none';
     if (overlay) overlay.style.display = 'none';
     container.appendChild(video);
 
-    // 三级降级加载
     trySource(video, 0);
   }
 
@@ -51,7 +49,6 @@ var CultureVideo = (function() {
     var loaded = false;
     var timer = null;
 
-    // 成功加载元数据 → 取消超时，开始播放（只需前几KB，不需要下载完）
     video.onloadedmetadata = function() {
       if (loaded) return;
       loaded = true;
@@ -59,7 +56,6 @@ var CultureVideo = (function() {
       video.play().catch(function() {});
     };
 
-    // 加载错误 → 尝试下一个源
     video.onerror = function() {
       if (loaded) return;
       loaded = true;
@@ -67,21 +63,17 @@ var CultureVideo = (function() {
       trySource(video, index + 1);
     };
 
-    // 设置 src 自动开始加载（不要手动调用 load()）
     video.src = videoSources[index];
 
-    // 超时 → 尝试下一个源
     timer = setTimeout(function() {
       if (!loaded) {
         loaded = true;
-        video.onerror = null;
         video.onloadedmetadata = null;
+        video.onerror = null;
         trySource(video, index + 1);
       }
     }, LOAD_TIMEOUT);
   }
 
-  return {
-    play: play
-  };
+  return { play: play };
 })();

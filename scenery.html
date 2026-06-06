@@ -33,8 +33,11 @@
     <section class="content-section">
       <div class="container">
         <div class="content-grid">
-          <div class="content-image">
+          <div class="content-image video-trigger" onclick="SceneryVideo.play()">
             <img src="/images/scenery/ancient-architecture.png" alt="福溪村古建筑" loading="lazy" onerror="this.src='/images/default/article.png'">
+            <div class="video-trigger__overlay">
+              <div class="video-trigger__play">▶</div>
+            </div>
           </div>
           <div class="content-text">
             <h3>120 根木柱 · 千年匠心</h3>
@@ -110,5 +113,6 @@
   <script src="/js/components/header.js"></script>
   <script src="/js/components/footer.js"></script>
   <script src="/js/pages/scenery.js"></script>
+  <script src="/js/pages/scenery-video.js"></script>
 </body>
 </html>
