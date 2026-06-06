@@ -20,24 +20,22 @@ export async function onRequest(context) {
     slug = params.slug;
   }
 
-  // 如果 slug 是纯数字，视为文章 ID，重定向到友好 URL
+  // 如果 slug 是纯数字，先按 ID 查找并重定向到友好 URL
   if (/^\d+$/.test(slug)) {
     try {
-      var article = await env.FUXICUN_DB.prepare(
+      var articleById = await env.FUXICUN_DB.prepare(
         "SELECT id, slug FROM articles WHERE id = ? AND status = 'published'"
       ).bind(parseInt(slug)).first();
 
-      if (article && article.slug) {
-        // 301 永久重定向到友好 URL
-        return Response.redirect('/articles/' + article.slug, 301);
-      } else if (article) {
-        // 没有 slug，重定向到传统 URL
-        return Response.redirect('/article-detail.html?id=' + article.id, 301);
+      if (articleById && articleById.slug) {
+        return Response.redirect('/articles/' + articleById.slug, 301);
+      } else if (articleById) {
+        return Response.redirect('/article-detail.html?id=' + articleById.id, 301);
       }
     } catch (e) {
       console.error('文章查询失败:', e.message);
     }
-    return new Response('文章不存在', { status: 404 });
+    // ID 未找到，继续按 slug 查找（可能是数字 slug）
   }
 
   // 通过 slug 查询文章详情（包含作者和分类信息）
@@ -87,6 +85,29 @@ export async function onRequest(context) {
     console.error('文章页面生成失败:', e.message);
     return new Response('服务器错误', { status: 500 });
   }
+}
+
+// 简易 Markdown 渲染器
+function renderMarkdown(md) {
+  if (!md) return '';
+  if (/<[a-z][\s\S]*>/i.test(md)) return md;
+  var html = md
+    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:4px;">')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--color-primary);">$1</a>')
+    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+    .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #ddd;margin:16px 0;">')
+    .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>')
+    .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br>');
+  return '<p>' + html + '</p>';
 }
 
 /**
@@ -208,7 +229,7 @@ function generateArticlePage(article) {
     '          </div>\n' +
     '        </div>\n' +
     (article.cover_image ? '        <img src="' + escapeHtml(article.cover_image) + '" alt="' + escapeHtml(article.title) + '" class="article-detail__cover" loading="lazy">\n' : '') +
-    '        <div class="article-detail__content">' + sanitizeHtml(article.content || '') + '</div>\n' +
+    '        <div class="article-detail__content">' + renderMarkdown(article.content || '') + '</div>\n' +
     '        <div class="article-detail__actions">\n' +
     '          <button class="btn-like" id="btn-like">\n' +
     '            <span>&#9829;</span> <span id="like-count">' + (article.likes || 0) + '</span>\n' +

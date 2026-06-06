@@ -442,6 +442,7 @@
   overflow: hidden;
   box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
+  margin-bottom: 16px;
 }
 
 .article-item:hover {

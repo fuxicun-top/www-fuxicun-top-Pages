@@ -25,22 +25,29 @@ export async function handleArticles(request, env, path, method) {
     return await getArticles(request, env);
   }
 
-  // 文章详情 - 数字 ID 方式
-  const detailMatch = path.match(/^\/articles\/(\d+)$/);
+  // 文章详情 - 数字 ID 或 slug 方式
+  const detailMatch = path.match(/^\/articles\/([^\/]+)$/);
   if (detailMatch && method === 'GET') {
-    return await getArticleDetail(env, detailMatch[1]);
-  }
+    var identifier = detailMatch[1];
+    var decoded;
+    try { decoded = decodeURIComponent(identifier); } catch (e) { decoded = identifier; }
 
-  // 文章详情 - slug 友好 URL 查询
-  const slugMatch = path.match(/^\/articles\/([^\/]+)$/);
-  if (slugMatch && method === 'GET' && !/^\d+$/.test(slugMatch[1])) {
-    var decodedSlug;
-    try {
-      decodedSlug = decodeURIComponent(slugMatch[1]);
-    } catch (e) {
-      decodedSlug = slugMatch[1];
+    // 先按 slug 查找
+    var article = await dbQueryFirst(
+      env.FUXICUN_DB,
+      "SELECT id FROM articles WHERE slug = ? AND status = 'published'",
+      [decoded]
+    );
+    if (article) {
+      return await getArticleDetailBySlug(env, decoded);
     }
-    return await getArticleDetailBySlug(env, decodedSlug);
+
+    // slug 未找到且是纯数字，再按 ID 查找
+    if (/^\d+$/.test(identifier)) {
+      return await getArticleDetail(env, identifier);
+    }
+
+    return errorResponse('文章不存在', 404);
   }
 
   // === 需要登录的接口 ===

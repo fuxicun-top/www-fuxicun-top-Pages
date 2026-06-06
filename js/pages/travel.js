@@ -7,7 +7,26 @@
   'use strict';
 
   function init() {
+    loadSections();
     loadRelatedArticles();
+  }
+
+  async function loadSections() {
+    try {
+      var result = await API.get('/page-sections', { slug: 'travel' });
+      if (result.success && result.data && result.data.length > 0) {
+        result.data.forEach(function(section) {
+          if (section.title) {
+            var titleEl = document.querySelector('[data-section-title="' + section.section_key + '"]');
+            if (titleEl) titleEl.textContent = section.title;
+          }
+          var el = document.querySelector('[data-section="' + section.section_key + '"]');
+          if (el && section.content) {
+            el.innerHTML = section.content;
+          }
+        });
+      }
+    } catch (e) { /* API 不可用 */ }
   }
 
   async function loadRelatedArticles() {
@@ -15,14 +34,14 @@
     if (!container) return;
 
     try {
-      var result = await API.get('/articles', { category: 'travel-guide', pageSize: 6 });
-      if (result.success && result.data.list && result.data.list.length > 0) {
-        renderArticles(container, result.data.list);
+      var result = await API.get('/page-articles', { slug: 'travel' });
+      if (result.success && result.data && result.data.articles && result.data.articles.length > 0) {
+        renderArticles(container, result.data.articles);
+        return;
       }
-    } catch (e) {
-      var section = container.closest('.content-section');
-      if (section) section.style.display = 'none';
-    }
+    } catch (e) { /* API 不可用 */ }
+    var section = container.closest('.content-section');
+    if (section) section.style.display = 'none';
   }
 
   function renderArticles(container, articles) {

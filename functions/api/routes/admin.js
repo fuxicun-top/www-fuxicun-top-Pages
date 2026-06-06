@@ -30,7 +30,9 @@ export async function handleAdmin(request, env, path, method) {
     '/admin/home-modules',
     '/admin/nav',
     '/admin/pages',
-    '/admin/database'
+    '/admin/database',
+    '/admin/page-articles',
+    '/admin/page-sections'
   ];
   const isAdminOnly = adminOnlyPaths.some(function(p) { return path.startsWith(p); });
 
@@ -136,6 +138,37 @@ export async function handleAdmin(request, env, path, method) {
   }
   if (path.match(/^\/admin\/home-modules\/\d+$/) && method === 'DELETE') {
     return await deleteHomeModule(env, path);
+  }
+
+  // === 页面文章管理 ===
+  if (path === '/admin/page-articles' && method === 'GET') {
+    return await getPageArticlesAdmin(request, env);
+  }
+  if (path === '/admin/page-articles' && method === 'POST') {
+    return await createPageArticle(request, env, user);
+  }
+  if (path.match(/^\/admin\/page-articles\/\d+$/) && method === 'DELETE') {
+    return await deletePageArticle(env, path);
+  }
+  if (path.match(/^\/admin\/page-articles\/\d+\/mode$/) && method === 'PUT') {
+    return await updateSinglePageArticleMode(request, env, path, user);
+  }
+  if (path === '/admin/page-articles/sort' && method === 'PUT') {
+    return await sortPageArticles(request, env, user);
+  }
+
+  // === 页面板块管理 ===
+  if (path === '/admin/page-sections' && method === 'GET') {
+    return await getPageSectionsAdmin(request, env);
+  }
+  if (path === '/admin/page-sections' && method === 'POST') {
+    return await createPageSection(request, env, user);
+  }
+  if (path.match(/^\/admin\/page-sections\/\d+$/) && method === 'PUT') {
+    return await updatePageSection(request, env, path, user);
+  }
+  if (path.match(/^\/admin\/page-sections\/\d+$/) && method === 'DELETE') {
+    return await deletePageSection(env, path);
   }
 
   // === 文章管理 ===
@@ -1242,7 +1275,7 @@ async function importBackup(request, env, currentUser) {
       'audit_logs', 'password_resets', 'sessions',
       'likes', 'comments', 'media',
       'articles', 'categories', 'users',
-      'banners', 'site_config', 'nav_items', 'pages', 'home_modules'
+      'banners', 'site_config', 'nav_items', 'pages', 'home_modules', 'page_articles'
     ];
 
     // 临时关闭外键约束
@@ -1260,7 +1293,7 @@ async function importBackup(request, env, currentUser) {
 
     // 按依赖关系正序插入
     const insertOrder = [
-      'users', 'categories', 'articles', 'comments', 'likes',
+      'users', 'categories', 'articles', 'page_articles', 'comments', 'likes',
       'media', 'banners', 'site_config', 'sessions', 'password_resets',
       'audit_logs', 'nav_items', 'pages', 'home_modules'
     ];
@@ -1329,7 +1362,7 @@ async function clearAllData(env, currentUser) {
       'audit_logs', 'password_resets', 'sessions',
       'likes', 'comments', 'media',
       'articles', 'categories', 'users',
-      'banners', 'site_config', 'nav_items', 'pages', 'home_modules'
+      'banners', 'site_config', 'nav_items', 'pages', 'home_modules', 'page_articles'
     ];
 
     for (const table of tables) {
@@ -1417,7 +1450,7 @@ async function reinstallSite(request, env, currentUser) {
       'audit_logs', 'password_resets', 'sessions',
       'likes', 'comments', 'media',
       'articles', 'categories', 'users',
-      'banners', 'site_config', 'nav_items', 'pages', 'home_modules'
+      'banners', 'site_config', 'nav_items', 'pages', 'home_modules', 'page_articles'
     ];
 
     for (const table of tables) {
@@ -1682,6 +1715,151 @@ async function clearHomeModulesCache(env) {
   }
 }
 
+// ==============================
+// 页面文章管理
+// ==============================
+
+// 页面与分类的对应关系
+const PAGE_CATEGORY_MAP = {
+  'about': 'village-news',
+  'culture': 'lixue-culture',
+  'scenery': 'architecture',
+  'ethnic': 'folk-custom',
+  'travel': 'travel-guide'
+};
+
+// 获取页面文章配置
+async function getPageArticlesAdmin(request, env) {
+  const url = new URL(request.url);
+  const slug = url.searchParams.get('slug') || '';
+
+  if (!slug || !PAGE_CATEGORY_MAP[slug]) {
+    return errorResponse('无效的页面标识');
+  }
+
+  // 获取该页面所有文章槽位（每条有自己的 mode）
+  const articles = await dbQuery(
+    env.FUXICUN_DB,
+    "SELECT pa.id, pa.article_id, pa.mode, pa.sort_order, a.title, a.slug, a.excerpt, a.cover_image FROM page_articles pa LEFT JOIN articles a ON pa.article_id = a.id WHERE pa.page_slug = ? ORDER BY pa.sort_order",
+    [slug]
+  );
+
+  // 获取该页面对应分类的已发布文章（供手动选择用）
+  const categorySlug = PAGE_CATEGORY_MAP[slug];
+  const allArticles = await dbQuery(
+    env.FUXICUN_DB,
+    "SELECT a.id, a.title, c.name as category_name, c.slug as category_slug FROM articles a LEFT JOIN categories c ON a.category_id = c.id WHERE a.status = 'published' AND c.slug = ? ORDER BY a.published_at DESC",
+    [categorySlug]
+  );
+
+  return successResponse({
+    articles: articles.results || [],
+    allArticles: allArticles.results || [],
+    category: PAGE_CATEGORY_MAP[slug]
+  });
+}
+
+// 添加页面文章槽位（mode: manual/latest/likes）
+async function createPageArticle(request, env, user) {
+  const { page_slug, mode, article_id } = await request.json();
+
+  if (!page_slug || !PAGE_CATEGORY_MAP[page_slug]) {
+    return errorResponse('无效的页面标识');
+  }
+  if (!['manual', 'latest', 'likes', 'views'].includes(mode)) {
+    return errorResponse('无效的模式');
+  }
+
+  // 手动模式必须指定文章
+  if (mode === 'manual' && !article_id) {
+    return errorResponse('请选择文章');
+  }
+  if (mode === 'manual') {
+    const article = await dbQueryFirst(env.FUXICUN_DB, 'SELECT id FROM articles WHERE id = ?', [article_id]);
+    if (!article) return errorResponse('文章不存在');
+  }
+
+  // 获取当前最大排序
+  const maxSort = await dbQueryFirst(
+    env.FUXICUN_DB,
+    "SELECT MAX(sort_order) as max_sort FROM page_articles WHERE page_slug = ?",
+    [page_slug]
+  );
+  const newSort = (maxSort?.max_sort || 0) + 1;
+
+  await dbRun(
+    env.FUXICUN_DB,
+    "INSERT INTO page_articles (page_slug, article_id, mode, sort_order) VALUES (?, ?, ?, ?)",
+    [page_slug, mode === 'manual' ? article_id : null, mode, newSort]
+  );
+
+  await clearPageArticlesCache(env, page_slug);
+  await writeAuditLog(env, user.id, 'page_article_add', 'page_articles', null, '添加页面文章: ' + page_slug + ' mode=' + mode);
+
+  return successResponse(null, '添加成功');
+}
+
+// 删除页面文章
+async function deletePageArticle(env, path) {
+  const id = path.match(/\/admin\/page-articles\/(\d+)/)[1];
+
+  const row = await dbQueryFirst(env.FUXICUN_DB, 'SELECT page_slug FROM page_articles WHERE id = ?', [id]);
+  if (!row) return errorResponse('记录不存在');
+
+  await dbRun(env.FUXICUN_DB, 'DELETE FROM page_articles WHERE id = ?', [id]);
+  await clearPageArticlesCache(env, row.page_slug);
+
+  return successResponse(null, '删除成功');
+}
+
+// 更新单篇文章的模式
+async function updateSinglePageArticleMode(request, env, path, user) {
+  const id = path.match(/\/admin\/page-articles\/(\d+)\/mode/)[1];
+  const { mode, article_id } = await request.json();
+
+  if (!['manual', 'latest', 'likes', 'views'].includes(mode)) {
+    return errorResponse('无效的模式');
+  }
+
+  const row = await dbQueryFirst(env.FUXICUN_DB, 'SELECT page_slug FROM page_articles WHERE id = ?', [id]);
+  if (!row) return errorResponse('记录不存在');
+
+  if (mode === 'manual') {
+    if (!article_id) return errorResponse('请选择文章');
+    await dbRun(env.FUXICUN_DB, 'UPDATE page_articles SET mode = ?, article_id = ? WHERE id = ?', [mode, article_id, id]);
+  } else {
+    await dbRun(env.FUXICUN_DB, 'UPDATE page_articles SET mode = ?, article_id = NULL WHERE id = ?', [mode, id]);
+  }
+
+  await clearPageArticlesCache(env, row.page_slug);
+  return successResponse(null, '模式更新成功');
+}
+
+// 排序页面文章
+async function sortPageArticles(request, env, user) {
+  const { page_slug, ids } = await request.json();
+
+  if (!page_slug || !Array.isArray(ids)) {
+    return errorResponse('参数无效');
+  }
+
+  for (let i = 0; i < ids.length; i++) {
+    await dbRun(env.FUXICUN_DB, 'UPDATE page_articles SET sort_order = ? WHERE id = ?', [i + 1, ids[i]]);
+  }
+
+  await clearPageArticlesCache(env, page_slug);
+  return successResponse(null, '排序更新成功');
+}
+
+// 清除页面文章缓存
+async function clearPageArticlesCache(env, slug) {
+  if (env.FUXICUN_KV) {
+    try {
+      await env.FUXICUN_KV.delete('cache:page-articles:' + slug);
+    } catch (e) { /* 忽略 */ }
+  }
+}
+
 /**
  * 管理员/编辑者手动重置用户密码
  * 向指定邮箱发送重置链接，邮件中包含修改手机号指引
@@ -1751,5 +1929,96 @@ async function adminResetPassword(request, env) {
   } catch (e) {
     console.error('Admin reset password error:', e);
     return errorResponse('操作失败');
+  }
+}
+
+// ==============================
+// 页面板块管理
+// ==============================
+
+// 获取页面板块
+async function getPageSectionsAdmin(request, env) {
+  const url = new URL(request.url);
+  const slug = url.searchParams.get('slug') || '';
+
+  if (!slug) return errorResponse('缺少页面标识');
+
+  const sections = await dbQuery(
+    env.FUXICUN_DB,
+    "SELECT id, page_slug, section_key, title, content, sort_order FROM page_sections WHERE page_slug = ? ORDER BY sort_order",
+    [slug]
+  );
+
+  return successResponse(sections.results || []);
+}
+
+// 创建页面板块
+async function createPageSection(request, env, user) {
+  const { page_slug, section_key, title, content } = await request.json();
+
+  if (!page_slug || !section_key) {
+    return errorResponse('页面标识和板块标识为必填');
+  }
+
+  // 检查是否已存在
+  const existing = await dbQueryFirst(
+    env.FUXICUN_DB,
+    "SELECT id FROM page_sections WHERE page_slug = ? AND section_key = ?",
+    [page_slug, section_key]
+  );
+  if (existing) return errorResponse('该板块标识已存在');
+
+  const maxSort = await dbQueryFirst(
+    env.FUXICUN_DB,
+    "SELECT MAX(sort_order) as max_sort FROM page_sections WHERE page_slug = ?",
+    [page_slug]
+  );
+
+  await dbRun(
+    env.FUXICUN_DB,
+    "INSERT INTO page_sections (page_slug, section_key, title, content, sort_order) VALUES (?, ?, ?, ?, ?)",
+    [page_slug, section_key, title || '', content || '', (maxSort?.max_sort || 0) + 1]
+  );
+
+  await clearPageSectionsCache(env, page_slug);
+  return successResponse(null, '板块创建成功');
+}
+
+// 更新页面板块
+async function updatePageSection(request, env, path, user) {
+  const id = path.match(/\/admin\/page-sections\/(\d+)/)[1];
+  const { title, content, sort_order } = await request.json();
+
+  const section = await dbQueryFirst(env.FUXICUN_DB, 'SELECT page_slug FROM page_sections WHERE id = ?', [id]);
+  if (!section) return errorResponse('板块不存在');
+
+  await dbRun(
+    env.FUXICUN_DB,
+    "UPDATE page_sections SET title = ?, content = ?, sort_order = ?, created_at = datetime('now') WHERE id = ?",
+    [title || '', content || '', sort_order || 0, id]
+  );
+
+  await clearPageSectionsCache(env, section.page_slug);
+  return successResponse(null, '板块更新成功');
+}
+
+// 删除页面板块
+async function deletePageSection(env, path) {
+  const id = path.match(/\/admin\/page-sections\/(\d+)/)[1];
+
+  const section = await dbQueryFirst(env.FUXICUN_DB, 'SELECT page_slug FROM page_sections WHERE id = ?', [id]);
+  if (!section) return errorResponse('板块不存在');
+
+  await dbRun(env.FUXICUN_DB, 'DELETE FROM page_sections WHERE id = ?', [id]);
+  await clearPageSectionsCache(env, section.page_slug);
+  return successResponse(null, '板块删除成功');
+}
+
+// 清除页面板块缓存
+async function clearPageSectionsCache(env, slug) {
+  if (env.FUXICUN_KV) {
+    try {
+      await env.FUXICUN_KV.delete('cache:page-sections:' + slug);
+    } catch (e) { /* 忽略 */ }
   }
 }

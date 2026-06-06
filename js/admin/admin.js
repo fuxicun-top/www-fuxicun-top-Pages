@@ -18,6 +18,7 @@ var Admin = (function() {
     ]},
     { group: '网站设置', items: [
       { icon: '🏠', text: '首页配置', href: '/admin/homepage.html' },
+      { icon: '📝', text: '页面文章', href: '/admin/page-articles.html' },
       { icon: '🧭', text: '导航管理', href: '/admin/nav.html' },
       { icon: '📄', text: '页面管理', href: '/admin/pages.html' },
       { icon: '⚙️', text: '网站设置', href: '/admin/settings.html' }
@@ -61,7 +62,7 @@ var Admin = (function() {
       var filteredItems = group.items.filter(function(item) {
         if (!isAdmin) {
           // editor 无法访问的菜单
-          var adminOnly = ['/admin/settings.html', '/admin/homepage.html', '/admin/nav.html', '/admin/pages.html', '/admin/database.html'];
+          var adminOnly = ['/admin/settings.html', '/admin/homepage.html', '/admin/nav.html', '/admin/pages.html', '/admin/database.html', '/admin/page-articles.html'];
           return adminOnly.indexOf(item.href) === -1;
         }
         return true;

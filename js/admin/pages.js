@@ -23,25 +23,35 @@
     }
   }
 
+  // 系统页面 slug 列表
+  var SYSTEM_SLUGS = ['about', 'culture', 'scenery', 'ethnic', 'travel', 'news', 'articles'];
+
   function renderPages(pages) {
     var tbody = document.getElementById('pages-tbody');
     if (!pages || pages.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;">暂无自定义页面</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;">暂无页面</td></tr>';
       return;
     }
 
     tbody.innerHTML = pages.map(function(page) {
+      var isSystem = SYSTEM_SLUGS.indexOf(page.slug) !== -1;
       var date = Utils.formatDate(page.updated_at);
+      var pageUrl = isSystem ? '/' + page.slug + '.html' : '/p/' + page.slug;
+      var typeTag = isSystem
+        ? '<span style="background:var(--color-primary-bg);color:var(--color-primary);padding:2px 8px;border-radius:4px;font-size:11px;">系统</span>'
+        : '<span style="background:var(--color-bg-hover);color:var(--color-text-secondary);padding:2px 8px;border-radius:4px;font-size:11px;">自定义</span>';
+      var actions = isSystem
+        ? '<button class="btn btn-sm btn-outline" onclick="PagesPage.editPage(' + page.id + ')">编辑</button>'
+        : '<button class="btn btn-sm btn-outline" onclick="PagesPage.editPage(' + page.id + ')">编辑</button> <button class="btn btn-sm btn-danger" onclick="PagesPage.deletePage(' + page.id + ', \'' + Utils.escapeHtml(page.title).replace(/'/g, "\\'") + '\')">删除</button>';
+
       return '<tr>' +
+        '<td>' + typeTag + '</td>' +
         '<td><strong>' + Utils.escapeHtml(page.title) + '</strong></td>' +
         '<td><code>' + Utils.escapeHtml(page.slug) + '</code></td>' +
         '<td>' + (page.status === 'published' ? '<span style="color:var(--color-success);">已发布</span>' : '<span style="color:var(--color-text-secondary);">草稿</span>') + '</td>' +
-        '<td><a href="/p/' + Utils.escapeHtml(page.slug) + '" target="_blank" style="color:var(--color-primary);">/p/' + Utils.escapeHtml(page.slug) + '</a></td>' +
+        '<td><a href="' + pageUrl + '" target="_blank" style="color:var(--color-primary);">' + pageUrl + '</a></td>' +
         '<td>' + date + '</td>' +
-        '<td>' +
-          '<button class="btn btn-sm btn-outline" onclick="PagesPage.editPage(' + page.id + ')">编辑</button> ' +
-          '<button class="btn btn-sm btn-danger" onclick="PagesPage.deletePage(' + page.id + ', \'' + Utils.escapeHtml(page.title).replace(/'/g, "\\'") + '\')">删除</button>' +
-        '</td>' +
+        '<td>' + actions + '</td>' +
       '</tr>';
     }).join('');
   }
@@ -54,7 +64,13 @@
     API.get('/admin/pages').then(function(result) {
       if (result.success) {
         var page = result.data.find(function(p) { return p.id === id; });
-        if (page) showPageModal(page);
+        if (page) {
+          if (SYSTEM_SLUGS.indexOf(page.slug) !== -1) {
+            showSectionEditor(page);
+          } else {
+            showPageModal(page);
+          }
+        }
       }
     });
   }
@@ -132,6 +148,89 @@
         }
       }
     });
+  }
+
+  // 系统页面板块编辑器
+  async function showSectionEditor(page) {
+    try {
+      var result = await API.get('/admin/page-sections?slug=' + page.slug);
+      var sections = result.success ? result.data : [];
+
+      if (sections.length === 0) {
+        Modal.show({
+          title: '编辑：' + page.title,
+          content: '<p style="text-align:center;padding:24px;color:var(--color-text-secondary);">该页面暂无可编辑板块</p>',
+          showConfirm: false,
+          cancelText: '关闭'
+        });
+        return;
+      }
+
+      // 构建表单：每个板块一个区块
+      var html = '<div style="max-height:65vh;overflow-y:auto;padding-right:4px;">';
+      html += '<p style="margin-bottom:20px;color:var(--color-text-secondary);font-size:14px;">编辑「' + Utils.escapeHtml(page.title) + '」页面的各板块内容，修改后前端页面实时生效。</p>';
+
+      sections.forEach(function(section, index) {
+        var isFirst = index === 0;
+        html += '<div class="section-block" data-id="' + section.id + '" style="' + (isFirst ? '' : 'margin-top:24px;padding-top:24px;border-top:1px solid var(--color-border);') + '">' +
+          '<div class="form-group">' +
+            '<label class="form-label">板块标题</label>' +
+            '<input type="text" class="form-input section-title" data-id="' + section.id + '" value="' + Utils.escapeHtml(section.title || '') + '">' +
+          '</div>' +
+          '<div class="form-group">' +
+            '<label class="form-label">板块内容 <span style="font-weight:normal;color:var(--color-text-secondary);">（支持 HTML 格式）</span></label>' +
+            '<textarea class="form-input form-textarea section-content" data-id="' + section.id + '" rows="8" style="font-family:var(--font-family-mono);font-size:13px;line-height:1.6;">' + Utils.escapeHtml(section.content || '') + '</textarea>' +
+          '</div>' +
+          '<div style="font-size:12px;color:var(--color-text-secondary);">板块标识：<code>' + Utils.escapeHtml(section.section_key) + '</code></div>' +
+        '</div>';
+      });
+
+      html += '</div>';
+
+      Modal.show({
+        title: '编辑：' + page.title,
+        content: html,
+        confirmText: '保存全部',
+        showCancel: true,
+        contentWidth: '720px',
+        onConfirm: function() { saveSections(page.slug); }
+      });
+    } catch (e) {
+      Toast.error('加载板块失败');
+    }
+  }
+
+  async function saveSections(slug) {
+    var blocks = document.querySelectorAll('.section-block');
+    var hasError = false;
+    var savedCount = 0;
+
+    for (var i = 0; i < blocks.length; i++) {
+      var block = blocks[i];
+      var id = block.dataset.id;
+      var titleInput = block.querySelector('.section-title');
+      var contentTextarea = block.querySelector('.section-content');
+      var title = titleInput ? titleInput.value : '';
+      var content = contentTextarea ? contentTextarea.value : '';
+
+      try {
+        var result = await API.put('/admin/page-sections/' + id, { title: title, content: content });
+        if (!result.success) {
+          Toast.error('保存失败: ' + result.message);
+          hasError = true;
+          break;
+        }
+        savedCount++;
+      } catch (e) {
+        Toast.error('保存失败: ' + e.message);
+        hasError = true;
+        break;
+      }
+    }
+
+    if (!hasError) {
+      Toast.success('已保存 ' + savedCount + ' 个板块');
+    }
   }
 
   window.PagesPage = {

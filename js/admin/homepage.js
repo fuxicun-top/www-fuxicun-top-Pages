@@ -305,7 +305,7 @@
       case 'articles':
         return buildArticlesForm(config);
       case 'gallery':
-        return '<p style="color:var(--color-text-secondary);font-size:13px;">图片画廊自动从媒体库获取最新图片，无需额外配置。</p>';
+        return buildGalleryForm(config);
       case 'travel':
         return buildTravelForm(config);
       case 'custom':
@@ -459,63 +459,76 @@
   // 文章列表编辑表单
   // ==============================
   function buildArticlesForm(config) {
-    var mode = config.mode || 'auto_likes';
-    var count = config.count || 5;
     var articles = config.articles || [];
 
     var html = '<div class="form-group">' +
-      '<label class="form-label">显示文章数</label>' +
-      '<input type="number" class="form-input" id="edit-articles-count" value="' + count + '" min="1" max="20" style="width:100px;">' +
-      '<span style="font-size:12px;color:var(--color-text-secondary);margin-left:8px;">篇</span>' +
-    '</div>' +
-    '<div class="form-group">' +
-      '<label class="form-label">默认自动填充模式</label>' +
-      '<select class="form-input" id="edit-articles-mode">' +
-        '<option value="auto_likes"' + (mode === 'auto_likes' ? ' selected' : '') + '>按点赞量排行</option>' +
-        '<option value="auto_latest"' + (mode === 'auto_latest' ? ' selected' : '') + '>按最新发布</option>' +
-        '<option value="manual"' + (mode === 'manual' ? ' selected' : '') + '>仅显示手动指定的文章</option>' +
-      '</select>' +
-    '</div>' +
-    '<div class="form-group">' +
-      '<label class="form-label">文章列表 <span style="font-weight:400;color:var(--color-text-secondary);font-size:12px;">（可拖拽排序，每项可指定固定文章或自动填充方式）</span></label>' +
+      '<label class="form-label">文章列表 <span style="font-weight:400;color:var(--color-text-secondary);font-size:12px;">（每条可独立设置显示方式，添加多少显示多少）</span></label>' +
       '<div id="edit-articles-list">' +
         articles.map(function(a, i) { return buildArticleSlotRow(i, a); }).join('') +
       '</div>' +
-      '<div style="display:flex;gap:8px;margin-top:8px;">' +
-        '<button class="btn" onclick="HomepageConfig.addArticleSlot(\'custom\')">+ 指定文章</button>' +
-        '<button class="btn" onclick="HomepageConfig.addArticleSlot(\'likes\')">+ 自动(点赞)</button>' +
-        '<button class="btn" onclick="HomepageConfig.addArticleSlot(\'latest\')">+ 自动(最新)</button>' +
-      '</div>' +
+      '<button class="btn" style="margin-top:8px;" onclick="HomepageConfig.addArticleSlot()">+ 添加文章条目</button>' +
     '</div>';
     return html;
   }
 
   function buildArticleSlotRow(index, slot) {
-    if (slot.article_id) {
-      // 固定文章
-      var options = '<option value="">-- 选择文章 --</option>' +
+    var currentMode = slot.sort || (slot.article_id ? 'manual' : 'latest');
+
+    var modeSelect = '<select class="form-input article-slot-mode" data-index="' + index + '" onchange="HomepageConfig.onSlotModeChange(this)" style="width:auto;min-width:110px;">' +
+      '<option value="latest"' + (currentMode === 'latest' ? ' selected' : '') + '>最新发布</option>' +
+      '<option value="likes"' + (currentMode === 'likes' ? ' selected' : '') + '>最多点赞</option>' +
+      '<option value="views"' + (currentMode === 'views' ? ' selected' : '') + '>最多浏览</option>' +
+      '<option value="manual"' + (currentMode === 'manual' ? ' selected' : '') + '>自定义文章</option>' +
+    '</select>';
+
+    var articleSelect = '';
+    if (currentMode === 'manual') {
+      articleSelect = '<select class="form-input article-slot-article" data-index="' + index + '" style="flex:1;">' +
+        '<option value="">-- 选择文章 --</option>' +
         articlesList.map(function(a) {
           var label = (a.category_name ? '[' + a.category_name + '] ' : '') + a.title;
           var sel = a.id === slot.article_id ? ' selected' : '';
           return '<option value="' + a.id + '"' + sel + '>' + Utils.escapeHtml(Utils.truncate(label, 50)) + '</option>';
+        }).join('') +
+      '</select>';
+    }
+
+    return '<div class="article-row" data-index="' + index + '" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--color-bg-hover);border-radius:6px;margin-bottom:8px;">' +
+      '<span style="font-size:12px;color:var(--color-text-secondary);min-width:20px;">#' + (index + 1) + '</span>' +
+      modeSelect +
+      articleSelect +
+      '<button class="article-row__remove" onclick="this.parentElement.remove()" title="删除">✕</button>' +
+    '</div>';
+  }
+
+  function addArticleSlot() {
+    var container = document.getElementById('edit-articles-list');
+    var index = container.children.length;
+    var slot = { sort: 'latest' };
+    container.insertAdjacentHTML('beforeend', buildArticleSlotRow(index, slot));
+  }
+
+  function onSlotModeChange(select) {
+    var row = select.closest('.article-row');
+    var index = select.dataset.index;
+    var mode = select.value;
+
+    // 移除旧的文章选择器
+    var oldSelect = row.querySelector('.article-slot-article');
+    if (oldSelect) oldSelect.remove();
+
+    // 手动模式显示文章选择器
+    if (mode === 'manual') {
+      var articleSelect = document.createElement('select');
+      articleSelect.className = 'form-input article-slot-article';
+      articleSelect.dataset.index = index;
+      articleSelect.style.cssText = 'flex:1;';
+      articleSelect.innerHTML = '<option value="">-- 选择文章 --</option>' +
+        articlesList.map(function(a) {
+          var label = (a.category_name ? '[' + a.category_name + '] ' : '') + a.title;
+          return '<option value="' + a.id + '">' + Utils.escapeHtml(Utils.truncate(label, 50)) + '</option>';
         }).join('');
-      return '<div class="article-row" data-type="custom">' +
-        '<span style="font-size:11px;color:var(--color-primary);min-width:40px;">固定</span>' +
-        '<select class="form-input" data-slot-type="custom">' + options + '</select>' +
-        '<button class="article-row__remove" onclick="this.parentElement.remove()">✕</button>' +
-      '</div>';
-    } else {
-      // 自动填充
-      var sortMode = slot.sort || 'likes';
-      var sortLabel = sortMode === 'likes' ? '按点赞排行' : '按最新发布';
-      return '<div class="article-row" data-type="auto">' +
-        '<span style="font-size:11px;color:var(--color-text-secondary);min-width:40px;">自动</span>' +
-        '<select class="form-input" data-slot-type="auto">' +
-          '<option value="likes"' + (sortMode === 'likes' ? ' selected' : '') + '>按点赞排行</option>' +
-          '<option value="latest"' + (sortMode === 'latest' ? ' selected' : '') + '>按最新发布</option>' +
-        '</select>' +
-        '<button class="article-row__remove" onclick="this.parentElement.remove()">✕</button>' +
-      '</div>';
+      select.after(articleSelect);
     }
   }
 
@@ -527,6 +540,38 @@
     } else {
       container.insertAdjacentHTML('beforeend', buildArticleSlotRow(index, { sort: type }));
     }
+  }
+
+  // ==============================
+  // 画廊编辑表单
+  // ==============================
+  function buildGalleryForm(config) {
+    var images = config.images || [];
+
+    var html = '<div class="form-group">' +
+      '<label class="form-label">图片列表 <span style="font-weight:400;color:var(--color-text-secondary);font-size:12px;">（添加多少张前端就显示多少张）</span></label>' +
+      '<div id="gallery-images-list">' +
+        images.map(function(img, i) { return buildGalleryImageRow(i, img); }).join('') +
+      '</div>' +
+      '<button class="btn" style="margin-top:8px;" onclick="HomepageConfig.addGalleryImage()">+ 添加图片</button>' +
+    '</div>';
+    return html;
+  }
+
+  function buildGalleryImageRow(index, img) {
+    img = img || {};
+    return '<div class="gallery-image-row" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--color-bg-hover);border-radius:6px;margin-bottom:8px;">' +
+      '<span style="font-size:12px;color:var(--color-text-secondary);min-width:20px;">#' + (index + 1) + '</span>' +
+      '<input type="text" class="form-input gallery-field" data-field="url" placeholder="图片地址（URL/R2路径/静态路径）" value="' + Utils.escapeHtml(img.url || '') + '" style="flex:1;">' +
+      '<input type="text" class="form-input gallery-field" data-field="alt" placeholder="图片描述" value="' + Utils.escapeHtml(img.alt || '') + '" style="width:150px;">' +
+      (img.url ? '<img src="' + Utils.escapeHtml(img.url) + '" style="width:48px;height:48px;object-fit:cover;border-radius:4px;flex-shrink:0;" alt="" onerror="this.style.display=\'none\'">' : '') +
+      '<button class="article-row__remove" onclick="this.parentElement.remove()" title="删除">✕</button>' +
+    '</div>';
+  }
+
+  function addGalleryImage() {
+    var container = document.getElementById('gallery-images-list');
+    container.insertAdjacentHTML('beforeend', buildGalleryImageRow(container.children.length, null));
   }
 
   // ==============================
@@ -591,17 +636,31 @@
         break;
 
       case 'articles':
-        config.mode = document.getElementById('edit-articles-mode').value;
-        config.count = parseInt(document.getElementById('edit-articles-count').value) || 5;
         config.articles = [];
         document.querySelectorAll('#edit-articles-list .article-row').forEach(function(row) {
-          var select = row.querySelector('select');
-          var slotType = select.dataset.slotType;
-          if (slotType === 'custom') {
-            var val = select.value;
-            config.articles.push({ article_id: val ? parseInt(val) : null });
+          var modeSelect = row.querySelector('.article-slot-mode');
+          var articleSelect = row.querySelector('.article-slot-article');
+          var mode = modeSelect ? modeSelect.value : 'latest';
+          if (mode === 'manual' && articleSelect && articleSelect.value) {
+            config.articles.push({ sort: 'manual', article_id: parseInt(articleSelect.value) });
           } else {
-            config.articles.push({ sort: select.value });
+            config.articles.push({ sort: mode });
+          }
+        });
+        // 兼容旧格式：设置 mode 和 count
+        config.mode = 'auto_latest';
+        config.count = config.articles.length;
+        break;
+
+      case 'gallery':
+        config.images = [];
+        document.querySelectorAll('#gallery-images-list .gallery-image-row').forEach(function(row) {
+          var urlInput = row.querySelector('.gallery-field[data-field="url"]');
+          var altInput = row.querySelector('.gallery-field[data-field="alt"]');
+          var url = urlInput ? urlInput.value.trim() : '';
+          var alt = altInput ? altInput.value.trim() : '';
+          if (url) {
+            config.images.push({ url: url, alt: alt });
           }
         });
         break;
@@ -647,6 +706,8 @@
     deleteModule: deleteModule,
     addIntroCard: addIntroCard,
     addArticleSlot: addArticleSlot,
+    onSlotModeChange: onSlotModeChange,
+    addGalleryImage: addGalleryImage,
     addTravelCard: addTravelCard,
     addBannerItem: addBannerItem,
     confirmEdit: confirmEdit

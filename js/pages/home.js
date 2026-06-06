@@ -210,7 +210,7 @@
       async function fetchAutoList(sortType) {
         if (sortType === 'likes' && autoCacheLikes) return autoCacheLikes;
         if (sortType === 'latest' && autoCacheLatest) return autoCacheLatest;
-        var sortParam = sortType === 'likes' ? 'likes' : '';
+        var sortParam = sortType === 'likes' ? 'likes' : sortType === 'views' ? 'views' : '';
         var list = [];
         if (categories.length > 0) {
           // 按分类过滤：分别获取各分类文章后合并去重
@@ -226,6 +226,8 @@
           // 按排序字段重新排序
           if (sortType === 'likes') {
             list.sort(function(a, b) { return b.likes - a.likes; });
+          } else if (sortType === 'views') {
+            list.sort(function(a, b) { return b.views - a.views; });
           } else {
             list.sort(function(a, b) { return new Date(b.published_at) - new Date(a.published_at); });
           }
@@ -234,7 +236,7 @@
           list = (res.success && res.data.list) ? res.data.list : [];
         }
         if (sortType === 'likes') autoCacheLikes = list;
-        else autoCacheLatest = list;
+        else if (sortType === 'latest') autoCacheLatest = list;
         return list;
       }
 
@@ -249,39 +251,26 @@
       }
 
       // 按 slots 配置逐个填充
-      if (slots.length > 0) {
-        for (var i = 0; i < slots.length && articles.length < count; i++) {
-          var slot = slots[i];
-          if (slot.article_id) {
-            // 固定文章
-            var article = await fetchArticle(slot.article_id);
-            if (article && !usedIds.has(article.id)) {
-              articles.push(article);
-              usedIds.add(article.id);
-            }
-          } else {
-            // 自动填充（按 slot 指定的 sort，或用模块默认 mode）
-            var sortType = slot.sort || (mode === 'auto_likes' ? 'likes' : 'latest');
-            var autoArticle = await getNextAutoArticle(sortType);
-            if (autoArticle) {
-              articles.push(autoArticle);
-              usedIds.add(autoArticle.id);
-            }
+      for (var i = 0; i < slots.length && articles.length < count; i++) {
+        var slot = slots[i];
+        if (slot.article_id) {
+          // 固定文章
+          var article = await fetchArticle(slot.article_id);
+          if (article && !usedIds.has(article.id)) {
+            articles.push(article);
+            usedIds.add(article.id);
           }
-        }
-      } else {
-        // 无 slots 配置，按 count 和 mode 自动填充
-        if (mode !== 'manual') {
-          var sortP = mode === 'auto_likes' ? 'likes' : 'latest';
-          var list2 = await fetchAutoList(sortP);
-          for (var j = 0; j < list2.length && articles.length < count; j++) {
-            if (!usedIds.has(list2[j].id)) {
-              articles.push(list2[j]);
-              usedIds.add(list2[j].id);
-            }
+        } else {
+          // 自动填充（按 slot 指定的 sort，或用模块默认 mode）
+          var sortType = slot.sort || (mode === 'auto_likes' ? 'likes' : 'latest');
+          var autoArticle = await getNextAutoArticle(sortType);
+          if (autoArticle) {
+            articles.push(autoArticle);
+            usedIds.add(autoArticle.id);
           }
         }
       }
+      // slots 为空时不自动填充，显示空列表
 
       var container = document.getElementById(containerId);
       if (!container) return;
@@ -354,8 +343,19 @@
   // 图片画廊模块
   // ==============================
   function renderGalleryModule(module) {
+    var config = module.config || {};
     var containerId = 'gallery-module-' + module.id;
-    loadGalleryForModule(containerId);
+    var images = config.images || [];
+
+    // 生成图片 HTML
+    var imagesHtml = '';
+    if (images.length > 0) {
+      imagesHtml = images.map(function(img) {
+        return '<div class="gallery-item">' +
+          '<img src="' + Utils.escapeHtml(img.url) + '" alt="' + Utils.escapeHtml(img.alt || '福溪村风光') + '" loading="lazy">' +
+        '</div>';
+      }).join('');
+    }
 
     return '<section class="home-section home-section--gray">' +
       '<div class="container">' +
@@ -364,48 +364,12 @@
           '<a href="/gallery.html" class="section-more">查看更多 →</a>' +
         '</div>' +
         '<div class="gallery-grid" id="' + containerId + '">' +
-          '<div style="text-align:center;padding:20px;color:var(--color-text-placeholder);grid-column:1/-1;">加载中...</div>' +
+          (imagesHtml || '<div style="text-align:center;padding:20px;color:var(--color-text-placeholder);grid-column:1/-1;">暂无图片</div>') +
         '</div>' +
       '</div>' +
     '</section>';
   }
 
-  async function loadGalleryForModule(containerId) {
-    try {
-      var result = await API.get('/media', { page: 1, pageSize: 8, type: 'image' });
-      var container = document.getElementById(containerId);
-      if (!container) return;
-
-      if (result.success && result.data.list && result.data.list.length > 0) {
-        container.innerHTML = result.data.list.map(function(img) {
-          return '<div class="gallery-item">' +
-            '<img src="' + (img.url || '/images/default/gallery.svg') + '" alt="' + Utils.escapeHtml(img.original_name || '福溪村风光') + '" loading="lazy">' +
-          '</div>';
-        }).join('');
-      } else {
-        renderDefaultGallery(container);
-      }
-    } catch (e) {
-      var c = document.getElementById(containerId);
-      if (c) renderDefaultGallery(c);
-    }
-  }
-
-  function renderDefaultGallery(container) {
-    var defaultImages = [
-      { src: '/images/scenery/ancient-architecture.png', alt: '古建筑群' },
-      { src: '/images/culture/ai-lian-tang.png', alt: '爱莲堂' },
-      { src: '/images/culture/lecture.png', alt: '讲学堂' },
-      { src: '/images/ethnic/dance.svg', alt: '民俗活动' },
-      { src: '/images/ethnic/yao-people.svg', alt: '瑶族风情' },
-      { src: '/images/about/village-overview.svg', alt: '福溪全景' }
-    ];
-    container.innerHTML = defaultImages.map(function(img) {
-      return '<div class="gallery-item">' +
-        '<img src="' + img.src + '" alt="' + Utils.escapeHtml(img.alt) + '" loading="lazy">' +
-      '</div>';
-    }).join('');
-  }
 
   // ==============================
   // 旅游指南模块

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>页面文章管理 - 福溪村后台</title>
+  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
+  <link rel="stylesheet" href="/css/common/reset.css">
+  <link rel="stylesheet" href="/css/common/variables.css">
+  <link rel="stylesheet" href="/css/common/typography.css">
+  <link rel="stylesheet" href="/css/common/utilities.css">
+  <link rel="stylesheet" href="/css/components/form.css">
+  <link rel="stylesheet" href="/css/components/modal.css">
+  <link rel="stylesheet" href="/css/admin/admin-layout.css">
+  <script src="/js/common/theme-loader.js"></script>
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
+    <div class="admin-main">
+      <header class="admin-header" id="admin-header"></header>
+      <main class="admin-content">
+        <div style="max-width:900px;">
+          <h2 style="font-size:20px;font-weight:600;margin-bottom:8px;">页面文章管理</h2>
+          <p style="color:var(--color-text-secondary);font-size:14px;margin-bottom:24px;">管理各内容页面底部显示的相关文章</p>
+
+          <!-- 页面选择标签 -->
+          <div class="page-tabs" id="page-tabs">
+            <button class="page-tab active" data-slug="about">走进福溪</button>
+            <button class="page-tab" data-slug="culture">理学文化</button>
+            <button class="page-tab" data-slug="scenery">古村风貌</button>
+            <button class="page-tab" data-slug="ethnic">民族文化</button>
+            <button class="page-tab" data-slug="travel">旅游指南</button>
+          </div>
+
+          <!-- 文章列表 -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <label style="font-weight:600;">文章列表</label>
+            <button class="btn btn-primary btn-sm" onclick="PageArticles.showAddModal()">+ 添加文章</button>
+          </div>
+          <div id="article-list"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <style>
+    .page-tabs { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+    .page-tab { padding:8px 20px; border:1px solid var(--color-border); border-radius:var(--radius-full); background:var(--color-bg-card); cursor:pointer; font-size:14px; white-space:nowrap; }
+    .page-tab.active { background:var(--color-primary); color:#fff; border-color:var(--color-primary); }
+    .article-slot { padding:16px; background:var(--color-bg-card); border:1px solid var(--color-border); border-radius:var(--radius-base); margin-bottom:12px; }
+    .article-slot__header { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .article-slot__num { font-size:12px; font-weight:600; color:var(--color-text-secondary); min-width:24px; }
+    .article-info { font-size:13px; color:var(--color-text-secondary); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .article-info--auto { font-style:italic; }
+    .article-slot__delete { color:var(--color-danger); cursor:pointer; font-size:16px; padding:4px 8px; border:none; background:none; }
+    .article-slot__delete:hover { background:rgba(231,76,60,0.1); border-radius:4px; }
+    .article-slot__detail { margin-top:8px; }
+    .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+    .tag--manual { background:#e8f5e9; color:#2e7d32; }
+    .tag--latest { background:#e3f2fd; color:#1565c0; }
+    .tag--likes { background:#fff3e0; color:#e65100; }
+    .add-modal__list { max-height:400px; overflow-y:auto; }
+    .add-modal__item { display:flex; align-items:center; gap:12px; padding:10px; cursor:pointer; border-bottom:1px solid var(--color-border); }
+    .add-modal__item:hover { background:var(--color-bg-hover); }
+    .add-modal__item-title { font-size:14px; }
+    .add-modal__item-cat { font-size:12px; color:var(--color-text-secondary); }
+  </style>
+
+  <script src="/js/common/config.js"></script>
+  <script src="/js/common/storage.js"></script>
+  <script src="/js/common/utils.js"></script>
+  <script src="/js/common/api.js"></script>
+  <script src="/js/common/auth.js"></script>
+  <script src="/js/common/toast.js"></script>
+  <script src="/js/components/modal.js"></script>
+  <script src="/js/admin/admin.js"></script>
+  <script src="/js/admin/page-articles.js"></script>
+</body>
+</html>

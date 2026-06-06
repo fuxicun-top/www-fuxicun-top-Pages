@@ -70,7 +70,7 @@ export async function onRequest(context) {
     }
 
     // 公开接口（无需认证）：分类、轮播图、网站配置、导航菜单、首页模块、自定义页面
-    if (['/categories', '/banners', '/config', '/nav', '/media', '/home-modules'].includes(path) || path.startsWith('/pages/')) {
+    if (['/categories', '/banners', '/config', '/nav', '/media', '/home-modules', '/page-articles', '/page-sections'].includes(path) || path.startsWith('/pages/')) {
       return await handlePublic(request, env, path, method);
     }
 

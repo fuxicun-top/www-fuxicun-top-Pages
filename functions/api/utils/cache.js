@@ -30,10 +30,10 @@ export async function isCacheEnabled(env) {
   if (!env.FUXICUN_KV) return false;
   try {
     const val = await env.FUXICUN_KV.get('setting:cache_enabled');
-    if (val === null) return true; // 默认启用
+    if (val === null) return false; // 默认关闭
     return val === 'true';
   } catch (e) {
-    return true; // KV 异常时默认启用
+    return false; // KV 异常时默认关闭
   }
 }
 

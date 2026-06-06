@@ -229,6 +229,8 @@ async function createAdmin(request, env) {
     try {
       await db.prepare("INSERT INTO articles (title, slug, content, category_id, author_id, status) VALUES ('_test', '_test', 'test', 1, ?, 'draft')").bind(adminId).run();
       await db.prepare("DELETE FROM articles WHERE slug = '_test'").run();
+      // 重置自增计数器，确保种子文章从 ID=1 开始
+      try { await db.prepare("DELETE FROM sqlite_sequence WHERE name = 'articles'").run(); } catch (e) {}
       console.log('FK 测试通过，开始插入种子数据');
     } catch (fkErr) {
       console.error('FK 测试失败:', fkErr.message);

@@ -282,6 +282,31 @@
     script.textContent = JSON.stringify(jsonLd, null, 2);
   }
 
+  // 简易 Markdown 渲染器
+  function renderMarkdown(md) {
+    if (!md) return '';
+    // 如果内容已经是 HTML，直接返回
+    if (/<[a-z][\s\S]*>/i.test(md)) return md;
+    // Markdown 转 HTML
+    var html = md
+      .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;border-radius:4px;">')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color:var(--color-primary);">$1</a>')
+      .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+      .replace(/^---$/gm, '<hr style="border:none;border-top:1px solid #ddd;margin:16px 0;">')
+      .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>')
+      .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+    return '<p>' + html + '</p>';
+  }
+
   /**
    * 设置或更新 meta 标签
    * @param {string} property - 属性名（property 或 name）
@@ -334,7 +359,7 @@
       '</div>' +
     '</div>' +
     cover +
-    '<div class="article-detail__content">' + article.content + '</div>' +
+    '<div class="article-detail__content">' + renderMarkdown(article.content) + '</div>' +
     '<div class="article-detail__actions">' +
       '<button class="btn-like" id="btn-like">' +
         '<span>&#9829;</span> <span id="like-count">' + (article.likes || 0) + '</span>' +

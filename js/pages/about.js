@@ -7,7 +7,29 @@
   'use strict';
 
   function init() {
+    loadSections();
     loadRelatedArticles();
+  }
+
+  // 从 API 加载板块内容并注入页面
+  async function loadSections() {
+    try {
+      var result = await API.get('/page-sections', { slug: 'about' });
+      if (result.success && result.data && result.data.length > 0) {
+        result.data.forEach(function(section) {
+          // 更新板块标题
+          if (section.title) {
+            var titleEl = document.querySelector('[data-section-title="' + section.section_key + '"]');
+            if (titleEl) titleEl.textContent = section.title;
+          }
+          // 更新板块内容
+          var el = document.querySelector('[data-section="' + section.section_key + '"]');
+          if (el && section.content) {
+            el.innerHTML = section.content;
+          }
+        });
+      }
+    } catch (e) { /* API 不可用，使用默认 HTML 内容 */ }
   }
 
   async function loadRelatedArticles() {
@@ -15,13 +37,15 @@
     if (!container) return;
 
     try {
-      var result = await API.get('/articles', { category: 'village-news', pageSize: 6 });
-      if (result.success && result.data.list && result.data.list.length > 0) {
-        renderArticles(container, result.data.list);
+      var result = await API.get('/page-articles', { slug: 'about' });
+      if (result.success && result.data && result.data.articles && result.data.articles.length > 0) {
+        renderArticles(container, result.data.articles);
+        return;
       }
-    } catch (e) {
-      console.error('加载相关文章失败:', e);
-    }
+    } catch (e) { /* API 不可用 */ }
+    // 无文章条目时隐藏整个板块
+    var section = container.closest('.content-section');
+    if (section) section.style.display = 'none';
   }
 
   function renderArticles(container, articles) {

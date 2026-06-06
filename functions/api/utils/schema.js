@@ -163,6 +163,26 @@ export const CREATE_TABLES_SQL = [
     protected INTEGER NOT NULL DEFAULT 0,
     config TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+  // 内容页面相关文章表
+  `CREATE TABLE IF NOT EXISTS page_articles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_slug TEXT NOT NULL,
+    article_id INTEGER,
+    mode TEXT NOT NULL DEFAULT 'manual' CHECK(mode IN ('manual','latest','likes','views')),
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+  // 内容页面板块表
+  `CREATE TABLE IF NOT EXISTS page_sections (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_slug TEXT NOT NULL,
+    section_key TEXT NOT NULL,
+    title TEXT,
+    content TEXT,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(page_slug, section_key)
   )`
 ];
 
@@ -176,6 +196,7 @@ export const CREATE_INDEXES_SQL = [
   'CREATE INDEX IF NOT EXISTS idx_articles_status ON articles(status)',
   'CREATE INDEX IF NOT EXISTS idx_articles_published_at ON articles(published_at)',
   'CREATE INDEX IF NOT EXISTS idx_comments_article ON comments(article_id)',
+  'CREATE INDEX IF NOT EXISTS idx_page_articles_slug ON page_articles(page_slug)',
   'CREATE INDEX IF NOT EXISTS idx_comments_user ON comments(user_id)',
   'CREATE INDEX IF NOT EXISTS idx_likes_article ON likes(article_id)',
   'CREATE INDEX IF NOT EXISTS idx_likes_user ON likes(user_id)',
@@ -200,6 +221,15 @@ export const SEED_DATA_SQL = [
     ('通知公告', 'announcements', '村委会通知与重要公告', 7),
     ('村民分享', 'villager-share', '村民生活分享与交流', 8),
     ('游客分享', 'visitor-share', '游客游记与体验分享', 9)`,
+  // 系统页面（内容页面，对应静态 HTML 文件）
+  `INSERT OR IGNORE INTO pages (id, title, slug, content, cover_image, status) VALUES
+    (1, '走进福溪', 'about', '千年古村 · 理学圣地 · 三省通衢', '/images/about/village-overview.svg', 'published'),
+    (2, '理学文化', 'culture', '北宋理学鼻祖周敦颐讲学堂、爱莲堂、周氏宗祠', '/images/culture/zhou-dunyi.png', 'published'),
+    (3, '古村风貌', 'scenery', '120 根木柱、24 座古戏台、门楣石雕、风雨桥', '/images/scenery/ancient-architecture.png', 'published'),
+    (4, '民族文化', 'ethnic', '瑶族风情、盘王节、火把节、芦笙长鼓舞', '/images/ethnic/yao-people.svg', 'published'),
+    (5, '旅游指南', 'travel', '2 天 1 晚串联潇贺古道三村', '/images/scenery/ancient-architecture.png', 'published'),
+    (6, '新闻动态', 'news', '村务公告 · 活动资讯 · 媒体报道', '/images/banners/banner1.svg', 'published'),
+    (7, '全部文章', 'articles', '新闻动态、理学文化、古建筑、民俗风情、旅游攻略、村民故事', '/images/banners/banner1.svg', 'published')`,
   // 网站配置
   `INSERT OR IGNORE INTO site_config (key, value) VALUES
     ('site_name', '福溪村'),
@@ -225,7 +255,7 @@ export const SEED_DATA_SQL = [
     ('home_news', '{"1":null,"2":null,"3":null,"4":null}'),
     ('install_password_hash', ''),
     ('rate_limit_exempt_ips', '127.0.0.1'),
-    ('cache_enabled', 'true')`,
+    ('cache_enabled', 'false')`,
   // 默认导航
   `INSERT OR IGNORE INTO nav_items (name, url, sort_order, status, is_external) VALUES
     ('首页', '/', 1, 'active', 0),
@@ -244,10 +274,10 @@ export const SEED_DATA_SQL = [
   // 默认首页模块（protected=1 表示系统默认模块，不可删除）
   `INSERT OR IGNORE INTO home_modules (id, type, title, subtitle, sort_order, status, protected, config) VALUES
     (1, 'banner', '轮播图', NULL, 1, 'active', 1, '{}'),
-    (2, 'intro', '走进福溪村', '千年古村 · 理学圣地 · 瑶族风情', 2, 'active', 1, '{"description":"福溪村位于广西贺州市富川瑶族自治县朝东镇，地处湘、桂、粤三省交界，自古有“三省通衢”之称。村落始建于宋代，距今已有千年历史，2012年列入首批中国传统村落名录。这里是宋代理学鼻祖周敦颐后裔聚居地，村中保存有纪念性讲学堂遗址，以及120根木柱撑起的明清古建筑群、24座古戏台遗存和千年风雨桥，是瑶汉文化融合的活态博物馆。","cards":[{"title":"古建筑群","desc":"120根木柱撑起的明清古建筑群，门楣石雕融合理学家训与瑶族图腾，马头墙、青砖黛瓦展现岭南建筑与瑶族智慧的完美融合。","icon":"🏛️","link":"/scenery.html"},{"title":"理学文化",“desc”:”宋代理学鼻祖周敦颐后裔聚居地，纪念性讲学堂遗址、爱莲堂、周氏宗祠构成完整的理学文化轴，”出淤泥而不染”的精神代代相传。”,"icon":"📚","link":"/culture.html"},{"title":"瑶族风情","desc":"千年瑶汉融合的活态博物馆，火把节、盘王节、芦笙长鼓舞、二声部民歌，体验多彩民族风情。","icon":"🎭","link":"/ethnic.html"}]}'),
+    (2, 'intro', '走进福溪村', '千年古村 · 理学圣地 · 瑶族风情', 2, 'active', 1, '{"description":"福溪村位于广西贺州市富川瑶族自治县朝东镇，地处湘、桂、粤三省交界，自古有「三省通衢」之称。村落始建于宋代，距今已有千年历史，2012年列入首批中国传统村落名录。这里是宋代理学鼻祖周敦颐后裔聚居地，村中保存有纪念性讲学堂遗址，以及120根木柱撑起的明清古建筑群、24座古戏台遗存和千年风雨桥，是瑶汉文化融合的活态博物馆。","cards":[{"title":"理学文化","desc":"宋代理学鼻祖周敦颐后裔聚居地，纪念性讲学堂遗址、爱莲堂、周氏宗祠构成完整的理学文化轴，「出淤泥而不染」的精神代代相传。","icon":"📚","link":"/culture.html"},{"title":"古建筑群","desc":"120根木柱撑起的明清古建筑群，门楣石雕融合理学家训与瑶族图腾，马头墙、青砖黛瓦展现岭南建筑与瑶族智慧的完美融合。","icon":"🏛️","link":"/scenery.html"},{"title":"瑶族风情","desc":"千年瑶汉融合的活态博物馆，火把节、盘王节、芦笙长鼓舞、二声部民歌，体验多彩民族风情。","icon":"🎭","link":"/ethnic.html"}]}'),
     (3, 'articles', '精选推荐', NULL, 3, 'active', 1, '{"mode":"auto_likes","count":5,"articles":[{"sort":"likes"},{"sort":"likes"},{"sort":"likes"},{"sort":"likes"},{"sort":"likes"}]}'),
     (4, 'articles', '新闻动态', NULL, 4, 'active', 1, '{"mode":"auto_latest","count":4,"categories":["announcements","village-news"],"articles":[{"sort":"latest"},{"sort":"latest"},{"sort":"latest"},{"sort":"latest"}]}'),
-    (5, 'gallery', '福溪印象', NULL, 5, 'active', 1, '{}'),
+    (5, 'gallery', '福溪印象', NULL, 5, 'active', 1, '{"images":[{"url":"/images/scenery/ancient-architecture.png","alt":"古建筑群"},{"url":"/images/culture/ai-lian-tang.png","alt":"爱莲堂"},{"url":"/images/culture/lecture.png","alt":"讲学堂"},{"url":"/images/ethnic/dance.svg","alt":"民俗活动"},{"url":"/images/ethnic/yao-people.svg","alt":"瑶族风情"},{"url":"/images/about/village-overview.svg","alt":"福溪全景"}]}'),
     (6, 'travel', '旅游指南', '来福溪村，感受千年古村的魅力', 6, 'active', 1, '{"cards":[{"icon":"🚗","title":"交通指南","desc":"自驾：永贺高速、国道207、省道203均可到达，距贺州市约1小时车程。铁路：洛湛铁路富川站直达。"},{"icon":"🏠","title":"住宿推荐","desc":"村内有特色民宿可体验古村生活，也可选择富川县城酒店，车程约40分钟。"},{"icon":"🍜","title":"美食推荐","desc":"瑶族油茶、富川三角饺、果条、瑶族腊肉，秋季可品尝富川脐橙和油桃。"},{"icon":"📸","title":"必打卡点","desc":"周敦颐讲学堂（纪念建筑，非原址原貌）、爱莲堂、风雨桥、120根木柱古建筑、门楣石雕、青石板古街。"}]}')`
 ];
 
@@ -266,6 +296,43 @@ export const ARTICLES_SEED_SQL = [
     ('关于福溪村官方网站正式上线的公告', 'fuxicun-guanwang-shangxian', '<h2>网站正式上线</h2><p>经村委会研究决定，<strong>福溪村官方网站</strong>（www.fuxicun.top）即日起正式上线运行。本站系统展示福溪村千年历史文化、古建筑风貌、瑶族民俗风情与旅游服务信息，支持游客与注册用户两种互动方式。</p><h2>关于福溪村</h2><p>福溪村位于广西贺州市富川瑶族自治县朝东镇，地处湘、桂、粤三省交界，自古有"三省通衢"之称。村落始建于宋代，距今已有千年历史，2012年列入首批中国传统村落名录。这里是宋代理学鼻祖周敦颐后裔聚居地，村中保存有纪念性讲学堂遗址，以及120根木柱撑起的明清古建筑群、24座古戏台遗存、千年风雨桥和潇贺古道遗迹，是瑶汉文化融合的活态博物馆。</p><h2>网站主要栏目</h2><ul><li><strong>走进福溪</strong>：村庄概况、历史沿革、地理区位</li><li><strong>理学文化</strong>：周敦颐讲学堂、爱莲堂、周氏宗祠、理学思想传承</li><li><strong>古村风貌</strong>：120根木柱建筑、门楣石雕、风雨桥、古戏台、青石板古街</li><li><strong>民族文化</strong>：瑶族传统、盘王节、火把节、芦笙长鼓舞、二声部民歌</li><li><strong>旅游指南</strong>：交通、住宿、美食、行程推荐、最佳时节</li><li><strong>新闻动态</strong>：村内新闻、活动资讯、媒体报道</li></ul><h2>联系我们</h2><p>如有任何问题或建议，欢迎通过网站联系我们。福溪村期待您的到来！</p>', '福溪村官方网站正式上线。本站系统展示福溪历史文化、古建筑、民族风情与旅游信息，支持游客与注册用户两种互动方式。', '/images/about/village-overview.svg', 7, 1, 'published', datetime('now')),
     ('福溪村的清晨：青石板路上的烟火气', 'fuxicun-qingchen-yanhuoqi', '<h2>清晨五点半的福溪</h2><p>天刚蒙蒙亮，福溪村的青石板路上已经响起了脚步声。村里上了年纪的老人习惯早起，趁着凉快去菜地里摘菜。阿婆挑着两筐新鲜的豆角和苦瓜，从风雨桥那头慢慢走过来，桥下的溪水哗哗作响。</p><h2>老屋里的早餐</h2><p>我家老屋是典型的福溪古民居——<strong>120根木柱</strong>撑起的木构建筑，冬暖夏凉。奶奶一大早就熬好了<strong>瑶族油茶</strong>，配上自家做的<strong>果条</strong>，这就是福溪人最地道的早餐。油茶用茶叶和生姜为主料，捣碎后加水煮开，喝一口又香又提神。</p><h2>门楣下的故事</h2><p>吃完早饭，我习惯在村里走走。每家每户的门楣上都有精美的石雕，刻着莲花、"诚"字和各种图案。奶奶说这些是老祖宗留下来的家训，教后人做人的道理。2025年央视来拍过这些门楣，说是"石头里的家训"。现在村里年轻人大多外出打工了，但每逢过年过节，大家都会回来，在<strong>周氏宗祠</strong>里祭祖、唱戏、闹元宵。</p><h2>守望千年古村</h2><p>我是一名普通的福溪村民，生在这里长在这里。虽然外面的世界很精彩，但每次回到福溪，走在青石板路上，听着溪水声和鸟叫声，心里就觉得踏实。希望更多人能来福溪看看，感受这份千年传承的宁静与美好。</p>', '福溪村民分享清晨的古村生活：油茶早餐、门楣石雕、青石板路、风雨桥，感受千年古村的烟火气。', 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800', 8, 1, 'published', datetime('now', '-3 days')),
     ('自驾福溪古村：两天一夜的潇贺古道之旅', 'zijia-fuxicun-xiaohe-gudao', '<h2>为什么选择福溪村</h2><p>作为一个喜欢探访古村落的旅行爱好者，福溪村在我的清单上已经很久了。这个位于<strong>广西贺州市富川瑶族自治县</strong>的千年古村，2012年列入首批中国传统村落，是宋代理学鼻祖<strong>周敦颐后裔</strong>的聚居地。从广州出发，走永贺高速大约4小时就能到达。</p><h2>第一天：福溪深度游</h2><p>上午抵达福溪，第一眼就被<strong>风雨桥</strong>震撼到了——这座横跨溪水的廊桥是瑶族建筑的代表作。过了桥就是青石板古街，两旁是保存完好的明清古民居。最让我惊叹的是<strong>120根木柱</strong>撑起的古建筑群，以及每家门楣上精美的石雕，融合了理学家训和瑶族图腾。下午参观了<strong>周敦颐讲学堂遗址</strong>（纪念建筑）和<strong>爱莲堂</strong>，感受到了理学文化在岭南的深厚根基。</p><h2>第二天：串联潇贺古道</h2><p>第二天沿着潇贺古道去了<strong>岔山村</strong>和<strong>秀水状元村</strong>。岔山是"潇贺古道入桂第一村"，可以体验瑶族服饰和品尝油茶、梭子粑粑。秀水有1300多年历史，出过1名状元27名进士。下午返回途中去了<strong>富川古明城</strong>，鹅卵石老街很有味道。</p><h2>实用攻略</h2><p><strong>交通</strong>：自驾最方便，永贺高速、国道207均可到达。<strong>住宿</strong>：村内有特色民宿，也可住富川县城。<strong>美食</strong>：必尝瑶族油茶、富川三角饺、果条。<strong>最佳时间</strong>：春秋两季最舒适，正月十五有火把节。强烈推荐给喜欢古村落和民族文化的朋友们！</p>', '自驾两天一夜游福溪村：风雨桥、120根木柱古建筑、门楣石雕、潇贺古道串联岔山秀水，完整攻略分享。', 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800', 9, 1, 'published', datetime('now', '-2 days'))`
+];
+
+/**
+ * 内容页面板块种子数据
+ * 每个页面的可编辑文本板块
+ */
+export const PAGE_SECTIONS_SEED_SQL = [
+  // 走进福溪
+  `INSERT OR IGNORE INTO page_sections (page_slug, section_key, title, content, sort_order) VALUES
+    ('about', 'intro', '千年古村 · 三省通衢', '<p>福溪村位于<strong>广西贺州市富川瑶族自治县朝东镇</strong>（东经 111°16′，北纬 24°49′），距县城 40 公里、贺州市区 100 公里，与湖南江华瑶族自治县相邻，地处<strong>湘、桂、粤三省交界</strong>，自古号"三省通衢"。</p><p>始建于宋代，距今<strong>千余年</strong>历史，是<strong>首批中国传统村落</strong>（2012 年 12 月 17 日列入）。村中保存有<strong>120 根木柱撑起</strong>的传统木构、明清古民居、周氏宗祠、风雨桥（廊桥）、青石板古道与精美门楣石刻，<strong>鼎盛时期曾有古戏台 24 座</strong>，是潇贺古道沿线戏曲文化最繁盛的节点之一。</p><p>2025 年 2 月 17 日，央视新闻"文化中国行"以《<strong>千年古村 山水人和</strong>》为题专题报道；同日共产党员网以<strong>《门楣之上》</strong>为专题展示村中门楣石雕；同年 7 月红网视频再次报道，将福溪与岔山、秀水并称为"潇贺古道上散落的明珠"。</p>', 1),
+    ('about', 'history', '历史沿革', '<p><strong>五代</strong>：楚王马殷率部至此协助剿匪，留下124名汉族士兵驻守，与原本的瑶族居民共同奠定了瑶汉融合的村落基础。</p><p><strong>宋代</strong>：福溪村正式形成规模。同期周敦颐（1017–1073）出生于潇贺古道北端的湖南道县，其父周辅成曾任贺州桂岭县令，理学思想沿潇贺古道南下传至福溪。</p><p><strong>元—清</strong>：福溪作为潇贺古道沿线节点，商旅往来频繁。鼎盛时期村中曾有古戏台24座，桂剧、彩调、祁剧交汇上演。</p><p><strong>2012年</strong>：12月17日，福溪村被列入第一批中国传统村落名录。</p><p><strong>2022年</strong>：富川瑶族自治县入选"传统村落集中连片保护利用示范县"，福溪古建筑群得到系统性修缮。</p><p><strong>2025年</strong>：央视《文化中国行》、共产党员网《门楣之上》、红网接连报道，福溪走入全国视野。</p>', 2),
+    ('about', 'data', '村庄数据', '<p><strong>1000+</strong> 年历史（宋代起）</p><p><strong>24</strong> 鼎盛期古戏台</p><p><strong>120</strong> 木柱建筑结构</p><p><strong>2012</strong> 首批中国传统村落</p>', 3),
+    ('about', 'culture', '特色文化', '<p><strong>理学文化</strong>：理学鼻祖周敦颐讲学传承之地。爱莲堂、周氏宗祠承载"出淤泥而不染"的理学精神，村中周姓多为周敦颐后裔。</p><p><strong>古建筑艺术</strong>：明清古民居、风雨桥、马头墙、青石板古街、24座古戏台遗存与精美门楣石刻 —— 岭南建筑与瑶族建筑深度融合的活化石。</p><p><strong>潇贺古道</strong>：秦代（公元前219年）开辟的"楚粤通衢"，连接长江与珠江两大水系。2013年湘桂古道列为全国重点文物保护单位，福溪正在沿线。</p><p><strong>瑶族风情</strong>：盘王节、千年火把节习俗、芦笙长鼓舞、瑶族二声部民歌等非遗活态展演 —— 瑶汉文化在福溪和谐共生。</p>', 4)`,
+  // 理学文化
+  `INSERT OR IGNORE INTO page_sections (page_slug, section_key, title, content, sort_order) VALUES
+    ('culture', 'biography', '周敦颐 · 北宋理学鼻祖', '<p><strong>周敦颐</strong>（1017–1073），字茂叔，号濂溪，世称濂溪先生，<strong>北宋"五子"之一</strong>（与邵雍、张载、程颢、程颐并列），宋代理学开山祖师。著有《<strong>太极图说</strong>》《<strong>通书</strong>》《<strong>爱莲说</strong>》。</p><p>父亲<strong>周辅成</strong>（1015 年进士）官至贺州<strong>桂岭县令</strong>，与富川同属贺州；周敦颐本人出生于湖南道州（今道县），即<strong>潇贺古道北端</strong>。其理学思想沿古道南传至福溪，村中周姓为其后裔 ——<strong>周恩来</strong>系第 33 代孙，<strong>鲁迅</strong>（周树人）亦为后裔。</p>', 1),
+    ('culture', 'lecture_hall', '讲学堂与爱莲堂', '<p>福溪村保存有<strong>宋代理学鼻祖周敦颐讲学堂</strong>遗址（现存建筑<strong>"濂溪祠"</strong>或宗族祠堂，后世村内各氏族人为纪念先祖而修建的纪念性建筑，并非宋代原址原貌）—— 这是村中最重要的文化 IP，也是研究周敦颐理学在岭南传播的关键实物载体。讲学堂之畔便是<strong>爱莲堂</strong>，"出淤泥而不染，濯清涟而不妖"的莲花意象在此具象为堂前莲池、堂内雕饰。</p><p>讲学堂、爱莲堂与<strong>周氏宗祠</strong>共同构成村中的"理学文化轴"。每逢重要节日，周姓族人在此祭祖、诵读《爱莲说》《太极图说》，将"诚为本、莲为志"的家风一代代传下去。</p>', 2)`,
+  // 古村风貌
+  `INSERT OR IGNORE INTO page_sections (page_slug, section_key, title, content, sort_order) VALUES
+    ('scenery', 'architecture', '120 根木柱 · 千年匠心', '<p>福溪古建筑群以独特的<strong>"120 根木柱撑起"</strong>木构体系闻名，融合岭南建筑的<strong>马头墙（封火墙）</strong>、青砖黛瓦，与瑶族建筑的<strong>风雨桥</strong>结构。明清古民居、周氏宗祠、爱莲堂、24 座古戏台、青石板古街、鹅卵石巷道、精美门楣石刻共同构成完整的传统村落肌理。</p><p>2025 年央视新闻"文化中国行"以《千年古村 山水人和》为题报道；同期共产党员网以<strong>《门楣之上》</strong>为专题，专门展示福溪门楣雕刻艺术 —— 那些静静凝视百年时光的石雕，是福溪最具辨识度的视觉符号。</p>', 1)`,
+  // 民族文化
+  `INSERT OR IGNORE INTO page_sections (page_slug, section_key, title, content, sort_order) VALUES
+    ('ethnic', 'yao_intro', '瑶族 · 勉的人民', '<p>瑶族自称<strong>"勉"（Mien）</strong>，是中国最古老的民族之一，全球总人口约 350 万，其中中国境内约 282 万（广西约 147 万，占全国 62%）。始祖传说为<strong>蚩尤、盘瓠</strong>，最重要的传统节日是纪念始祖的<strong>盘王节</strong>。</p><p>福溪所在的<strong>富川瑶族自治县</strong>于 1983 年成立，2021 年获评第八批<strong>全国民族团结进步示范区</strong>。福溪是瑶汉融合的典型村落 —— 五代时期楚王马殷部下<strong>124 名汉族士兵</strong>驻守此地，与原本的瑶族居民世代共同生活，形成今天瑶汉同村、风俗交融的独特景观。</p>', 1)`,
+  // 旅游指南
+  `INSERT OR IGNORE INTO page_sections (page_slug, section_key, title, content, sort_order) VALUES
+    ('travel', 'transport', '到达福溪', '<p><strong>自驾</strong>：永贺高速、国道 207、省道 203 均可到达，距贺州市约 1 小时车程。富川为"四好农村路"全国示范县，路况良好。</p><p><strong>铁路</strong>：洛湛铁路富川站直达。</p><p><strong>飞机</strong>：桂林两江国际机场后转高铁。</p>', 1),
+    ('travel', 'itinerary', '推荐行程：2 天 1 晚串联三村', '<p><strong>第一天</strong>上午抵达福溪，参观周敦颐讲学堂（纪念建筑）、爱莲堂、周氏宗祠与古戏台群；午餐尝<strong>富川三角饺</strong>、油茶、果条；下午沿青石板古街细看门楣石雕，傍晚在风雨桥上对夕阳。</p><p><strong>第二天</strong>顺潇贺古道串联同属朝东镇的<strong>岔山村</strong>（潇贺古道入桂第一村）和<strong>秀水状元村</strong>（出过 1 状元 27 进士），下午折返<strong>富川古明城</strong>（建于明洪武二十九年/1396 年）。</p>', 2)`
+];
+
+/**
+ * 内容页面相关文章种子数据
+ * 每个页面预置 1 条手动指定的文章
+ */
+export const PAGE_ARTICLES_SEED_SQL = [
+  `INSERT OR IGNORE INTO page_articles (page_slug, article_id, mode, sort_order) VALUES
+    ('scenery', 3, 'manual', 1),
+    ('travel', 5, 'manual', 1)`
 ];
 
 /**
@@ -313,6 +380,19 @@ export async function insertArticlesSeed(db, adminId) {
     const actualSql = sql.replace(/, 1, 'published', datetime\(/g, ', ' + adminId + ", 'published', datetime(");
     await db.prepare(actualSql).run();
   }
+  // 插入内容页面相关文章种子数据（先清空再插入，防止重复）
+  try {
+    await db.prepare("DELETE FROM page_articles").run();
+    for (const sql of PAGE_ARTICLES_SEED_SQL) {
+      await db.prepare(sql).run();
+    }
+  } catch (e) { /* 表不存在时忽略 */ }
+  // 插入内容页面板块种子数据
+  try {
+    for (const sql of PAGE_SECTIONS_SEED_SQL) {
+      await db.prepare(sql).run();
+    }
+  } catch (e) { /* 表不存在时忽略 */ }
 }
 
 /**
@@ -386,7 +466,7 @@ export async function migrateDatabase(db, env) {
   try {
     const ce = await db.prepare("SELECT key FROM site_config WHERE key = 'cache_enabled'").first();
     if (!ce) {
-      await db.prepare("INSERT INTO site_config (key, value) VALUES ('cache_enabled', 'true')").run();
+      await db.prepare("INSERT INTO site_config (key, value) VALUES ('cache_enabled', 'false')").run();
     }
   } catch (e) { /* 忽略 */ }
 
@@ -411,6 +491,80 @@ export async function migrateDatabase(db, env) {
     for (const [old, rep] of updates) {
       await db.prepare("UPDATE banners SET image_url = ? WHERE image_url = ?").bind(rep, old).run();
       await db.prepare("UPDATE articles SET cover_image = ? WHERE cover_image = ?").bind(rep, old).run();
+    }
+  } catch (e) { /* 忽略 */ }
+
+  // 创建 page_articles 表（如不存在）并插入默认种子数据
+  try {
+    await db.prepare(`CREATE TABLE IF NOT EXISTS page_articles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      page_slug TEXT NOT NULL,
+      article_id INTEGER,
+      mode TEXT NOT NULL DEFAULT 'manual' CHECK(mode IN ('manual','latest','likes','views')),
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    )`).run();
+    // 插入默认种子数据（如果表为空）
+    const existing = await db.prepare("SELECT COUNT(*) as count FROM page_articles").first();
+    if (existing && existing.count === 0) {
+      for (const sql of PAGE_ARTICLES_SEED_SQL) {
+        await db.prepare(sql).run();
+      }
+    }
+  } catch (e) { /* 忽略 */ }
+
+  // 创建 page_sections 表并插入默认数据
+  try {
+    await db.prepare(`CREATE TABLE IF NOT EXISTS page_sections (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      page_slug TEXT NOT NULL,
+      section_key TEXT NOT NULL,
+      title TEXT,
+      content TEXT,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(page_slug, section_key)
+    )`).run();
+    const psExisting = await db.prepare("SELECT COUNT(*) as count FROM page_sections").first();
+    if (psExisting && psExisting.count === 0) {
+      for (const sql of PAGE_SECTIONS_SEED_SQL) {
+        await db.prepare(sql).run();
+      }
+    }
+  } catch (e) { /* 忽略 */ }
+
+  // 修正首页 intro 模块卡片顺序（理学文化排第一）
+  try {
+    const introModule = await db.prepare("SELECT id, config FROM home_modules WHERE type = 'intro' LIMIT 1").first();
+    if (introModule && introModule.config) {
+      try {
+        const cfg = JSON.parse(introModule.config);
+        if (cfg.cards && cfg.cards.length === 3 && cfg.cards[0].title === '古建筑群') {
+          // 顺序错误，修正为：理学文化、古建筑群、瑶族风情
+          const correctOrder = [cfg.cards[1], cfg.cards[0], cfg.cards[2]];
+          cfg.cards = correctOrder;
+          await db.prepare("UPDATE home_modules SET config = ? WHERE id = ?").bind(JSON.stringify(cfg), introModule.id).run();
+        }
+      } catch (e) { /* JSON 解析失败忽略 */ }
+    }
+  } catch (e) { /* 忽略 */ }
+
+  // 插入系统页面（如果不存在）
+  try {
+    const systemPages = [
+      [1, '走进福溪', 'about', '千年古村 · 理学圣地 · 三省通衢', '/images/about/village-overview.svg'],
+      [2, '理学文化', 'culture', '北宋理学鼻祖周敦颐讲学堂、爱莲堂、周氏宗祠', '/images/culture/zhou-dunyi.png'],
+      [3, '古村风貌', 'scenery', '120 根木柱、24 座古戏台、门楣石雕、风雨桥', '/images/scenery/ancient-architecture.png'],
+      [4, '民族文化', 'ethnic', '瑶族风情、盘王节、火把节、芦笙长鼓舞', '/images/ethnic/yao-people.svg'],
+      [5, '旅游指南', 'travel', '2 天 1 晚串联潇贺古道三村', '/images/scenery/ancient-architecture.png'],
+      [6, '新闻动态', 'news', '村务公告 · 活动资讯 · 媒体报道', '/images/banners/banner1.svg'],
+      [7, '全部文章', 'articles', '新闻动态、理学文化、古建筑、民俗风情、旅游攻略、村民故事', '/images/banners/banner1.svg'],
+    ];
+    for (const [id, title, slug, content, cover] of systemPages) {
+      const existing = await db.prepare("SELECT id FROM pages WHERE slug = ?").first(slug);
+      if (!existing) {
+        await db.prepare("INSERT OR IGNORE INTO pages (id, title, slug, content, cover_image, status) VALUES (?, ?, ?, ?, ?, 'published')").bind(id, title, slug, content, cover).run();
+      }
     }
   } catch (e) { /* 忽略 */ }
 }

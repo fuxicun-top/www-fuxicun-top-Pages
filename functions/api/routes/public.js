@@ -33,6 +33,14 @@ export async function handlePublic(request, env, path, method) {
     return await getHomeModules(env);
   }
 
+  if (path === '/page-articles') {
+    return await getPageArticles(request, env);
+  }
+
+  if (path === '/page-sections') {
+    return await getPageSections(request, env);
+  }
+
   // 自定义页面：/pages/:slug
   const pageMatch = path.match(/^\/pages\/([^\/]+)$/);
   if (pageMatch && method === 'GET') {
@@ -264,4 +272,122 @@ async function getHomeModules(env) {
   }
 
   return withCacheHeader(successResponse(list), 'MISS');
+}
+
+// 获取内容页面相关文章（公开，带 KV 缓存）
+async function getPageArticles(request, env) {
+  const url = new URL(request.url);
+  const slug = url.searchParams.get('slug') || '';
+
+  if (!slug) {
+    return errorResponse('缺少页面标识');
+  }
+
+  const cacheKey = 'cache:page-articles:' + slug;
+  const cacheEnabled = await isCacheEnabled(env);
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      const cached = await env.FUXICUN_KV.get(cacheKey, 'json');
+      if (cached) return withCacheHeader(successResponse(cached), 'HIT');
+    } catch (e) { /* 降级到数据库 */ }
+  }
+
+  // 页面与分类的对应关系
+  const pageCategoryMap = {
+    'about': 'village-news',
+    'culture': 'lixue-culture',
+    'scenery': 'architecture',
+    'ethnic': 'folk-custom',
+    'travel': 'travel-guide'
+  };
+
+  const categorySlug = pageCategoryMap[slug];
+  if (!categorySlug) {
+    return errorResponse('无效的页面标识');
+  }
+
+  // 获取该页面所有槽位
+  const slots = await dbQuery(
+    env.FUXICUN_DB,
+    "SELECT id, article_id, mode FROM page_articles WHERE page_slug = ? ORDER BY sort_order",
+    [slug]
+  );
+
+  const slotList = slots.results || [];
+  const articles = [];
+
+  for (const slot of slotList) {
+    if (slot.mode === 'manual' && slot.article_id) {
+      // 手动模式：获取指定文章
+      const article = await dbQueryFirst(
+        env.FUXICUN_DB,
+        `SELECT a.id, a.title, a.slug, a.excerpt, a.cover_image, a.published_at,
+                COALESCE(u.display_name, u.username) as author_name
+         FROM articles a LEFT JOIN users u ON a.author_id = u.id
+         WHERE a.id = ? AND a.status = 'published'`,
+        [slot.article_id]
+      );
+      if (article) articles.push(article);
+    } else if (slot.mode === 'latest' || slot.mode === 'likes' || slot.mode === 'views') {
+      // 自动模式：按分类获取一篇未使用的文章
+      const sortField = slot.mode === 'likes' ? 'a.likes DESC' : slot.mode === 'views' ? 'a.views DESC' : 'a.published_at DESC';
+      const usedIds = articles.map(a => a.id);
+      const excludeClause = usedIds.length > 0 ? 'AND a.id NOT IN (' + usedIds.join(',') + ')' : '';
+      const article = await dbQueryFirst(
+        env.FUXICUN_DB,
+        `SELECT a.id, a.title, a.slug, a.excerpt, a.cover_image, a.published_at,
+                COALESCE(u.display_name, u.username) as author_name
+         FROM articles a
+         LEFT JOIN users u ON a.author_id = u.id
+         LEFT JOIN categories c ON a.category_id = c.id
+         WHERE a.status = 'published' AND c.slug = ? ${excludeClause}
+         ORDER BY ${sortField} LIMIT 1`,
+        [categorySlug]
+      );
+      if (article) articles.push(article);
+    }
+  }
+
+  const data = { articles: articles };
+
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      await env.FUXICUN_KV.put(cacheKey, JSON.stringify(data), { expirationTtl: 300 });
+    } catch (e) { /* 忽略 */ }
+  }
+
+  return withCacheHeader(successResponse(data), 'MISS');
+}
+
+// 获取页面板块内容（公开，带 KV 缓存）
+async function getPageSections(request, env) {
+  const url = new URL(request.url);
+  const slug = url.searchParams.get('slug') || '';
+
+  if (!slug) return errorResponse('缺少页面标识');
+
+  const cacheKey = 'cache:page-sections:' + slug;
+  const cacheEnabled = await isCacheEnabled(env);
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      const cached = await env.FUXICUN_KV.get(cacheKey, 'json');
+      if (cached) return withCacheHeader(successResponse(cached), 'HIT');
+    } catch (e) { /* 降级到数据库 */ }
+  }
+
+  const sections = await dbQuery(
+    env.FUXICUN_DB,
+    "SELECT section_key, title, content, sort_order FROM page_sections WHERE page_slug = ? ORDER BY sort_order",
+    [slug]
+  );
+
+  const result = sections.results || [];
+
+  if (cacheEnabled && env.FUXICUN_KV) {
+    try {
+      await env.FUXICUN_KV.put(cacheKey, JSON.stringify(result), { expirationTtl: 600 });
+    } catch (e) { /* 忽略 */ }
+  }
+
+  return withCacheHeader(successResponse(result), 'MISS');
 }
