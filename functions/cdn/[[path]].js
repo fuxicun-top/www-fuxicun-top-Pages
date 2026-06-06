@@ -21,8 +21,21 @@ export async function onRequest(context) {
   }
 
   try {
+    // 解析 Range 请求头
+    const rangeHeader = context.request.headers.get('Range');
+    let options = {};
+
+    if (rangeHeader) {
+      const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
+      if (match) {
+        const start = parseInt(match[1]);
+        const end = match[2] ? parseInt(match[2]) : undefined;
+        options.range = { offset: start, length: end ? end - start + 1 : undefined };
+      }
+    }
+
     // 从 R2 获取文件
-    const object = await env.FUXICUN_BUCKET.get(key);
+    const object = await env.FUXICUN_BUCKET.get(key, options.range ? { range: options.range } : undefined);
 
     if (!object) {
       return new Response('File Not Found', { status: 404 });
@@ -36,10 +49,16 @@ export async function onRequest(context) {
     headers.set('Content-Type', contentType);
     headers.set('Cache-Control', 'public, max-age=31536000, immutable');
     headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Accept-Ranges', 'bytes');
 
-    // 如果有 Content-Length
     if (object.size) {
       headers.set('Content-Length', object.size.toString());
+    }
+
+    // Range 请求返回 206
+    if (rangeHeader && object.range) {
+      headers.set('Content-Range', `bytes ${object.range.offset}-${object.range.offset + object.range.length - 1}/${object.size}`);
+      return new Response(object.body, { status: 206, headers });
     }
 
     return new Response(object.body, { headers });
